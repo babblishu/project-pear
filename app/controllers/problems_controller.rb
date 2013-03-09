@@ -1,3 +1,5 @@
+require 'my_html_render'
+
 class ProblemsController < ApplicationController
   before_filter :require_admin, only: [ :create, :update, :edit, :upload_test_data, :rejudge ]
 
@@ -12,7 +14,7 @@ class ProblemsController < ApplicationController
     end
     @tags = @problem.tags.map(&:name).join(APP_CONFIG.tags_input_separate_char)
     @enable_latex = @problem.content.enable_latex
-    @markdown = Redcarpet::Markdown.new Redcarpet::Render::HTML, no_intra_emphasis: true
+    @markdown = Redcarpet::Markdown.new MyHTMLRender, no_intra_emphasis: true, fenced_code_blocks: true
     @title = @problem.title
     @problem_active = true
   end

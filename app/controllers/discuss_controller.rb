@@ -1,3 +1,5 @@
+require 'my_html_render'
+
 class DiscussController < ApplicationController
   before_filter :require_login, only: [ :topic, :primary_reply, :secondary_reply ]
   before_filter :require_admin, only: [ :admin ]
@@ -26,8 +28,10 @@ class DiscussController < ApplicationController
     @primary_reply = PrimaryReply.new
 
     @markdown = Redcarpet::Markdown.new(
-        Redcarpet::Render::HTML.new(escape_html: true, no_styles: true, safe_links_only: true),
-        no_intra_emphasis: true
+        MyHTMLRender.new(escape_html: true, no_styles: true, safe_links_only: true),
+        no_intra_emphasis: true,
+        fenced_code_blocks: true,
+        autolink: true
     )
     @discuss_active = true
     @title = @topic.title
