@@ -19,7 +19,8 @@ module JudgeConfig
     tmp_config[:answer_file_prefix] ||= ''
     tmp_config[:input_file_extension] ||= 'in'
     tmp_config[:answer_file_extension] ||= 'out'
-    tmp_config[:sample_file_prefix] ||= 'sample'
+    tmp_config[:sample_input_prefix] ||= 'sample'
+    tmp_config[:sample_output_prefix] ||= 'sample'
     tmp_config[:time_limit] ||= 1000
     tmp_config[:memory_limit] ||= 64
 
@@ -39,7 +40,10 @@ module JudgeConfig
         when :answer_file_extension
           raise InvalidConfig unless value.is_a? String
 
-        when :sample_file_prefix
+        when :sample_input_prefix
+          raise InvalidConfig unless value.is_a? String
+
+        when :sample_output_prefix
           raise InvalidConfig unless value.is_a? String
 
         when :contestant_input_file_name
@@ -70,6 +74,7 @@ module JudgeConfig
 
         when :special_judge_language
           raise InvalidConfig unless value.is_a? String
+          raise InvalidConfig unless ['c', 'cpp', 'pas'].include? value
           config[:special_judge_language] = value
 
         when :score
@@ -111,14 +116,15 @@ module JudgeConfig
     ans_pre = tmp_config[:answer_file_prefix]
     in_ext = tmp_config[:input_file_extension]
     ans_ext = tmp_config[:answer_file_extension]
-    sample_pre = tmp_config[:sample_file_prefix]
+    sample_in_pre = tmp_config[:sample_input_prefix]
+    sample_out_pre = tmp_config[:sample_output_prefix]
 
     # sample test data
-    if data_exist? dir, sample_pre, sample_pre, in_ext, ans_ext
+    if data_exist? dir, sample_in_pre, sample_out_pre, in_ext, ans_ext
       config[:sample_test_data] = [
           {
-              input_file: "#{sample_pre}.#{in_ext}",
-              output_file: "#{sample_pre}.#{ans_ext}",
+              input_file: "#{sample_in_pre}.#{in_ext}",
+              output_file: "#{sample_out_pre}.#{ans_ext}",
               time_limit: tmp_config[:time_limit],
               memory_limit: tmp_config[:memory_limit]
           }
@@ -126,10 +132,10 @@ module JudgeConfig
     else
       tmp_arr = []
       x = 1
-      while data_exist? dir, "#{sample_pre}#{x}", "#{sample_pre}#{x}", in_ext, ans_ext
+      while data_exist? dir, "#{sample_in_pre}#{x}", "#{sample_out_pre}#{x}", in_ext, ans_ext
         tmp_arr << {
-            input_file: "#{sample_pre}#{x}.#{in_ext}",
-            output_file: "#{sample_pre}#{x}.#{ans_ext}",
+            input_file: "#{sample_in_pre}#{x}.#{in_ext}",
+            output_file: "#{sample_out_pre}#{x}.#{ans_ext}",
             time_limit: tmp_config[:time_limit],
             memory_limit: tmp_config[:memory_limit]
         }
