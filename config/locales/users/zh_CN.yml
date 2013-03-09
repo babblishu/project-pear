@@ -1,0 +1,136 @@
+zh_CN:
+  users:
+    login:
+      wrong_password: '密码错误'
+      invalid_handle: '用户名不存在'
+      blocked: '你的账户已被锁定，请联系管理员'
+
+    register:
+      register: '注册新用户'
+      handle: '用户名'
+      password: '密码'
+      password_confirmation: '确认密码'
+      real_name: '真实姓名'
+      real_name_info: '我们希望你输入真实的姓名，默认情况下只有管理员能看到，当然你也可以注册后在隐私设置中修改成让所有人都能看到。'
+      school: '学校'
+      school_info: '我们希望你输入真实的学校，默认情况下所有人都能看到，当然你也可以注册以后在隐私设置中修改成只让管理员能看到。'
+      email: 'Email'
+      signature: '签名'
+      choose_avatar: '选择头像'
+      avatar_info: '必须选择正方形尺寸的图片，且分辨率至少为200×200。不选择将使用默认头像。'
+      select: '选择'
+      change: '更换'
+      captcha: '验证码'
+      remove: '取消'
+      submit: '注册'
+      submitting: '提交中'
+
+    create:
+      wrong_captcha: '验证码错误'
+      success: '注册成功！'
+
+    list:
+      entire_rank: '总排名'
+      day_rank: '日排名'
+      week_rank: '周排名'
+      month_rank: '月排名'
+      year_rank: '年排名'
+      rank: '排名'
+      user: '用户'
+      accepted_problems: '通过题数'
+      attempted_problems: '尝试题数'
+      accepted_submissions: '通过提交数'
+      attempted_submissions: '提交数'
+      last_page: '上一页'
+      next_page: '下一页'
+
+    show:
+      remote_ip: '最后登录IP'
+      signature: '签名'
+      school: '学校'
+      real_name: '真实姓名'
+      email: 'Email'
+      rank: '排名'
+      accepted_problems_count: '通过题数'
+      attempted_problems_count: '尝试题数'
+      accepted_submissions: '通过提交数'
+      attempted_submissions: '提交数'
+      accept_ratio: '通过比率'
+      accepted_problems: '通过的题目'
+      upto_advanced_user_title: '提升%{handle}为高级用户'
+      upto_admin_title: '提升%{handle}为管理员'
+      block_user_title: '锁定用户%{handle}'
+      unblock_user_title: '解除用户%{handle}的锁定'
+
+    compare:
+      compare_with: '你和%{handle}的比较结果'
+      only_he_accepted: '只有他(她)通过的题目 (%{num})'
+      only_you_accepted: '只有你通过的题目 (%{num})'
+      both_accepted: '你们都通过的题目 (%{num})'
+
+    show_toolbar:
+      operations: '操作'
+      send_message: '发消息'
+      compare_with_me: '和我比较'
+      edit_profile: '编辑用户信息'
+      upto_advanced_user: '提升为高级用户'
+      upto_admin: '提升为管理员'
+      block_user: '锁定该用户'
+      unblock_user: '解除锁定'
+
+    confirm_operation_dialog:
+      your_password: '你的密码'
+      close: '关闭'
+      submit: '确认'
+      submitting: '提交中'
+
+    message_dialog:
+      send_to: '给%{handle}发消息'
+      close: '关闭'
+      submit: '确定'
+      submitting: '提交中'
+
+    admin:
+      success: '操作成功！'
+      wrong_password: '密码错误'
+
+    edit:
+      edit_profile: '修改个人信息'
+      real_name: '真实姓名'
+      school: '学校'
+      email: 'Email'
+      privacy_options: '隐私设置'
+      show_real_name: '显示真实姓名'
+      show_school: '显示学校'
+      show_email: '显示Email地址'
+      signature: '签名'
+      choose_avatar: '选择头像'
+      avatar_info: '必须选择正方形尺寸的图片，并且分辨率至少为200×200。不选择新的图片会继续使用原来的头像。'
+      select: '选择'
+      change: '更换'
+      remove: '取消'
+      submit: '提交'
+      submitting: '提交中'
+
+    update:
+      success: '成功修改个人信息！'
+
+    edit_password:
+      edit_password: '修改密码'
+      old_password: '旧密码'
+      new_password: '新密码'
+      new_password_confirmation: '确认新密码'
+      submit: '提交'
+      submitting: '提交中'
+
+    update_password:
+      wrong_password: '旧密码输入错误！'
+      blank_new_password: '密码不能为空！'
+      success: '成功修改个人密码，请重新登录！'
+
+    search:
+      not_exist: '不存在用户%{handle}'
+
+    notification:
+      edit_profile: '你的个人信息已被管理员<a href="%{admin_link}" target="_blank">%{handle}</a>编辑，点击<a href="%{user_link}" target="_blank">此处</a>查看。'
+      upto_advanced_user: '你已经被管理员<a href="%{admin_link}" target="_blank">%{handle}</a>提升为高级用户。'

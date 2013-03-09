@@ -1,0 +1,21 @@
+<div id="<%= name %>-dialog" class="confirm-operation-dialog modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3><%= title %></h3>
+  </div>
+  <div class="modal-body">
+    <%= form_tag submit_path, method: :get, class: 'form-horizontal' do %>
+      <div class="control-group">
+        <label for="password-input" class="control-label"><%= t '.your_password' %></label>
+        <div class="controls">
+          <input id="password-input" type="password" name="password">
+          <span class="help-inline" data-errors="password"></span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" data-dismiss="modal" class="btn"><%= t '.close' %></button>
+    <button type="submit" class="btn btn-primary" data-disabled="<%= t '.submitting' %>"><%= t '.submit' %></button>
+  </div>
+</div>

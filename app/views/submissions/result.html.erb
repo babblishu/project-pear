@@ -1,0 +1,67 @@
+<div class="tabbable">
+  <ul class="nav nav-tabs">
+    <% if @submission.status == 'judged' %>
+      <% if @result[:compile_message] %>
+        <li class="active"><a href="#compile-message" data-toggle="tab"><%= t '.compile_message' %></a></li>
+      <% else %>
+        <li class="active"><a href="#result" data-toggle="tab"><%= t '.result' %></a></li>
+      <% end %>
+    <% end %>
+    <li class="<%= 'active' if @submission.status != 'judged' %>">
+      <a href="#source-code" data-toggle="tab"><%= t '.source_code' %></a>
+    </li>
+  </ul>
+  <div class="tab-content">
+    <% if @submission.status == 'judged' %>
+      <% if @result[:compile_message] %>
+        <div class="tab-pane active" id="compile-message">
+<pre>
+<%= @result[:compile_message] %>
+</pre>
+        </div>
+      <% else %>
+        <div class="tab-pane active" id="result">
+          <table id="result-table" class="table table-condensed table-bordered">
+            <thead>
+            <tr>
+              <th><%= t '.test_case' %></th>
+              <th><%= t '.result' %></th>
+              <th><%= t '.time_used' %></th>
+              <th><%= t '.memory_used' %></th>
+              <th><%= t '.score' %></th>
+            </tr>
+            </thead>
+            <tbody>
+            <% @result[:result].each_with_index do |test_case, index1| %>
+              <% test_case.each_with_index do |single_case, index2| %>
+                <tr>
+                  <% if index2 == 0 %>
+                    <td rowspan="<%= test_case.size %>">#<%= index1 + 1 %></td>
+                  <% end %>
+                  <td><%= t '.' + single_case[:status] %></td>
+                  <td><%= format_time_used single_case[:time_used] %></td>
+                  <td><%= format_memory_used single_case[:memory_used] %></td>
+                  <% if index2 == 0 %>
+                    <td rowspan="<%= test_case.size %>"><%= @result[:score][index1] %></td>
+                  <% end %>
+                </tr>
+              <% end %>
+            <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    <% end %>
+    <div class="tab-pane<%= ' active' if @submission.status != 'judged' %>" id="source-code">
+      <div>
+        <a href="<%= submissions_download_path @submission.id %>" class="btn pull-right">
+          <i class="iconic-download"></i>
+        </a>
+<pre class="prettyprint lang-<%= @submission.language %> linenums">
+<%= @submission.program.gsub(/\t/, '    ') %>
+</pre>
+      </div>
+    </div>
+  </div>
+</div>
+

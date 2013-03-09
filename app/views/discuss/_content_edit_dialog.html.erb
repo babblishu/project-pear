@@ -1,0 +1,118 @@
+<div id="<%= name %>-dialog" data-name="<%= name %>" class="edit-content-dialog modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3><%= title %></h3>
+  </div>
+  <div class="modal-body">
+    <%= form_for modal, url: submit_path, method: :post,
+                 html: { enctype: 'multipart/form-data', class: 'form-horizontal' } do |f| %>
+      <ul class="nav nav-pills">
+        <% if modal.is_a? Topic %>
+          <li class="active"><a href="#<%= name %>-basic" data-toggle="pill"><%= t '.basic' %></a></li>
+          <li><a href="#<%= name %>-content" data-toggle="pill"><%= t '.content' %></a></li>
+        <% else %>
+          <li class="active"><a href="#<%= name %>-content" data-toggle="pill"><%= t '.content' %></a></li>
+        <% end %>
+        <li><a href="#<%= name %>-attachment" data-toggle="pill"><%= t '.attachment' %></a></li>
+      </ul>
+      <div class="pill-content">
+        <% if modal.is_a? Topic %>
+          <div class="pill-pane active" id="<%= name %>-basic">
+            <div class="control-group">
+              <label class="control-label"><%= t '.title' %></label>
+              <div class="controls">
+                <%= f.text_field :title, maxlength: 20 %>
+                <span class="help-inline" data-errors="title"></span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label"><%= t '.related_problem' %></label>
+              <div class="controls">
+                <%= f.text_field :problem_id, maxlength: 4, class: 'input-small' %>
+                <span class="help-inline" data-errors="problem_id"></span>
+              </div>
+            </div>
+            <% if @current_user.role == 'admin' %>
+              <div class="control-group">
+                <label class="control-label"><%= t '.status' %></label>
+                <div class="controls">
+                  <label class="radio"><%= f.radio_button :status, 'normal' %><span><%= t '.normal' %></span></label>
+                  <label class="radio"><%= f.radio_button :status, 'advanced' %><span><%= t '.advanced' %></span></label>
+                  <label class="radio"><%= f.radio_button :status, 'hidden' %><span><%= t '.hidden' %></span></label>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="controls">
+                  <label class="checkbox inline"><%= f.check_box :top %><span><%= t '.top' %></span></label>
+                  <label class="checkbox inline"><%= f.check_box :no_reply %><span><%= t '.no_reply' %></span></label>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="pill-pane" id="<%= name %>-content">
+            <div class="control-group" style="padding-left: 10px; padding-right: 10px;">
+              <label class="checkbox">
+                <%= f.check_box :enable_markdown %>
+                <span><%= t '.enable_markdown' %></span>
+              </label>
+              <%= f.text_area :content, rows: 13, class: 'editor', maxlength: APP_CONFIG.topic_length_limit %>
+              <span class="help-inline" data-errors="content"></span>
+            </div>
+          </div>
+        <% else %>
+          <div class="pill-pane active" id="<%= name %>-content">
+            <div class="control-group" style="padding-left: 10px; padding-right: 10px;">
+              <label class="checkbox">
+                <%= f.check_box :enable_markdown %>
+                <span><%= t '.enable_markdown' %></span>
+              </label>
+              <%= f.text_area :content, rows: 13, class: 'editor', maxlength: APP_CONFIG.primary_reply_length_limit %>
+              <span class="help-inline" data-errors="content"></span>
+            </div>
+          </div>
+        <% end %>
+        <div class="pill-pane" id="<%= name %>-attachment">
+          <div class="control-group">
+            <label class="control-label"><%= t '.source' %></label>
+            <div class="controls">
+              <span class="fileupload fileupload-new" data-provides="fileupload">
+                 <span class="btn btn-file">
+                  <span class="fileupload-new"><%= t '.select' %></span>
+                  <span class="fileupload-exists"><%= t '.change' %></span>
+                  <input class="program" name="program" type="file">
+                </span>
+                <span class="fileupload-preview"></span>
+                <a href="#" class="close fileupload-exists" data-dismiss="fileupload" style="float: none">×</a>
+              </span>
+              <% if create_mode %>
+                <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.source_create_info' %>">
+                  <i class="icon-question-sign"></i>
+                </a>
+              <% else %>
+                <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.source_edit_info' %>">
+                  <i class="icon-question-sign"></i>
+                </a>
+              <% end %>
+              <span class="help-inline" data-errors="code_size"></span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label"><%= t '.language' %></label>
+            <div class="controls">
+              <% APP_CONFIG.program_languages.each do |key, value| %>
+                <label class="radio inline">
+                  <%= f.radio_button :language, key, class: 'language ' + key.to_s %><span><%= value %></span>
+                </label>
+              <% end %>
+              <span class="help-inline" data-errors="language"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" data-dismiss="modal" class="btn"><%= t '.close' %></button>
+    <button type="submit" class="btn btn-primary" data-disabled="<%= t '.submitting' %>"><%= t '.submit' %></button>
+  </div>
+</div>

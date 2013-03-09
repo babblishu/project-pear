@@ -1,0 +1,15 @@
+<div id="<%= id %>" class="program-dialog modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3><%= t '.attachment_program' %></h3>
+  </div>
+  <div class="modal-body">
+<pre class="prettyprint lang-<%= language %> pre-scrollable linenums">
+<%= program.gsub(/\t/, '    ') %>
+</pre>
+  </div>
+  <div class="modal-footer">
+    <a data-dismiss="modal" class="btn"><%= t '.close' %></a>
+    <a href="<%= download_path %>" class="btn pull-left"><%= t '.download' %></a>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<ul class="nav nav-pills">
+  <li class="<%= @span == 'all' ? ' active' : '' %>"><%= link_to t('.entire_rank'), rank_path('all') %></li>
+  <li class="<%= @span == 'day' ? ' active' : '' %>"><%= link_to t('.day_rank'), rank_path('day') %></li>
+  <li class="<%= @span == 'week' ? ' active' : '' %>"><%= link_to t('.week_rank'), rank_path('week') %></li>
+  <li class="<%= @span == 'month' ? ' active' : '' %>"><%= link_to t('.month_rank'), rank_path('month') %></li>
+  <li class="<%= @span == 'year' ? ' active' : '' %>"><%= link_to t('.year_rank'), rank_path('year') %></li>
+</ul>
+
+
+<table id="users-list" class="table table-condensed table-striped">
+  <thead>
+  <tr>
+    <th><%= t '.rank' %></th>
+    <th><%= t '.user' %></th>
+    <th><%= t '.accepted_problems' %></th>
+    <th><%= t '.attempted_problems' %></th>
+    <th><%= t '.accepted_submissions' %></th>
+    <th><%= t '.attempted_submissions' %></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @rank_list.each_with_index do |user, index| %>
+    <tr>
+      <td><%= (@page - 1) * @page_size + index + 1 %></td>
+      <td><%= user_link user.handle %></td>
+      <td><%= user.accepted_problems %></td>
+      <td><%= user.attempted_problems %></td>
+      <td><%= user_accepted_submissions_link user.accepted_submissions, user.handle %></td>
+      <td><%= user_attempted_submissions_link user.attempted_submissions, user.handle %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<ul class="pager">
+  <% if @page > 1 %>
+    <li><%= link_to t('.last_page'), rank_path(@span, @page - 1) %></li>
+  <% end %>
+  <% unless @is_last_page %>
+    <li><%= link_to t('.next_page'), rank_path(@span, @page + 1) %></li>
+  <% end %>
+</ul>

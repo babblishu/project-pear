@@ -1,0 +1,51 @@
+<div class="row-fluid">
+  <div class="span3">
+    <div id="user-block">
+      <%= link_to image_tag(@user.avatar.url(:large), class: 'img-polaroid'), users_show_path(@user.handle), target: '_blank' %>
+      <h4><%= user_link @user.handle %></h4>
+    </div>
+  </div>
+  <div class="span9">
+    <div id="message-container">
+      <% @messages.each do |message| %>
+        <% if message.to.id == @current_user.id %>
+          <div class="clearfix">
+            <div class="message-block pull-left" data-id="<%= message.id %>">
+              <div class="content"><%= simple_format h message.content %></div>
+              <div class="time corner left"><%= format_datetime message.created_at %></div>
+              <% unless message.read %>
+                <div class="not-read corner right"><%= t '.not_read' %></div>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <div class="clearfix">
+            <div class="message-block pull-right" data-id="<%= message.id %>">
+              <div class="content"><%= simple_format h message.content %></div>
+              <div class="time corner left"><%= format_datetime message.created_at %></div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    <% unless @is_last_page %>
+      <div style="text-align: center;">
+        <button id="more-button" class="btn btn-primary" data-normal="<%= t '.view_more' %>" data-loading="<%= t '.loading' %>">
+          <%= t '.view_more' %>
+        </button>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% unless @is_last_page %>
+  <div class="clearfix template hidden">
+    <div>
+      <div class="content"></div>
+      <div class="time corner left"></div>
+      <div class="not-read corner right hidden"><%= t '.not_read' %></div>
+    </div>
+  </div>
+<% end %>
+
+<%= render 'messages/reply_dialog' %>

@@ -1,0 +1,53 @@
+<table id="discuss-list" class="table table-striped table-hover">
+  <thead>
+  <tr>
+    <% unless @problem %>
+      <th style="width: 8%;"><%= t '.related_problem' %></th>
+    <% end %>
+    <th style="width: 10%;"><%= t '.author' %></th>
+    <th class="title"><%= t '.title' %></th>
+    <th style="width: 10%;"><%= t '.release_date' %></th>
+    <th style="width: 20%;"><%= t '.last_reply' %></th>
+    <th style="width: 8%;"><%= t '.replies' %></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @topics.each do |topic| %>
+  <tr>
+    <% unless @problem %>
+      <td><%= (problem_link topic.problem_id) if topic.problem_id %></td>
+    <% end %>
+    <td><%= user_link topic.author %></td>
+    <td class="title">
+      <%= link_to topic.title, discuss_show_path(topic.id) %>
+      <% if topic.top %>
+        <span class="badge badge-info" style="margin-left: 5px;"><%= t '.top' %></span>
+      <% end %>
+    </td>
+    <td><%= format_date topic.created_at %></td>
+    <td><%= format_datetime topic.last_reply %></td>
+    <td><%= topic.replies_count %></td>
+  </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<ul class="pager">
+  <% if @page > 1 %>
+    <li><%= link_to t('.last_page'), discuss_list_path(@page - 1, problem_id: (@problem.id if @problem)) %></li>
+  <% end %>
+  <% if @page < @total_page %>
+    <li><%= link_to t('.next_page'), discuss_list_path(@page + 1, problem_id: (@problem.id if @problem)) %></li>
+  <% end %>
+</ul>
+
+<% if @current_user %>
+  <%= render partial: 'discuss/content_edit_dialog', locals: {
+          name: 'new-topic',
+          title: t('.new_topic'),
+          modal: @topic,
+          submit_path: discuss_topic_path('create'),
+          errors_hash: flash[:topic_errors],
+          create_mode: true
+  } %>
+<% end %>

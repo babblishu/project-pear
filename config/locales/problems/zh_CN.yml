@@ -1,0 +1,181 @@
+zh_CN:
+  problems:
+    list:
+      problems_list: '题目列表'
+      id: '编号'
+      title: '标题'
+      source: '题目来源'
+      accepted_submissions: '通过提交数'
+      attempted_submissions: '提交数'
+      accepted_ratio: '通过比率'
+
+    list_toolbar:
+      add_problem: '添加题目'
+      filter: '筛选'
+
+    new_dialog:
+      add_problem: '添加题目'
+      title: '标题'
+      source: '题目来源'
+      time_limit: '时间限制'
+      memory_limit: '内存限制'
+      help: '帮助'
+      add: '添加'
+      close: '关闭'
+      submitting: '提交中'
+
+    filter_dialog:
+      filter: '按标签筛选'
+      filter_info: '将会筛选出拥有所有选择标签的题目'
+      filter_alert: '最多选择五个标签'
+      close: '关闭'
+      submit: '确定'
+
+    show_toolbar:
+      submit: '提交程序'
+      other_operations: '其他操作'
+      my_submissions: '我的提交'
+      discuss: '讨论本题'
+      status: '提交情况'
+      solution: '标准解答'
+      solution_confirm: '你确定要查看解答？'
+      edit_content: '编辑题面'
+      edit_tags: '编辑标签'
+      upload_test_data: '上传测试数据'
+      download_test_data: '下载测试数据'
+      rejudge: '重测本题所有提交'
+      rejudge_confirm: '你确定执行此操作？'
+
+    submit_dialog:
+      submit_program: '提交程序'
+      source: '源程序'
+      select: '选择文件'
+      change: '更换文件'
+      language: '语言'
+      platform: '系统平台'
+      close: '关闭'
+      submit: '提交'
+      submitting: '提交中'
+
+    upload_test_data_dialog:
+      upload_test_data: '上传测试数据'
+      data_file: '数据压缩包'
+      select: '选择文件'
+      change: '更换文件'
+      close: '关闭'
+      upload: '上传'
+      submitting: '上传中'
+
+    edit_tags_dialog:
+      edit_tags: '编辑标签'
+      close: '关闭'
+      submit: '确定'
+
+    upload_test_data:
+      empty: '不能为空'
+      cannot_unzip: '无法解压数据文件'
+      config_not_exist: '配置文件不存在'
+      invalid_config: '非法配置文件'
+      success: '数据成功上传'
+      case_no: '编号'
+      input_file: '输入文件'
+      output_file: '答案文件'
+      time_limit: '内存限制'
+      memory_limit: '空间限制'
+      score: '分数'
+      sample_test_data: '样例'
+
+    solution_dialog:
+      solution: '标准解答'
+      hint: '解题思路'
+      standard_program: '参考程序'
+      close: '关闭'
+
+    upload_test_data_toolbar:
+      back_to_problem: '返回题面'
+      upload_test_data: '重新上传'
+
+    edit:
+      edit_problem: '编辑题目%{id}'
+      basic_settings: '基本设置'
+      status: '题目可见性'
+      hidden: '仅管理员可见'
+      normal: '所有用户可见'
+      advanced: '仅高级用户和管理员可见'
+      title: '标题'
+      source: '题目来源'
+      time_limit: '时间限制'
+      memory_limit: '内存限制'
+      tags: '标签'
+      background: '问题背景'
+      description: '问题描述'
+      input: '输入描述'
+      output: '输出描述'
+      sample_illustration: '样例说明'
+      additional_information: '附加说明'
+      solution: '标准解答'
+      source_code: '源代码'
+      language: '语言'
+      data_file: '数据'
+      attachment_file: '附件'
+      select: '选择文件'
+      change: '更换文件'
+      enable_markdown: '启用Markdown'
+      enable_latex: '启用LaTeX'
+      cannot_unzip_attachment_file: '无法解压附件文件'
+      tag_too_long: '每个标签不能超过20个字符'
+      program_too_long: '源程序不能超过50KB'
+      leave_confirm_message: '修改尚未保存，你确定离开此页？'
+
+    edit_toolbar:
+      submit: '提交'
+
+    show:
+      time_limit: '时间限制：'
+      memory_limit: '内存限制：'
+      tags: '标签：'
+      background: '问题背景'
+      description: '问题描述'
+      input: '输入描述'
+      output: '输出描述'
+      sample_input: '样例输入'
+      sample_output: '样例输出'
+      sample_illustration: '样例说明'
+      additional_information: '附加说明'
+      source: '题目来源'
+
+    status:
+      status: '《%{title}》的提交情况'
+      status_id: '题目%{id}的提交情况'
+      rank: '排名'
+      score: '分数'
+      user: '用户'
+      time_used: '运行时间'
+      memory_used: '内存占用'
+      language: '语言'
+      platform: '平台'
+      code_size: '代码长度'
+      code_length: '代码行数'
+      submit_time: '提交时间'
+      last_page: '上一页'
+      next_page: '下一页'
+
+    status_toolbar:
+      view_problem: '查看题目'
+      statistics: '统计信息'
+      accepted_users: '通过人数'
+      attempted_users: '尝试人数'
+      accepted_submissions: '通过提交数'
+      attempted_submissions: '提交数'
+      accepted_ratio: '通过比率'
+      average_score: '提交平均分'
+
+    rejudge:
+      success: '操作成功！'
+
+    search:
+      not_exist: '题号%{id}不存在'
+
+    no_privilege:
+      title: '你没有权限查看本题'
+      subtitle: '管理员设置本题为仅部分用户可见'

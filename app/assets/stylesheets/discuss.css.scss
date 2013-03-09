@@ -1,0 +1,150 @@
+.discuss .edit-content-dialog {
+  width: 700px;
+  margin-left: -350px;
+  .checkbox.inline span, .radio.inline span {
+    display: block;
+  }
+}
+
+.discuss .list {
+  #discuss-list {
+    th, td {
+      text-align: center;
+    }
+    .title {
+      text-align: left;
+    }
+  }
+}
+
+.discuss .show {
+  .block {
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    position: relative;
+    .left-block {
+      .user-avatar img {
+        border: 1.5px solid gainsboro;
+        border-radius: 10px;
+      }
+      .user-handle {
+        text-align: center;
+      }
+    }
+    .right-block {
+      .content {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      hr {
+        margin: 10px;
+      }
+      .information {
+        margin-left: 10px;
+        .time {
+          color: grey;
+        }
+      }
+      .operations {
+        margin-right: 10px;
+        .reply-area, .edit-area {
+          margin-top: 30px;
+          textarea {
+            height: 40px;
+          }
+        }
+        button.act {
+          margin-left: 5px;
+        }
+      }
+    }
+  }
+
+  .primary-block.topic {
+    .left-block {
+      margin-top: 20px;
+    }
+    .right-block .content {
+      min-height: 110px;
+    }
+  }
+  .primary-block.reply {
+    .left-block {
+      margin-top: 15px;
+    }
+    .right-block .content {
+      min-height: 90px;
+    }
+  }
+
+  .primary-block {
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    .left-block {
+      .user-handle {
+        margin-top: 5px;
+      }
+    }
+    .right-block {
+      margin-left: 115px;
+      .content {
+        margin-top: 15px;
+      }
+      .operations {
+        .reply-area, .edit-area {
+          textarea {
+            width: 570px;
+          }
+        }
+      }
+    }
+    .floor {
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      padding: 3px 7px;
+      font-size: 12px;
+      font-weight: bold;
+      background-color: #f5f5f5;
+      border: 1.5px solid rgba(0, 0, 0, 0.2);
+      color: #9da0a4;
+      border-radius: 0 8px 0 8px;
+    }
+  }
+
+  .secondary-block {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    margin-left: 130px;
+    padding-left: 15px;
+    padding-right: 20px;
+    padding-bottom: 10px;
+    .left-block {
+      margin-top: 15px;
+      .user-handle {
+        margin-top: 2px;
+      }
+    }
+    .right-block {
+      margin-left: 85px;
+      .content {
+        margin-top: 20px;
+        min-height: 60px;
+      }
+      .operations {
+        .reply-area, .edit-area {
+          textarea {
+            width: 520px;
+          }
+        }
+      }
+    }
+  }
+
+  .program-dialog {
+    width: 800px;
+    margin-left: -400px;
+  }
+}

@@ -1,0 +1,25 @@
+<table class="table table-hover table-bordered">
+  <tbody>
+  <% @messages.each do |message| %>
+  <tr class="<%= 'warning' unless message.read %>">
+    <td class="user">
+      <div class="user-avatar"><div><%= user_avatar_link message.user, :thumb %></div></div>
+      <div class="user-handle"><%= user_link message.user.handle %></div>
+    </td>
+    <td class="preview" data-href="<%= messages_show_path(message.user.handle) %>">
+        <div class="content"><%= simple_format h message.content %></div>
+        <div class="time"><%= format_datetime message.created_at %></div>
+    </td>
+  </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<ul class="pager">
+  <% if @page > 1 %>
+    <li><%= link_to t('.last_page'), messages_list_path(@page - 1) %></li>
+  <% end %>
+  <% if @page < @total_page %>
+    <li><%= link_to t('.next_page'), messages_list_path(@page + 1) %></li>
+  <% end %>
+</ul>

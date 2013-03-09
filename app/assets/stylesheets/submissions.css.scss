@@ -1,0 +1,24 @@
+#submissions-filter-dropdown {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 15px;
+}
+
+.submissions .list {
+  #submissions-list {
+    th, td {
+      text-align: center;
+    }
+  }
+}
+
+.submissions .result {
+  #result-table {
+    width: 600px;
+    margin: 0 auto;
+    th, td {
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+}

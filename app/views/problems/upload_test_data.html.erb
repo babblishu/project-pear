@@ -1,0 +1,56 @@
+<div style="text-align: center;">
+  <h3 style="color: #468847;"><i class="iconic-check"></i><%= t '.success' %></h3>
+</div>
+
+<div class="row-fluid">
+  <div class="span2"></div>
+  <div class="span8">
+    <table class="table table-bordered">
+      <thead>
+      <tr>
+        <th><%= t '.case_no' %></th>
+        <th><%= t '.input_file' %></th>
+        <th><%= t '.output_file' %></th>
+        <th><%= t '.time_limit' %></th>
+        <th><%= t '.memory_limit' %></th>
+        <th><%= t '.score' %></th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @config[:sample_test_data].each_with_index do |data, index| %>
+        <tr>
+          <% if index == 0 %>
+            <td rowspan="<%= @config[:sample_test_data].size %>"><%= t '.sample_test_data' %></td>
+          <% end %>
+          <td><%= data[:input_file] %></td>
+          <td><%= data[:output_file] %></td>
+          <td><%= (data[:time_limit] / 1000.0).to_s + ' s' %></td>
+          <td><%= data[:memory_limit].to_s + ' MB' %></td>
+          <% if index == 0 %>
+            <td rowspan="<%= @config[:sample_test_data].size %>">0</td>
+          <% end %>
+        </tr>
+      <% end %>
+      <% @config[:test_data].each_with_index do |arr, index1| %>
+        <% arr.each_with_index do |data, index2| %>
+          <tr>
+            <% if index2 == 0 %>
+              <td rowspan="<%= arr.size %>"><%= "##{index1 + 1}" %></td>
+            <% end %>
+            <td><%= data[:input_file] %></td>
+            <td><%= data[:output_file] %></td>
+            <td><%= (data[:time_limit] / 1000.0).to_s + ' s' %></td>
+            <td><%= data[:memory_limit].to_s + ' MB' %></td>
+            <% if index2 == 0 %>
+              <td rowspan="<%= arr.size %>"><%= @config[:score][index1] %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="span2"></div>
+</div>
+
+<%= render 'problems/upload_test_data_dialog' %>

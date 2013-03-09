@@ -1,0 +1,70 @@
+<%= form_for @user, url: users_update_path(@user.handle), method: :post, html: {class: 'form-horizontal'} do |f| %>
+  <fieldset>
+    <legend><strong><%= t '.edit_profile' %></strong></legend>
+    <%= fields_for @user.information do |f| %>
+      <div class="control-group">
+        <%= f.label :real_name, t('.real_name'), class: 'control-label' %>
+        <div class="controls">
+          <%= f.text_field :real_name, maxlength: 20 %>
+          <span class="help-inline" data-errors="information.real_name"></span>
+        </div>
+      </div>
+      <div class="control-group">
+        <%= f.label :school, t('.school'), class: 'control-label' %>
+        <div class="controls">
+          <%= f.text_field :school, maxlength: 50 %>
+          <span class="help-inline" data-errors="information.school"></span>
+        </div>
+      </div>
+      <div class="control-group">
+        <%= f.label :email, t('.email'), class: 'control-label' %>
+        <div class="controls">
+          <%= f.email_field :email, maxlength: 50 %>
+          <span class="help-inline" data-errors="information.email"></span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label"><%= t '.privacy_options' %></label>
+        <div class="controls">
+          <label class="checkbox"><%= f.check_box :show_real_name %><%= t '.show_real_name' %></label>
+          <label class="checkbox"><%= f.check_box :show_school %><%= t '.show_school' %></label>
+          <label class="checkbox"><%= f.check_box :show_email %><%= t '.show_email' %></label>
+        </div>
+      </div>
+      <div class="control-group">
+        <%= f.label :signature, t('.signature'), class: 'control-label' %>
+        <div class="controls">
+          <%= f.text_area :signature, rows: 4, maxlength: 100 %>
+          <span class="help-inline" data-errors="information.signature"></span>
+        </div>
+      </div>
+    <% end %>
+    <div class="control-group">
+      <%= f.label :avatar, t('.choose_avatar'), class: 'control-label' %>
+      <div class="controls">
+        <div class="fileupload fileupload-new" data-provides="fileupload">
+          <div class="fileupload-preview thumbnail" style="width: 200px; height: 200px; line-height: 200px;">
+            <%= image_tag @user.avatar.url, style: 'margin: auto auto; display: inline-block;' %>
+          </div>
+          <div>
+            <span class="btn btn-file">
+              <span class="fileupload-new"><%= t '.select' %></span>
+              <span class="fileupload-exists"><%= t '.change' %></span>
+              <%= f.file_field :avatar, accept: 'accept="image/jpg,image/png,image/jpeg' %>
+            </span>
+            <a href="#" class="btn fileupload-exists" data-dismiss="fileupload"><%= t '.remove' %></a>
+            <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.avatar_info' %>">
+              <i class="icon-question-sign"></i>
+            </a>
+            <span class="help-inline" data-errors="avatar avatar_content_type avatar_file_size"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="controls">
+        <button type="submit" class="btn btn-primary submit" data-disabled="<%= t '.submitting' %>"><%= t '.submit' %></button>
+      </div>
+    </div>
+  </fieldset>
+<% end %>

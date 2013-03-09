@@ -1,0 +1,43 @@
+<% if @current_user && @user.id != @current_user.id %>
+  <ul class="nav pull-right">
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+        <%= t '.operations' %>
+        <b class="caret"></b>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="#message-dialog" data-toggle="modal"><%= t '.send_message' %></a></li>
+        <li><%= link_to t('.compare_with_me'), users_compare_path(@user.handle) %></li>
+        <% if @current_user.role == 'admin' && @user.role != 'admin' %>
+          <li class="divider"></li>
+          <li><%= link_to t('.edit_profile'), users_edit_path(@user.handle) %></li>
+          <% if @user.role == 'normal_user' %>
+            <li>
+              <a id="upto-advanced-user-button" href="#upto-advanced-user-dialog" data-toggle="modal">
+                <%= t '.upto_advanced_user' %>
+              </a>
+            </li>
+          <% end %>
+          <li>
+            <a id="upto-admin-button" href="#upto-admin-dialog" data-toggle="modal">
+              <%= t '.upto_admin' %>
+            </a>
+          </li>
+          <% if @user.blocked %>
+            <li>
+              <a id="unblock-user-button" href="#unblock-user-dialog" data-toggle="modal">
+                <%= t '.unblock_user' %>
+              </a>
+            </li>
+          <% else %>
+            <li>
+              <a id="block-user-button" href="#block-user-dialog" data-toggle="modal">
+                <%= t '.block_user' %>
+              </a>
+            </li>
+          <% end %>
+        <% end %>
+      </ul>
+    </li>
+  </ul>
+<% end %>

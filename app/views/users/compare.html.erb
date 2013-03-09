@@ -1,0 +1,38 @@
+<div id="user-block">
+  <h3 style="margin-left: 5px;"><%= t '.compare_with', handle: @user.handle %></h3>
+  <table class="table" style="margin-bottom: 0">
+    <thead></thead>
+    <tbody>
+    <% if @he_accepted.size > 0 %>
+      <tr>
+        <td class="left-column"><%= t '.only_he_accepted', num: @he_accepted.size %></td>
+        <td class="right-column">
+          <% @he_accepted.each do |problem_id| %>
+            <span><%= problem_link problem_id %></span>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    <% if @you_accepted.size > 0 %>
+      <tr>
+        <td class="left-column"><%= t '.only_you_accepted', num: @you_accepted.size %></td>
+        <td class="right-column">
+          <% @you_accepted.each do |problem_id| %>
+            <span><%= problem_link problem_id %></span>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    <% if @both.size > 0 %>
+      <tr>
+        <td class="left-column"><%= t '.both_accepted', num: @both.size %></td>
+        <td class="right-column">
+          <% @both.each do |problem_id| %>
+            <span><%= problem_link problem_id %></span>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>

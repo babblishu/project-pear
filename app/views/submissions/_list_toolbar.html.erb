@@ -1,0 +1,40 @@
+<ul class="nav pull-right">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+      <%= t '.filter' %><b class="caret"></b>
+    </a>
+    <div id="submissions-filter-dropdown" class="dropdown-menu">
+      <%= form_tag submissions_list_path, method: :get do %>
+        <div class="row-fluid" style="width: 250px;">
+          <input type="text" class="span6" name="handle" placeholder="<%= t '.user' %>"
+                 value="<%= params[:handle] || '' %>">
+          <input type="text" class="span6" name="problem_id" placeholder="<%= t '.problem' %>"
+                 value="<%= params[:problem_id] || '' %>">
+          <input type="text" class="span6" name="min_score" placeholder="<%= t '.min_score' %>"
+                 value="<%= params[:min_score] || '' %>">
+          <input type="text" class="span6" name="max_score" placeholder="<%= t '.max_score' %>"
+                 value="<%= params[:max_score] || '' %>">
+          <div class="span12">
+            <% APP_CONFIG.program_languages.each do |key, value| %>
+              <label class="checkbox inline item">
+                <input type="checkbox" name="language_<%= key %>" value="1"
+                       <%= %q{checked="checked"} if params["language_#{key}"] || params[:choose_all] %>>
+                <%= value %>
+              </label>
+            <% end %>
+          </div>
+          <div class="span12">
+            <% APP_CONFIG.judge_platforms.each do |key, value| %>
+              <label class="checkbox inline item">
+                <input type="checkbox" name="platform_<%= key %>" value="1"
+                       <%= %q{checked="checked"} if params["platform_#{key}"] || params[:choose_all] %>>
+                <%= value %>
+              </label>
+            <% end %>
+          </div>
+          <button type="submit" class="pull-right btn"><%= t '.filter' %></button>
+        </div>
+      <% end %>
+    </div>
+  </li>
+</ul>

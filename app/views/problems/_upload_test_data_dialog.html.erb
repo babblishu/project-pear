@@ -1,0 +1,29 @@
+<div id="upload-test-data-dialog" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3><%= t '.upload_test_data' %></h3>
+  </div>
+  <div class="modal-body">
+    <%= form_tag problems_upload_test_data_path(@problem.id), multipart: true, method: :post,
+                 class: 'form-horizontal' do %>
+      <div class="control-group">
+        <label class="control-label"><%= t '.data_file' %></label>
+        <div class="controls">
+          <span class="fileupload fileupload-new" data-provides="fileupload">
+            <span class="btn btn-file">
+              <span class="fileupload-new"><%= t '.select' %></span>
+              <span class="fileupload-exists"><%= t '.change' %></span>
+              <input name="data_file" type="file" accept="application/zip">
+            </span>
+            <span class="fileupload-preview"></span>
+            <a href="#" class="close fileupload-exists" data-dismiss="fileupload" style="float: none">×</a>
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" data-dismiss="modal" class="btn"><%= t '.close' %></button>
+    <button type="submit" class="btn btn-primary" data-disabled="<%= t '.submitting' %>"><%= t '.upload' %></button>
+  </div>
+</div>

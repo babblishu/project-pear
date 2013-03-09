@@ -1,0 +1,36 @@
+zh_CN:
+  global:
+    home:
+      title: '欢迎来到%{name}'
+      subtitle: '本OJ还在测试阶段'
+      user_block:
+        rank: '总排名'
+        accepted_problems: '通过题数'
+        submissions: '提交数'
+        today_accepted_problems: '今日通过题数'
+        today_submissions: '今日提交数'
+      search_block:
+        go_problem: '转到题目'
+        search_user: '搜素用户'
+      top_users:
+        title: '今日刷题榜'
+        rank: '排名'
+        handle: '用户名'
+        accepted_problems: '通过题数'
+      hot_problems:
+        title: '今日热门题目'
+        problem_title: '题目标题'
+        submissions: '提交数'
+      recent_discuss:
+        related_problem: '相关题目'
+        author: '作者'
+        title: '主题'
+        last_reply: '最后回复'
+        replies: '回复数'
+        top: '置顶'
+
+    captcha_verify:
+      title: '输入验证码以继续操作'
+      captcha: '验证码'
+      submit: '提交'
+      wrong_captcha: '验证码错误'

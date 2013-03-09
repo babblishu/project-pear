@@ -1,0 +1,61 @@
+zh_CN:
+  submissions:
+    list:
+      submissions_list: '提交记录'
+      id: '编号'
+      score: '分数'
+      user: '用户'
+      problem: '题目'
+      time_used: '运行时间'
+      memory_used: '内存占用'
+      language: '语言'
+      platform: '平台'
+      code_size: '代码长度'
+      code_length: '代码行数'
+      submit_time: '提交时间'
+      waiting: '等待评测'
+      running: '正在评测'
+      last_page: '上一页'
+      next_page: '下一页'
+
+    list_toolbar:
+      user: '用户'
+      problem: '题目编号'
+      min_score: '分数最小值'
+      max_score: '分数最大值'
+      filter: '筛选'
+
+    result:
+      submission_result: '提交%{id}的结果'
+      basic_info: '基本信息'
+      result: '运行结果'
+      compile_message: '编译信息'
+      source_code: '源代码'
+      test_case: '测试点'
+      time_used: '运行时间'
+      memory_used: '内存占用'
+      score: '得分'
+      correct_answer: '答案正确'
+      wrong_answer: '答案错误'
+      partly_correct: '答案部分正确'
+      time_limit_exceeded: '运行超时'
+      memory_limit_exceeded: '超过内存限制'
+      output_limit_exceeded: '输出内容过多'
+      no_output: '未发现输出文件'
+      runtime_error: '运行时错误'
+      judge_runtime_error: '校验器运行错误'
+      judge_time_limit_exceeded: '校验器运行超时'
+      invalid_special_judge: '非法校验器'
+
+    result_toolbar:
+      view_problem: '查看题目'
+      share: '分享代码'
+      share_confirm: '确定分享你的代码？'
+      other_operations: '其他操作'
+      hide_submission: '隐藏记录'
+      show_submission: '显示记录'
+      rejudge_submission: '重测本条记录'
+      confirm: '确定执行此操作？'
+
+    operation:
+      success: '操作成功！'

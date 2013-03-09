@@ -1,0 +1,99 @@
+zh_CN:
+  activerecord:
+    errors:
+      models:
+        user:
+          attributes:
+            handle:
+              taken: '用户名已存在'
+              invalid: '只能包含字母、数字、点和下划线'
+              too_short: '至少要有%{count}个字符'
+              too_long: '最多只能有%{count}个字符'
+            password:
+              confirmation: '两次输入不一致'
+            password_digest:
+              blank: '不能为空'
+            avatar:
+              not_square: '头像文件必须是正方形尺寸'
+              too_small: '头像分辨率至少应该为200×200'
+              invalid_type: '头像文件需要是图片格式(jpg或png)'
+              too_large: '图片大小不能超过100KB'
+
+        user_information:
+          attributes:
+            real_name:
+              blank: '不能为空'
+              too_long: '最多只能有%{count}个字符'
+            school:
+              blank: '不能为空'
+              too_long: '最多只能有%{count}个字符'
+            email:
+              blank: '不能为空'
+              invalid: '非法Email地址'
+              too_long: '最多只能有%{count}个字符'
+            signature:
+              blank: '不能为空'
+              too_long: '最多只能有%{count}个字符'
+
+        problem:
+          attributes:
+            title:
+              blank: '标题不能为空'
+              too_long: '最多只能有%{count}个字符'
+            source:
+              too_long: '最多只能有%{count}个字符'
+
+        problem_content:
+          attributes:
+            time_limit:
+              blank: '时间限制不能为空'
+              too_long: '最多只能有%{count}个字符'
+            memory_limit:
+              blank: '内存限制不能为空'
+              too_long: '最多只能有%{count}个字符'
+
+        submission:
+          attributes:
+            program:
+              blank: '请选择源程序'
+            code_size:
+              inclusion: '源程序不能超过50KB'
+            language:
+              blank: '语言不能为空'
+              inclusion: '内容不合法'
+            platform:
+              blank: '系统平台不能为空'
+              inclusion: '内容不合法'
+
+        topic:
+          attributes:
+            title:
+              blank: '主题不能为空'
+              too_long: '最多只能有%{count}个字符'
+            content:
+              blank: '内容不能为空'
+              too_long: '最多只能有%{count}个字符'
+            language:
+              blank: '语言不能为空'
+              inclusion: '内容不合法'
+
+        primary_reply:
+          attributes:
+            content:
+              blank: '内容不能为空'
+              too_long: '最多只能有%{count}个字符'
+            language:
+              blank: '语言不能为空'
+              inclusion: '内容不合法'
+
+        secondary_reply:
+          attributes:
+            content:
+              blank: '内容不能为空'
+              too_long: '最多只能有%{count}个字符'
+
+        message:
+          attributes:
+            content:
+              blank: '内容不能为空'
+              too_long: '最多只能有%{count}个字符'

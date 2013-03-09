@@ -1,0 +1,55 @@
+.users .list {
+  .nav-pills {
+    text-align: center;
+    li {
+      float: none;
+      display: inline-block;
+      zoom: 1;
+    }
+  }
+  #users-list {
+    width: 500px;
+    margin: 0 auto;
+    th, td {
+      text-align: center;
+    }
+  }
+}
+
+.users .show {
+  #user-block {
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    #user-div {
+      .left-column {
+        width: 150px;
+        font-weight: bold;
+      }
+    }
+    #avatar-div {
+      padding: 18px 10px;
+      text-align: center;
+    }
+  }
+}
+
+.users .compare {
+  #user-block {
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    .left-column {
+      width: 200px;
+      font-weight: bold;
+    }
+  }
+}

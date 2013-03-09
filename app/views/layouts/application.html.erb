@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= page_title @title %></title>
+  <%= stylesheet_link_tag "application" %>
+  <%= javascript_include_tag "application" %>
+  <% if @enable_latex %>
+    <script type="text/javascript" src="/jsMath/easy/load.js"></script>
+  <% end %>
+  <% if notice && !notice.empty? %>
+    <script type="text/javascript">
+      alert("<%= notice %>");
+    </script>
+  <% end %>
+  <%= csrf_meta_tags %>
+</head>
+
+<body onload="prettyPrint()">
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <%= link_to APP_CONFIG.oj_name, root_path, class: 'brand' %>
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+          <li class="<%= 'active' if @discuss_active %>"><%= link_to t('.discuss'), discuss_list_path %></li>
+          <li class="<%= 'active' if @problem_active %>"><%= link_to t('.problems'), problems_list_path %></li>
+          <li class="<%= 'active' if @submission_active %>"><%= link_to t('.submissions'), submissions_list_path(choose_all: '1') %></li>
+          <li class="<%= 'active' if @rank_active %>"><%= link_to t('.rank_list'), rank_path('all') %></li>
+          <li class="<%= 'active' if @faq_active %>"><%= link_to t('.faq'), faq_path %></li>
+        </ul>
+        <% if !@some_wrong && lookup_context.exists?(controller.action_name + '_toolbar', controller.controller_name, true) %>
+          <%= render controller.controller_name + '/' + controller.action_name + '_toolbar' %>
+        <% end %>
+        <ul class="nav pull-right">
+          <% if @current_user %>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+                <i class="iconic-user"></i>
+                <% if (@notifications_count || 0) > 0 || (@messages_count || 0) > 0 %>
+                  <%= @current_user.handle + " (#{(@notifications_count || 0) + (@messages_count || 0)})" %>
+                <% else %>
+                  <%= @current_user.handle %>
+                <% end %>
+                <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <% if (@notifications_count || 0) > 0 %>
+                    <%= link_to raw(t('.notification') + " <strong>(#{@notifications_count})</strong>"), notifications_path %>
+                  <% else %>
+                    <%= link_to t('.notification'), notifications_path %>
+                  <% end %>
+                </li>
+                <li>
+                  <% if (@messages_count || 0) > 0 %>
+                    <%= link_to raw(t('.message') + " <strong>(#{@messages_count})</strong>"), messages_list_path %>
+                  <% else %>
+                    <%= link_to t('.message'), messages_list_path %>
+                  <% end %>
+                </li>
+                <li><%= link_to t('.view_profile'), users_show_path(@current_user.handle) %></li>
+                <li class="divider"></li>
+                <li><%= link_to t('.change_profile'), users_edit_path(@current_user.handle) %></li>
+                <li><%= link_to t('.change_password'), users_edit_password_path %></li>
+                <li class="divider"></li>
+                <li><a href="<%= logout_path %>"><%= t '.logout' %></a></li>
+              </ul>
+            </li>
+          <% else %>
+            <li class="dropdown">
+              <a href="#" id="login-toggle" class="dropdown-toggle" data-toggle="dropdown" style="outline: none">
+                <%= t '.login' %>
+                <b class="caret"></b>
+              </a>
+              <div id="login-dropdown" class="dropdown-menu">
+                <%= form_tag login_path, method: :get do %>
+                  <div><input type="text" name="handle" placeholder="<%= t '.handle' %>"></div>
+                  <div><input type="password" name="password" placeholder="<%= t '.password' %>"></div>
+                  <div style="padding-left: 10px;">
+                    <label class="checkbox">
+                      <input type="checkbox" name="remember_login" value="1"><%= t '.remember_login' %>
+                    </label>
+                  </div>
+                  <div class="submit-div clearfix">
+                    <span class="text-error" style="margin-left: 10px;"></span>
+                    <button type="submit" class="btn pull-right" data-disabled="<%= t '.logining' %>">
+                      <%= t '.login' %>
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+            </li>
+            <li><a href="<%= register_path %>"><%= t '.register' %></a></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="main-container" class="container <%= controller.controller_name %>">
+  <div class="<%= controller.action_name %>" style="min-height: 500px;">
+    <%= yield %>
+  </div>
+
+  <hr style="margin: 20px 0 10px 0;">
+
+  <div id="footer">
+    <div>Designed & Developed by Zhipeng Jia</div>
+    <div>project-pear <%= APP_CONFIG.version_str %></div>
+  </div>
+
+</div>
+
+</body>
+</html>

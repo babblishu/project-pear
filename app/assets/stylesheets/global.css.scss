@@ -1,0 +1,125 @@
+.navbar {
+  a {
+    font-weight: bold;
+  }
+}
+
+#login-dropdown {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 15px;
+}
+
+#main-container {
+  width: 960px;
+  margin-top: 60px;
+  margin-bottom: 20px;
+  #footer {
+    color: silver;
+    text-align: center;
+  }
+}
+
+.help-inline span {
+  margin-left: 5px;
+}
+
+.global .home {
+  .block {
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  #main {
+    padding: 40px;
+    font-size: 18px;
+    font-weight: 200;
+    line-height: 30px;
+    h1 {
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", SimHei, sans-serif;
+    }
+  }
+
+  #recent-discuss {
+    padding: 15px;
+    table {
+      th, td {
+        text-align: center;
+      }
+      .title {
+        text-align: left;
+      }
+    }
+  }
+
+  #user-block {
+    padding: 15px;
+    .left-block {
+      .user-avatar {
+        margin-top: 5px;
+        a {
+          display: block;
+          text-align: center;
+          img {
+            border: 1.5px solid gainsboro;
+            border-radius: 10px;
+          }
+        }
+      }
+      .user-handle {
+        margin-top: 2px;
+        text-align: center;
+      }
+    }
+    .right-block {
+      padding-bottom: 5px;
+      padding-left: 3px;
+      .detail-row {
+        margin-top: 5px;
+        .left-column {
+          display: inline-block;
+          width: 100px;
+          font-weight: bold;
+        }
+        .right-column {
+          display: inline-block;
+        }
+      }
+
+    }
+  }
+
+  #search-block {
+    padding: 15px;
+  }
+
+  #top-users, #hot-problems {
+    .title {
+      font-size: 20px;
+      text-align: center;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", SimHei, sans-serif;
+    }
+    th, td {
+      text-align: center;
+    }
+  }
+}
+
+.global .faq {
+  .item {
+    margin-bottom: 20px;
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", SimHei, sans-serif;
+      margin: 15px 0;
+    }
+    .content {
+
+    }
+  }
+}

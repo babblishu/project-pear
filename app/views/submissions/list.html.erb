@@ -1,0 +1,59 @@
+<table id="submissions-list" class="table table-condensed table-striped">
+  <thead>
+  <tr>
+    <th><%= t '.id' %></th>
+    <th><%= t '.score' %></th>
+    <th><%= t '.user' %></th>
+    <th><%= t '.problem' %></th>
+    <th><%= t '.time_used' %></th>
+    <th><%= t '.memory_used' %></th>
+    <th><%= t '.language' %></th>
+    <th><%= t '.platform' %></th>
+    <th><%= t '.code_length' %></th>
+    <th><%= t '.code_size' %></th>
+    <th><%= t '.submit_time' %></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @submissions.each do |submission| %>
+    <tr class="<%= 'warning' if @current_user && @current_user.id == submission.user.id %>">
+      <td>
+        <% if submission.share || @current_user && (submission.user_id == @current_user.id || @current_user.role == 'admin') %>
+          <%= submission_link submission.id %>
+        <% else %>
+          <%= submission.id %>
+        <% end %>
+      </td>
+      <% if submission.status == 'waiting' %>
+        <td style="color: darkgoldenrod"><%= t '.waiting' %></td>
+      <% elsif submission.status == 'running' %>
+        <td style="color: darkorange"><%= t '.running' %></td>
+      <% else %>
+        <% if submission.score == 100 %>
+          <td style="color: green;"><%= submission.score %></td>
+        <% else %>
+          <td style="color: red;"><%= submission.score %></td>
+        <% end %>
+      <% end %>
+      <td><%= user_link submission.user.handle %></td>
+      <td><%= problem_link submission.problem_id %></td>
+      <td><%= format_time_used submission.time_used %></td>
+      <td><%= format_memory_used submission.memory_used %></td>
+      <td><%= format_language submission.language %></td>
+      <td><%= format_platform submission.platform %></td>
+      <td><%= submission.code_length %></td>
+      <td><%= format_code_size submission.code_size %></td>
+      <td><%= format_datetime submission.created_at %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<ul class="pager">
+  <% if @page > 1 %>
+    <li><%= link_to t('.last_page'), submissions_list_path(@page - 1, params.to_hash) %></li>
+  <% end %>
+  <% unless @is_last_page %>
+    <li><%= link_to t('.next_page'), submissions_list_path(@page + 1, params.to_hash) %></li>
+  <% end %>
+</ul>

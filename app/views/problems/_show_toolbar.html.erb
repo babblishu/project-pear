@@ -1,0 +1,33 @@
+<ul class="nav pull-right">
+  <% if @current_user && @problem.test_data_timestamp %>
+    <li><a id="program-submit-button" href="#program-submit-dialog" data-toggle="modal" style="outline: none;">
+      <%= t '.submit' %>
+    </a></li>
+  <% end %>
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+      <%= t '.other_operations' %>
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <% if @current_user %>
+        <li><%= link_to t('.my_submissions'), submissions_list_path(handle: @current_user.handle, problem_id: @problem.id, choose_all: '1'), target: '_blank' %></li>
+      <% end %>
+      <li><%= link_to t('.discuss'), discuss_list_path(problem_id: @problem.id), target: '_blank' %></li>
+      <li><%= link_to t('.status'), problems_status_path(@problem.id), target: '_blank' %></li>
+      <% unless @problem.content.solution.empty? && @problem.content.program.empty? %>
+        <li><a href="#solution-dialog" data-toggle="modal" data-confirm="<%= t '.solution_confirm' %>" style="outline: none;">
+          <%= t '.solution' %></a></li>
+      <% end %>
+      <% if @current_user && @current_user.role == 'admin' %>
+        <li class="divider"></li>
+        <li><%= link_to t('.edit_content'), problems_edit_path(@problem.id) %></li>
+        <li><a id="upload-test-data-button" href="#upload-test-data-dialog" data-toggle="modal"><%= t '.upload_test_data' %></a></li>
+        <% if @problem.test_data_timestamp %>
+          <li><%= link_to t('.download_test_data'), problems_download_test_data_path(@problem.id) %></li>
+          <li><%= link_to t('.rejudge'), problems_rejudge_path(@problem.id), confirm: t('.rejudge_confirm') %></li>
+        <% end %>
+      <% end %>
+    </ul>
+  </li>
+</ul>

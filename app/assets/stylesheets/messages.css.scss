@@ -1,0 +1,128 @@
+.messages .notifications {
+  .notification-block {
+    position: relative;
+    width: 500px;
+    margin: 0 auto;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 40px;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    .corner {
+      position: absolute;
+      top: -1px;
+      padding: 3px 7px;
+      font-size: 12px;
+      font-weight: bold;
+      background-color: #f5f5f5;
+      border: 1.5px solid #ddd;
+    }
+    .corner.left {
+      left: -1px;
+      border-radius: 8px 0 8px 0;
+    }
+    .corner.right {
+      right: -1px;
+      border-radius: 0 8px 0 8px;
+    }
+    .time {
+      color: grey;
+    }
+    .not-read {
+      color: coral;
+    }
+  }
+}
+
+.messages .list {
+  table {
+    width: 75%;
+    margin: 0 auto;
+    td.user {
+      width: 75px;
+      padding-left: 15px;
+      padding-right: 15px;
+      padding-top: 12px;
+      padding-bottom: 5px;
+      vertical-align: middle;
+      .user-avatar img {
+        border: 1.5px solid gainsboro;
+        border-radius: 10px;
+        margin: 0 auto;
+        display: block;
+      }
+      .user-handle {
+        margin-top: 2px;
+        text-align: center;
+      }
+    }
+    td.preview {
+      cursor: pointer;
+      padding-left: 15px;
+      padding-right: 15px;
+      padding-top: 15px;
+      padding-bottom: 10px;
+      .content {
+        min-height: 75px;
+      }
+      .time {
+        text-align: right;
+        color: grey;
+      }
+    }
+  }
+}
+
+.messages .show {
+  #user-block {
+    margin-top: 30px;
+    position: fixed;
+    text-align: center;
+    img {
+      margin: 0 auto;
+    }
+  }
+
+  #message-container {
+    margin-top: 20px;
+    .message-block {
+      min-width: 45%;
+      max-width: 70%;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      position: relative;
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-top: 40px;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      .corner {
+        position: absolute;
+        top: -1px;
+        padding: 3px 7px;
+        font-size: 12px;
+        font-weight: bold;
+        background-color: #f5f5f5;
+        border: 1.5px solid #ddd;
+      }
+      .corner.left {
+        left: -1px;
+        border-radius: 8px 0 8px 0;
+      }
+      .corner.right {
+        right: -1px;
+        border-radius: 0 8px 0 8px;
+      }
+      .time {
+        color: grey;
+      }
+      .not-read {
+        color: coral;
+      }
+    }
+  }
+}

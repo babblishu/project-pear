@@ -1,0 +1,98 @@
+zh_CN:
+  discuss:
+    list:
+      related_problem: '相关题目'
+      author: '作者'
+      title: '主题'
+      release_date: '发布日期'
+      last_reply: '最后回复'
+      replies: '回复数'
+      new_topic: '发布新话题'
+      last_page: '上一页'
+      next_page: '下一页'
+      discuss: '讨论列表'
+      discuss_problem: '题目%{id}的讨论列表'
+      top: '置顶'
+
+    list_toolbar:
+      new_topic: '发布新话题'
+
+    content_edit_dialog:
+      basic: '基本'
+      title: '主题'
+      related_problem: '相关题目'
+      status: '主题可见性'
+      normal: '所有用户可见'
+      advanced: '仅管理员和高级用户可见'
+      hidden: '仅管理员可见'
+      top: '置顶'
+      no_reply: '禁止回复'
+      enable_markdown: '启用Markdown'
+      content: '内容'
+      attachment: '附件'
+      source: '源程序'
+      source_create_info: '可以选择不上传附件代码'
+      source_edit_info: '不选择附件代码将会使用原先上传的代码'
+      select: '选择文件'
+      change: '更换文件'
+      language: '语言'
+      close: '关闭'
+      submit: '确定'
+      submitting: '提交中'
+
+    content_edit:
+      invalid_problem_id: '非法题目编号'
+      problem_not_exist: '题目编号不存在'
+      no_privilege_to_problem: '你无权查看此题号'
+      program_too_long: '附件程序不能超过50KB'
+      blank_content: '内容不能为空'
+      success: '操作成功！'
+
+    show:
+      owner: '楼主'
+      floor: '%{floor} 楼'
+      attachment: '附件'
+      edit: '编辑'
+      hide: '隐藏'
+      reply: '回复'
+      cancel: '收起'
+      submit: '确定'
+      cancel_hide: '取消隐藏'
+      confirm: '确定执行此操作？'
+      reply_to: '回复%{handle}: '
+      reply_topic: '回复本话题'
+      edit_topic: '编辑话题'
+      edit_reply: '编辑回复'
+      hidden: '内容已被管理员隐藏'
+      last_page: '上一页'
+      next_page: '下一页'
+      top: '置顶'
+
+    show_toolbar:
+      reply: '回复本话题'
+      view_problem: '查看题目'
+
+    program_dialog:
+      attachment_program: '附件程序'
+      close: '关闭'
+      download: '下载'
+
+    reply_dialog:
+      reply: '回复'
+      content: '内容'
+      attachment: '附件'
+      source: '源程序'
+      source_info: '可以选择不上传附件代码'
+      select: '选择文件'
+      change: '更换文件'
+      language: '语言'
+      close: '关闭'
+      submit: '确定'
+
+    notification:
+      create_primary_reply: '你的讨论主题《%{title}》有了来自<a href="%{user_link}" target="_blank">%{handle}</a>的新回复，点击<a href="%{reply_link}" target="_blank">此处</a>查看。'
+      create_secondary_reply: '你关于讨论主题《%{title}》的回复有了来自<a href="%{user_link}" target="_blank">%{handle}</a>的新回复，点击<a href="%{reply_link}" target="_blank">此处</a>查看。'
+      edit_topic: '你的讨论主题《%{title}》已被管理员<a href="%{user_link}" target="_blank">%{handle}</a>编辑，点击<a href="%{topic_link}">此处</a>查看。'
+      edit_reply: '你关于讨论主题《%{title}》的回复已被管理员<a href="%{user_link}" target="_blank">%{handle}</a>编辑，点击<a href="%{reply_link}" target="_blank">此处</a>查看。'
+      hide_reply: '你关于讨论主题《%{title}》的回复已被管理员<a href="%{user_link}" target="_blank">%{handle}</a>隐藏，点击<a href="%{reply_link}" target="_blank">此处</a>查看。'
+      show_reply: '你关于讨论主题《%{title}》的回复已被管理员<a href="%{user_link}" target="_blank">%{handle}</a>取消隐藏，点击<a href="%{reply_link}" target="_blank">此处</a>查看。'

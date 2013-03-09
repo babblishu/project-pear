@@ -1,0 +1,10 @@
+<ul class="nav pull-right">
+  <li>
+    <%= link_to t('.back_to_problem'), problems_show_path(@problem.id) %>
+  </li>
+  <li>
+    <a id="upload-test-data-button" href="#upload-test-data-dialog" data-toggle="modal" style="outline: none;">
+      <%= t '.upload_test_data' %>
+    </a>
+  </li>
+</ul>

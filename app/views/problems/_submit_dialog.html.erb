@@ -1,0 +1,52 @@
+<div id="program-submit-dialog" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3><%= t '.submit_program' %></h3>
+  </div>
+  <div class="modal-body">
+    <%= form_tag submissions_create_path(problem_id: @problem.id),
+                 multipart: true, method: :post, class: 'form-horizontal' do %>
+      <div class="control-group">
+        <label class="control-label"><%= t '.source' %></label>
+        <div class="controls">
+          <span class="fileupload fileupload-new" data-provides="fileupload">
+            <span class="btn btn-file">
+              <span class="fileupload-new"><%= t '.select' %></span>
+              <span class="fileupload-exists"><%= t '.change' %></span>
+              <input name="program" type="file">
+            </span>
+            <span class="fileupload-preview"></span>
+            <a href="#" class="close fileupload-exists" data-dismiss="fileupload" style="float: none">×</a>
+          </span>
+          <span class="help-inline" data-errors="program code_size"></span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label"><%= t '.language' %></label>
+        <div class="controls">
+          <% APP_CONFIG.program_languages.each do |key, value| %>
+            <label class="radio inline">
+              <input type="radio" name="language" value="<%= key %>"><span><%= value %></span>
+            </label>
+          <% end %>
+          <span class="help-inline" data-errors="language"></span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label"><%= t '.platform' %></label>
+        <div class="controls">
+          <% APP_CONFIG.judge_platforms.each do |key, value| %>
+            <label class="radio inline">
+              <input type="radio" name="platform" value="<%= key %>"><span><%= value %></span>
+            </label>
+          <% end %>
+          <span class="help-inline" data-errors="platform"></span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" data-dismiss="modal" class="btn"><%= t '.close' %></button>
+    <button type="submit" class="btn btn-primary" data-disabled="<%= t '.submitting' %>"><%= t '.submit' %></button>
+  </div>
+</div>

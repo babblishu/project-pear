@@ -1,0 +1,156 @@
+<%= form_for @problem, url: problems_update_path(@problem.id), method: :post,
+             html: {id: 'problem-edit-form', class: 'form-horizontal', enctype: 'multipart/form-data' } do |f| %>
+<div class="tabbable">
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#basic" data-toggle="tab"><%= t '.basic_settings' %></a></li>
+    <li><a href="#background" data-toggle="tab"><%= t '.background' %></a></li>
+    <li><a href="#description" data-toggle="tab"><%= t '.description' %></a></li>
+    <li><a href="#input" data-toggle="tab"><%= t '.input' %></a></li>
+    <li><a href="#output" data-toggle="tab"><%= t '.output' %></a></li>
+    <li><a href="#sample-illustration" data-toggle="tab"><%= t '.sample_illustration' %></a></li>
+    <li><a href="#additional-information" data-toggle="tab"><%= t '.additional_information' %></a></li>
+    <li><a href="#solution" data-toggle="tab"><%= t '.solution' %></a></li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane active" id="basic">
+      <div class="control-group">
+        <%= f.label :status, t('.status'), class: 'control-label' %>
+        <div class="controls">
+          <label class="radio"><%= f.radio_button :status, 'hidden' %><span><%= t '.hidden' %></span></label>
+          <label class="radio"><%= f.radio_button :status, 'normal' %><span><%= t '.normal' %></span></label>
+          <label class="radio"><%= f.radio_button :status, 'advanced' %><span><%= t '.advanced' %></span></label>
+        </div>
+      </div>
+      <div class="control-group">
+        <%= f.label :title, t('.title'), class: 'control-label', maxlength: 20 %>
+        <div class="controls">
+          <%= f.text_field :title, id: 'title-input' %>
+          <span class="help-inline" data-errors="title"></span>
+        </div>
+      </div>
+      <div class="control-group">
+        <%= f.label :source, t('.source'), class: 'control-label', maxlength: 100 %>
+        <div class="controls">
+          <%= f.text_field :source, id: 'source-input' %>
+          <span class="help-inline" data-errors="source"></span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="tags-input" class="control-label"><%= t '.tags' %></label>
+        <div class="controls">
+          <input id="tags-input" name="tags" type="text" value="<%= @tags %>">
+          <span class="help-inline" data-errors="tags"></span>
+        </div>
+      </div>
+      <%= fields_for @problem.content do |f| %>
+        <div class="control-group">
+          <%= f.label :time_limit, t('.time_limit'), class: 'control-label', maxlength: 20 %>
+          <div class="controls">
+            <%= f.text_field :time_limit, id: 'time-limit-input', class: 'input-small' %>
+            <span class="help-inline" data-errors="content.time_limit"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <%= f.label :memory_limit, t('.memory_limit'), class: 'control-label', maxlength: 20 %>
+          <div class="controls">
+            <%= f.text_field :memory_limit, id: 'memory-limit-input', class: 'input-small' %>
+            <span class="help-inline" data-errors="content.memory_limit"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <label class="checkbox inline">
+              <%= f.check_box :enable_markdown? %><span><%= t '.enable_markdown' %></span>
+            </label>
+            <label class="checkbox inline">
+              <%= f.check_box :enable_latex? %><span><%= t '.enable_latex' %></span>
+            </label>
+          </div>
+        </div>
+      <% end %>
+      <div class="control-group">
+        <label class="control-label"><%= t '.attachment_file' %></label>
+        <div class="controls">
+        <span class="fileupload fileupload-new" data-provides="fileupload">
+          <span class="btn btn-file">
+            <span class="fileupload-new"><%= t '.select' %></span>
+            <span class="fileupload-exists"><%= t '.change' %></span>
+            <input name="attachment_file" type="file" accept="application/zip">
+          </span>
+          <span class="fileupload-preview"></span>
+          <a href="#" class="close fileupload-exists" data-dismiss="fileupload" style="float: none">×</a>
+        </span>
+        <span class="help-inline" data-errors="attachment_file"></span>
+        </div>
+      </div>
+    </div>
+    <%= fields_for @problem.content do |f| %>
+      <div class="tab-pane" id="background">
+        <div class="editor-container">
+          <%= f.text_area :background, rows: 23, class: 'editor' %>
+        </div>
+      </div>
+      <div class="tab-pane" id="description">
+        <div class="editor-container">
+          <%= f.text_area :description, rows: 23, class: 'editor' %>
+        </div>
+      </div>
+      <div class="tab-pane" id="input">
+        <div class="editor-container">
+          <%= f.text_area :input, rows: 23, class: 'editor' %>
+        </div>
+      </div>
+      <div class="tab-pane" id="output">
+        <div class="editor-container">
+          <%= f.text_area :output, rows: 23, class: 'editor' %>
+        </div>
+      </div>
+      <div class="tab-pane" id="sample-illustration">
+        <div class="editor-container">
+          <%= f.text_area :sample_illustration, rows: 23, class: 'editor' %>
+        </div>
+      </div>
+      <div class="tab-pane" id="additional-information">
+        <div class="editor-container">
+          <%= f.text_area :additional_information, rows: 23, class: 'editor' %>
+        </div>
+      </div>
+      <div class="tab-pane" id="solution">
+        <div class="control-group">
+          <div class="editor-container">
+            <%= f.text_area :solution, rows: 18, class: 'editor' %>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><%= t '.source_code' %></label>
+          <div class="controls">
+            <span class="fileupload fileupload-new" data-provides="fileupload">
+              <span class="btn btn-file">
+                <span class="fileupload-new"><%= t '.select' %></span>
+                <span class="fileupload-exists"><%= t '.change' %></span>
+                <input class="program" name="program" type="file">
+              </span>
+              <span class="fileupload-preview"></span>
+              <a href="#" class="close fileupload-exists" data-dismiss="fileupload" style="float: none">×</a>
+            </span>
+            <span class="help-inline" data-errors="code_size"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label"><%= t '.language' %></label>
+          <div class="controls">
+            <% APP_CONFIG.program_languages.each do |key, value| %>
+              <label class="radio inline">
+                <%= f.radio_button :language, key, class: 'language ' + key.to_s %><span><%= value %></span>
+              </label>
+            <% end %>
+            <span class="help-inline" data-errors="language"></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<% end %>
+
+<div id="confirm-message" style="display: none;"><%= t '.leave_confirm_message' %></div>

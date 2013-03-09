@@ -1,0 +1,47 @@
+<div id="solution-dialog" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3><%= t '.solution' %></h3>
+  </div>
+  <div class="modal-body">
+    <% if !@problem.content.solution.empty? %>
+      <% if !@problem.content.program.empty? %>
+        <ul class="nav nav-pills">
+          <li class="active"><a href="#hint" data-toggle="pill"><%= t '.hint' %></a></li>
+          <li><a href="#standard-program" data-toggle="pill"><%= t '.standard_program' %></a></li>
+        </ul>
+        <div class="pill-content">
+          <div class="pill-pane active" id="hint">
+            <div class="problem-block statement-block">
+              <% if @problem.content.enable_markdown %>
+                <%= raw @markdown.render @problem.content.solution %>
+              <% else %>
+                <%= raw @problem.content.solution %>
+              <% end %>
+            </div>
+          </div>
+          <div class="pill-pane" id="standard-program">
+<pre class="prettyprint lang-<%= @problem.content.language %> linenums">
+<%= @problem.content.program.gsub(/\t/, '    ') %>
+</pre>
+          </div>
+        </div>
+      <% else %>
+        <div class="problem-block statement-block">
+          <% if @problem.content.enable_markdown %>
+            <%= raw @markdown.render @problem.content.solution %>
+          <% else %>
+            <%= raw @problem.content.solution %>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+<pre class="prettyprint lang-<%= @problem.content.language %> linenums">
+<%= @problem.content.program.gsub(/\t/, '    ') %>
+</pre>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" data-dismiss="modal" class="btn"><%= t '.close' %></button>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<div id="reply-dialog" class="program-dialog modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3><%= t '.reply_to', handle: @user.handle %></h3>
+  </div>
+  <div class="modal-body">
+    <%= form_tag messages_create_path(@user.handle) do %>
+      <textarea name="content" class="editor" rows="7" maxlength="<%= APP_CONFIG.message_length_limit %>"></textarea>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" data-dismiss="modal" class="btn"><%= t '.close' %></button>
+    <button type="submit" class="btn btn-primary submit" data-disabled="<%= t '.submitting' %>"><%= t '.submit' %></button>
+  </div>
+</div>

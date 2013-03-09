@@ -1,0 +1,150 @@
+.problems .list {
+  #problems-list {
+    th {
+      a {
+        color: black;
+        text-decoration: none;
+      }
+    }
+    .center {
+      text-align: center;
+    }
+    .title {
+      padding-left: 20px;
+    }
+    .icon {
+      padding-left: 20px;
+      font-size: 20px;
+    }
+  }
+  .pagination {
+    text-align: center;
+    margin: 10px;
+  }
+  #filter-dialog {
+    .modal-body {
+      padding-left: 30px;
+      padding-right: 30px;
+    }
+  }
+}
+
+.problems .show {
+  h2.title {
+    text-align: center;
+  }
+  h2.title, h3.title {
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", SimHei, sans-serif;
+  }
+  #problem-limits {
+    text-align: center;
+    font-size: 18px;
+    line-height: 30px;
+  }
+  #problem-tags {
+    font-size: 14px;
+    color: white;
+    span {
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
+  .problem-block {
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  .statement-block {
+    font-size: 16px;
+    line-height: 25px;
+    font-family: Arial, sans-serif;
+    .formula {
+      font-size: 18px;
+      font-family: 'Times New Roman', Times, serif;
+    }
+  }
+  .input-output-block {
+    font-size: 16px;
+    font-family: courier, monospace;
+    padding-bottom: 10px;
+  }
+  #program-submit-dialog {
+    .radio.inline span {
+      display: block;
+    }
+  }
+  #solution-dialog {
+    width: 800px;
+    margin-left: -400px;
+  }
+  #edit-tags-dialog {
+    .checkbox.inline span {
+      display: block;
+    }
+  }
+}
+
+.problems #no_privilege {
+  width: 75%;
+  margin: 0 auto;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 40px;
+  font-size: 18px;
+  font-weight: 200;
+  line-height: 30px;
+  h1 {
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", SimHei, sans-serif;
+  }
+}
+
+.problems .upload_test_data {
+  table {
+    th, td {
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+}
+
+.problems .status {
+  h2.title {
+    text-align: center;
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", SimHei, sans-serif;
+  }
+  #submissions-list {
+    th, td {
+      text-align: center;
+    }
+  }
+}
+
+.problems .edit {
+  #problem-edit-form {
+    .checkbox.inline span, .radio.inline span {
+      display: block;
+    }
+    .editor-container {
+      padding-left: 30px;
+      padding-right: 30px;
+    }
+  }
+}
+
+#statistics-dropdown {
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  table {
+    .left-column {
+      font-weight: bold;
+    }
+    td {
+      border-top: none;
+    }
+  }
+}

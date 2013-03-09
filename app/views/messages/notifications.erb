@@ -1,0 +1,24 @@
+<div id="notifications">
+  <% @notifications.each do |notification| %>
+    <div class="notification-block" data-id="<%= notification.id %>">
+      <div class="content"><%= simple_format notification.content %></div>
+      <div class="time corner left"><%= format_datetime notification.created_at %></div>
+      <% unless notification.read %>
+        <div class="not-read corner right"><%= t '.not_read' %></div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<% unless @is_last_page %>
+  <div class="template hidden">
+    <div class="content"></div>
+    <div class="time corner left"></div>
+    <div class="not-read corner right"><%= t '.not_read' %></div>
+  </div>
+  <div style="text-align: center;">
+    <button id="more-button" class="btn btn-primary" data-normal="<%= t '.view_more' %>" data-loading="<%= t '.loading' %>">
+      <%= t '.view_more' %>
+    </button>
+  </div>
+<% end %>

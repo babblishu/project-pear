@@ -1,0 +1,134 @@
+<h2 class="title"><%= @problem.title %></h2>
+
+<div id="problem-limits">
+  <span><%= t('.time_limit') + @problem.content.time_limit %></span>
+  <span style="margin-left: 20px;"><%= t('.memory_limit') + @problem.content.memory_limit %></span>
+</div>
+
+<div>
+  <div id="problem-tags" class="pull-right">
+    <%= t('.tags') + @tags %>
+  </div>
+
+  <% unless @problem.content.background.empty? %>
+    <div>
+      <h3 class="title"><%= t '.background' %></h3>
+      <div class="problem-block statement-block">
+        <% if @problem.content.enable_markdown %>
+          <%= raw @markdown.render @problem.content.background %>
+        <% else %>
+          <%= raw @problem.content.background %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @problem.content.description.empty? %>
+    <div>
+      <h3 class="title"><%= t '.description' %></h3>
+      <div class="problem-block statement-block">
+        <% if @problem.content.enable_markdown %>
+          <%= raw @markdown.render @problem.content.description %>
+        <% else %>
+          <%= raw @problem.content.description %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @problem.content.input.empty? %>
+    <div>
+      <h3 class="title"><%= t '.input' %></h3>
+      <div class="problem-block statement-block">
+        <% if @problem.content.enable_markdown %>
+          <%= raw @markdown.render @problem.content.input %>
+        <% else %>
+          <%= raw @problem.content.input %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @problem.content.output.empty? %>
+    <div>
+      <h3 class="title"><%= t '.output' %></h3>
+      <div class="problem-block statement-block">
+        <% if @problem.content.enable_markdown %>
+          <%= raw @markdown.render @problem.content.output %>
+        <% else %>
+          <%= raw @problem.content.output %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% @problem.sample_test_datas.each_with_index do |sample_test_data, index| %>
+    <div>
+      <% if @problem.sample_test_datas.size > 1 %>
+        <h3 class="title"><%= t('.sample_input') + " ##{index + 1}" %></h3>
+      <% else %>
+        <h3 class="title"><%= t('.sample_input') %></h3>
+      <% end %>
+      <div class="problem-block input-output-block">
+        <%= raw sample_test_data.input.gsub(/(?:\n\r?|\r\n?)/, '<br>') %>
+      </div>
+    </div>
+    <div>
+      <% if @problem.sample_test_datas.size > 1 %>
+        <h3 class="title"><%= t('.sample_output') + " ##{index + 1}" %></h3>
+      <% else %>
+        <h3 class="title"><%= t('.sample_output') %></h3>
+      <% end %>
+      <div class="problem-block input-output-block">
+        <%= raw sample_test_data.output.gsub(/(?:\n\r?|\r\n?)/, '<br>') %>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @problem.content.sample_illustration.empty? %>
+    <div>
+      <h3 class="title"><%= t '.sample_illustration' %></h3>
+      <div class="problem-block statement-block">
+        <% if @problem.content.enable_markdown %>
+          <%= raw @markdown.render @problem.content.sample_illustration %>
+        <% else %>
+          <%= raw @problem.content.sample_illustration %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @problem.content.additional_information.empty? %>
+    <div>
+      <h3 class="title"><%= t '.additional_information' %></h3>
+      <div class="problem-block statement-block">
+        <% if @problem.content.enable_markdown %>
+          <%= raw @markdown.render @problem.content.additional_information %>
+        <% else %>
+          <%= raw @problem.content.additional_information %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @problem.source.empty? %>
+    <div>
+      <h3 class="title"><%= t '.source' %></h3>
+      <div class="problem-block statement-block">
+        <p><%= @problem.source %></p>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @current_user && @problem.test_data_timestamp %>
+  <%= render 'problems/submit_dialog' %>
+<% end %>
+
+<% unless @problem.content.solution.empty? && @problem.content.program.empty? %>
+  <%= render 'problems/solution_dialog' %>
+<% end %>
+
+<% if @current_user && @current_user.role == 'admin' %>
+  <%= render 'problems/upload_test_data_dialog' %>
+<% end %>

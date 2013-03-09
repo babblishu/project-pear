@@ -1,0 +1,31 @@
+<div id="filter-dialog" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3><%= t '.filter' %></h3>
+  </div>
+  <div class="modal-body">
+    <%= form_tag problems_list_path, method: :get, id: 'filter-form' do %>
+      <div class="row-fluid">
+        <% 4.times do |x| %>
+          <div class="span3">
+            <% Tag.all.each_with_index do |tag, index| %>
+              <% if index % 4 == x %>
+                <label class="checkbox">
+                  <%= check_box_tag tag.id.to_s, '1', @tag_hash["tag_#{tag.id}"], name: "tag_#{tag.id}", id: "tag_#{tag.id}" %>
+                  <span><%= tag.name %></span>
+                </label>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      <div id="alert-message" class="hidden"><%= t '.filter_alert' %></div>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <a data-dismiss="modal" class="btn"><%= t '.close' %></a>
+    <button class="btn btn-primary submit" data-toggle="tooltip" title="<%= t '.filter_info' %>">
+      <%= t '.submit' %>
+    </button>
+  </div>
+</div>
