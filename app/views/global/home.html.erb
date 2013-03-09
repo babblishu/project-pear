@@ -5,34 +5,36 @@
       <p><%= t '.subtitle' %></p>
     </div>
 
-    <div id="recent-discuss" class="block">
-      <table class="table table-hover" style="margin-bottom: 0;">
-        <thead>
-        <tr>
-          <th style="width: 13%;"><%= t '.recent_discuss.related_problem' %></th>
-          <th class="title"><%= t '.recent_discuss.title' %></th>
-          <th style="width: 28%;"><%= t '.recent_discuss.last_reply' %></th>
-          <th style="width: 13%;"><%= t '.recent_discuss.replies' %></th>
-        </tr>
-        </thead>
-        <tbody>
-        <% @discuss.each do |topic| %>
+    <% unless @discuss.empty? %>
+      <div id="recent-discuss" class="block">
+        <table class="table table-hover" style="margin-bottom: 0;">
+          <thead>
           <tr>
-            <td><%= (problem_link topic.problem_id) if topic.problem_id %></td>
-            <td class="title">
-              <%= link_to topic.title, discuss_show_path(topic.id) %>
-              <% if topic.top %>
-                <span class="badge badge-info" style="margin-left: 5px;"><%= t '.top' %></span>
-              <% end %>
-            </td>
-            <td><%= format_datetime topic.last_reply %></td>
-            <td><%= topic.replies_count %></td>
+            <th style="width: 13%;"><%= t '.recent_discuss.related_problem' %></th>
+            <th class="title"><%= t '.recent_discuss.title' %></th>
+            <th style="width: 28%;"><%= t '.recent_discuss.last_reply' %></th>
+            <th style="width: 13%;"><%= t '.recent_discuss.replies' %></th>
           </tr>
-        <% end %>
-        </tbody>
-      </table>
-    </div>
-  </div>
+          </thead>
+          <tbody>
+          <% @discuss.each do |topic| %>
+            <tr>
+              <td><%= (problem_link topic.problem_id) if topic.problem_id %></td>
+              <td class="title">
+                <%= link_to topic.title, discuss_show_path(topic.id) %>
+                <% if topic.top %>
+                  <span class="badge badge-info" style="margin-left: 5px;"><%= t '.top' %></span>
+                <% end %>
+              </td>
+              <td><%= format_datetime topic.last_reply %></td>
+              <td><%= topic.replies_count %></td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+      </div>
+      </div>
+    <% end %>
 
   <div class="span4">
     <% if @current_user %>

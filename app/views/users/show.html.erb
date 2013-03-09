@@ -5,7 +5,7 @@
       <table class="table" style="margin-bottom: 0">
         <thead></thead>
         <tbody>
-        <% if @current_user && @current_user.role == 'admin' %>
+        <% if admin? %>
           <tr>
             <td class="left-column"><%= t '.remote_ip' %></td>
             <td class="right-column"><%= @user.remote_ip %></td>
@@ -22,22 +22,19 @@
           <td class="left-column"><%= t '.signature' %></td>
           <td class="right-column"><%= @user.information.signature %></td>
         </tr>
-        <% if @user.information.show_real_name ||
-                @current_user && (@current_user.id == @user.id || @current_user.role == 'admin') %>
+        <% if @user.information.show_real_name || owner?(@user) || admin? %>
           <tr>
             <td class="left-column"><%= t '.real_name' %></td>
             <td class="right-column"><%= @user.information.real_name %></td>
           </tr>
         <% end %>
-        <% if @user.information.show_school ||
-                @current_user && (@current_user.id == @user.id || @current_user.role == 'admin') %>
+        <% if @user.information.show_school || owner?(@user) || admin? %>
           <tr>
             <td class="left-column"><%= t '.school' %></td>
             <td class="right-column"><%= @user.information.school %></td>
           </tr>
         <% end %>
-        <% if @user.information.show_email ||
-                @current_user && (@current_user.id == @user.id || @current_user.role == 'admin') %>
+        <% if @user.information.show_email || owner?(@user) || admin? %>
           <tr>
             <td class="left-column"><%= t '.email' %></td>
             <td class="right-column">
@@ -74,11 +71,11 @@
   </div>
 </div>
 
-<% if @current_user && @current_user.id != @user.id %>
+<% if @current_user && !owner?(@user) %>
   <%= render 'users/message_dialog' %>
 <% end %>
 
-<% if @current_user && @current_user.role == 'admin' && @user.role != 'admin' %>
+<% if admin? %>
   <% unless @user.blocked %>
     <% if @user.role == 'normal_user' %>
       <%= render partial: 'users/confirm_operation_dialog', locals: {

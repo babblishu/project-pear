@@ -28,7 +28,7 @@
   <% @problems.each do |problem| %>
     <tr>
       <% if @current_user %>
-        <% if @current_user.role == 'admin' %>
+        <% if admin? %>
           <% if problem.status == 'hidden' %>
             <td style="color: grey;" class="icon"><i class="iconic-lock-stroke"></i></td>
           <% elsif problem.status == 'advanced' %>
@@ -73,7 +73,7 @@
   </div>
 <% end %>
 
-<% if @current_user && @current_user.role == 'admin' %>
+<% if admin? %>
   <%= render 'problems/new_dialog' %>
 <% end %>
 

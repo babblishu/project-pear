@@ -19,7 +19,7 @@
         <li><a href="#solution-dialog" data-toggle="modal" data-confirm="<%= t '.solution_confirm' %>" style="outline: none;">
           <%= t '.solution' %></a></li>
       <% end %>
-      <% if @current_user && @current_user.role == 'admin' %>
+      <% if admin? %>
         <li class="divider"></li>
         <li><%= link_to t('.edit_content'), problems_edit_path(@problem.id) %></li>
         <li><a id="upload-test-data-button" href="#upload-test-data-dialog" data-toggle="modal"><%= t '.upload_test_data' %></a></li>

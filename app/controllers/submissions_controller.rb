@@ -109,6 +109,7 @@ class SubmissionsController < ApplicationController
     raise AppExceptions::NoTestDataError unless problem.test_data_timestamp
 
     @submission = Submission.new(
+        remote_ip: request.remote_ip,
         language: params[:language],
         platform: params[:platform],
         program: program,

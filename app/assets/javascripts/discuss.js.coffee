@@ -4,6 +4,7 @@ $ -> # edit_content_dialog
 
   container.find('.edit-content-dialog').each ->
     $(this).containerFormHelper({})
+    $(this).find('.nav-pills a').first().tab('show')
     form = $(this).find('form')
     form.programLanguageSelectHelper()
     form.find("a[data-toggle='tooltip']").tooltip()

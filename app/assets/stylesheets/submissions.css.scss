@@ -13,6 +13,13 @@
 }
 
 .submissions .result {
+  #overall-table {
+    width: 300px;
+    margin: 0 auto;
+    .left-column {
+      font-weight: bold;
+    }
+  }
   #result-table {
     width: 600px;
     margin: 0 auto;

@@ -129,6 +129,6 @@
   <%= render 'problems/solution_dialog' %>
 <% end %>
 
-<% if @current_user && @current_user.role == 'admin' %>
+<% if admin? %>
   <%= render 'problems/upload_test_data_dialog' %>
 <% end %>

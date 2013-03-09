@@ -31,7 +31,7 @@
                     download_path: discuss_download_code_path('topic', @topic.id)
             } %>
           <% end %>
-          <% if @current_user && (@current_user.id == @topic.user.id || @current_user.role == 'admin') %>
+          <% if admin? || owner?(@topic) %>
             <button type="button" id="edit-topic-button" data-target="#edit-topic-dialog" data-toggle="modal" class="act" style="outline: none;">
               <%= t '.edit' %>
             </button>
@@ -95,12 +95,12 @@
                         download_path: discuss_download_code_path('primary_reply', reply.id)
                 } %>
               <% end %>
-              <% if @current_user && @current_user.role == 'admin' %>
+              <% if admin? %>
                 <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
                         data-href="<%= discuss_admin_path('hide', primary_reply_id: reply.id) %>"
                         style="outline: none;"><%= t '.hide' %></button>
               <% end %>
-              <% if @current_user && (@current_user.id == reply.user.id || @current_user.role == 'admin') %>
+              <% if admin? || owner?(reply) %>
                 <button type="button" id="edit-reply-<%= reply.id %>-button" data-target="#edit-reply-<%= reply.id %>-dialog"
                         data-toggle="modal" class="act" style="outline: none;"><%= t '.edit' %></button>
                 <%= render partial: 'discuss/content_edit_dialog', locals: {
@@ -111,7 +111,7 @@
                         create_mode: false
                 } %>
               <% end %>
-            <% elsif @current_user && @current_user.role == 'admin' %>
+            <% elsif admin? %>
               <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
                       data-href="<%= discuss_admin_path('show', primary_reply_id: reply.id) %>"
                       style="outline: none;"><%= t '.cancel_hide' %></button>
@@ -164,28 +164,28 @@
               <div class="inline-edit operations pull-right">
                 <div class="pull-right">
                   <% if !secondary_reply.hidden %>
-                    <% if @current_user.role == 'admin' %>
+                    <% if admin? %>
                       <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
                               data-href="<%= discuss_admin_path('hide', secondary_reply_id: secondary_reply.id) %>"
                               style="outline: none;"><%= t '.hide' %></button>
                     <% end %>
-                    <% if !secondary_reply.hidden && (@current_user.id == secondary_reply.user.id || @current_user.role == 'admin') %>
+                    <% if !secondary_reply.hidden && (admin? || owner?(secondary_reply)) %>
                       <button type="button" class="edit act" style="outline: none;"><%= t '.edit' %></button>
                       <button type="button" class="cancel-edit hidden act" style="outline: none;"><%= t '.cancel' %></button>
                       <button type="button" class="submit-edit hidden act" style="outline: none;"><%= t '.submit' %></button>
                     <% end %>
-                  <% elsif @current_user.role == 'admin' %>
+                  <% elsif admin? %>
                     <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
                             data-href="<%= discuss_admin_path('show', secondary_reply_id: secondary_reply.id) %>"
                             style="outline: none;"><%= t '.cancel_hide' %></button>
                   <% end %>
-                  <% if @current_user.id != secondary_reply.user.id && !@topic.no_reply %>
+                  <% if !owner?(secondary_reply) && !@topic.no_reply %>
                     <button type="button" class="reply act" style="outline: none;"><%= t '.reply' %></button>
                     <button type="button" class="cancel-reply hidden act" style="outline: none;"><%= t '.cancel' %></button>
                     <button type="button" class="submit-reply hidden act" style="outline: none;"><%= t '.submit' %></button>
                   <% end %>
                 </div>
-                <% if !secondary_reply.hidden && (@current_user.id == secondary_reply.user.id || @current_user.role == 'admin') %>
+                <% if !secondary_reply.hidden && (admin? || owner?(secondary_reply)) %>
                   <div class="edit-area hidden">
                     <%= form_tag discuss_secondary_reply_path('update', secondary_reply_id: secondary_reply.id), method: :post do %>
                       <textarea name="content" maxlength="<%= APP_CONFIG.secondary_reply_length_limit %>"><%= secondary_reply.content %></textarea>
@@ -193,7 +193,7 @@
                   </div>
                 <% end %>
                 <div class="reply-area hidden">
-                  <% if @current_user.id != secondary_reply.user.id && !@topic.no_reply %>
+                  <% if !owner?(secondary_reply) && !@topic.no_reply %>
                     <%= form_tag discuss_secondary_reply_path('create', primary_reply_id: reply.id, reply_to: secondary_reply.user.handle), method: :post do %>
                       <textarea name="content" maxlength="<%= APP_CONFIG.secondary_reply_length_limit %>"><%= t '.reply_to', handle: secondary_reply.user.handle %></textarea>
                     <% end %>

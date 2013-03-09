@@ -1,26 +1,93 @@
 <div class="tabbable">
   <ul class="nav nav-tabs">
+    <li><a href="#overall" data-toggle="tab"><%= t '.overall' %></a></li>
     <% if @submission.status == 'judged' %>
       <% if @result[:compile_message] %>
-        <li class="active"><a href="#compile-message" data-toggle="tab"><%= t '.compile_message' %></a></li>
+        <li><a href="#compile-message" data-toggle="tab"><%= t '.compile_message' %></a></li>
       <% else %>
-        <li class="active"><a href="#result" data-toggle="tab"><%= t '.result' %></a></li>
+        <li><a href="#result" data-toggle="tab"><%= t '.result' %></a></li>
       <% end %>
     <% end %>
-    <li class="<%= 'active' if @submission.status != 'judged' %>">
-      <a href="#source-code" data-toggle="tab"><%= t '.source_code' %></a>
-    </li>
+    <li><a href="#source-code" data-toggle="tab"><%= t '.source_code' %></a></li>
   </ul>
   <div class="tab-content">
+    <div class="tab-pane" id="overall">
+      <table id="overall-table" class="table table-bordered">
+        <tbody>
+        <% if admin? %>
+          <tr>
+            <td class="left-column"><%= t '.remote_ip' %></td>
+            <td class="right-column"><%= @submission.remote_ip %></td>
+          </tr>
+          <tr>
+            <td class="left-column"><%= t '.hide_status' %></td>
+            <td class="right-column"><%= @submission.hidden ? t('.hidden') : t('.not_hidden') %></td>
+          </tr>
+        <% end %>
+        <% if admin? || owner?(@submission) %>
+          <tr>
+            <td class="left-column"><%= t '.share_status' %></td>
+            <td class="right-column"><%= @submission.share ? t('.shared') : t('.not_shared') %></td>
+          </tr>
+        <% end %>
+        <tr>
+          <td class="left-column"><%= t '.handle' %></td>
+          <td class="right-column"><%= user_link @submission.user.handle %></td>
+        </tr>
+        <tr>
+          <td class="left-column"><%= t '.problem' %></td>
+          <td class="right-column"><%= problem_link @submission.problem_id %></td>
+        </tr>
+        <% if @submission.score %>
+          <tr>
+            <td class="left-column"><%= t '.score' %></td>
+            <td class="right-column"><%= @submission.score %></td>
+          </tr>
+        <% end %>
+        <% if @submission.time_used %>
+          <tr>
+            <td class="left-column"><%= t '.time_used' %></td>
+            <td class="right-column"><%= format_time_used @submission.time_used %></td>
+          </tr>
+        <% end %>
+        <% if @submission.memory_used %>
+          <tr>
+            <td class="left-column"><%= t '.memory_used' %></td>
+            <td class="right-column"><%= format_memory_used @submission.memory_used %></td>
+          </tr>
+        <% end %>
+        <tr>
+          <td class="left-column"><%= t '.language' %></td>
+          <td class="right-column"><%= format_language @submission.language %></td>
+        </tr>
+        <tr>
+          <td class="left-column"><%= t '.platform' %></td>
+          <td class="right-column"><%= format_platform @submission.platform %></td>
+        </tr>
+        <tr>
+          <td class="left-column"><%= t '.code_length' %></td>
+          <td class="right-column"><%= @submission.code_length %></td>
+        </tr>
+        <tr>
+          <td class="left-column"><%= t '.code_size' %></td>
+          <td class="right-column"><%= format_code_size @submission.code_size %></td>
+        </tr>
+        <tr>
+          <td class="left-column"><%= t '.submit_time' %></td>
+          <td class="right-column"><%= format_datetime @submission.created_at %></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
     <% if @submission.status == 'judged' %>
       <% if @result[:compile_message] %>
-        <div class="tab-pane active" id="compile-message">
+        <div class="tab-pane" id="compile-message">
 <pre>
 <%= @result[:compile_message] %>
 </pre>
         </div>
       <% else %>
-        <div class="tab-pane active" id="result">
+        <div class="tab-pane" id="result">
           <table id="result-table" class="table table-condensed table-bordered">
             <thead>
             <tr>
@@ -52,7 +119,7 @@
         </div>
       <% end %>
     <% end %>
-    <div class="tab-pane<%= ' active' if @submission.status != 'judged' %>" id="source-code">
+    <div class="tab-pane" id="source-code">
       <div>
         <a href="<%= submissions_download_path @submission.id %>" class="btn pull-right">
           <i class="iconic-download"></i>

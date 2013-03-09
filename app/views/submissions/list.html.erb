@@ -16,7 +16,7 @@
   </thead>
   <tbody>
   <% @submissions.each do |submission| %>
-    <tr class="<%= 'warning' if @current_user && @current_user.id == submission.user.id %>">
+    <tr class="<%= 'warning' if owner?(submission) %>">
       <td>
         <% if submission.share || @current_user && (submission.user_id == @current_user.id || @current_user.role == 'admin') %>
           <%= submission_link submission.id %>

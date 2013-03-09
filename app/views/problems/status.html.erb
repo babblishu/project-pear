@@ -17,14 +17,14 @@
   </thead>
   <tbody>
   <% @status_list.each_with_index do |row, index| %>
-    <tr class="<%= 'warning' if @current_user && @current_user.handle == row.user_handle %>">
+    <tr class="<%= 'warning' if owner?(row) %>">
       <td><%= (@page - 1) * @page_size + index + 1 %></td>
       <td><%= user_link row.user_handle %>
         <% if row.tried_times > 1 %>
           (<%= link_to row.tried_times, submissions_list_path(handle: row.user_handle, problem_id: @problem.id, choose_all: '1') %>)
         <% end %>
       </td>
-      <% if row.share || @current_user && (@current_user.handle == row.user_handle || @current_user.role == 'admin') %>
+      <% if row.share || admin? || owner?(row) %>
         <td><%= link_to row.score.to_s, submissions_result_path(row.submission_id), target: '_blank' %></td>
       <% else %>
         <td><%= row.score %></td>

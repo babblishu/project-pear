@@ -85,4 +85,25 @@ module ApplicationHelper
     end
     ''
   end
+
+  def admin?
+    @current_user && @current_user.role == 'admin'
+  end
+
+  def owner?(modal)
+    return false unless @current_user
+    if modal.respond_to? :user
+      return modal.user.id == @current_user.id if modal.user.respond_to? :id
+    end
+    if modal.respond_to? :user_id
+      return modal.user_id == @current_user.id
+    end
+    if modal.respond_to? :user_handle
+      return modal.user_handle == @current_user.handle
+    end
+    if modal.respond_to? :handle
+      return modal.handle == @current_user.handle
+    end
+    false
+  end
 end

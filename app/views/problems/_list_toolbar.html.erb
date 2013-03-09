@@ -1,5 +1,5 @@
 <ul class="nav pull-right">
-  <% if @current_user && @current_user.role == 'admin' %>
+  <% if admin? %>
     <li>
       <a id="new-problem-button" href="#new-problem-dialog" data-toggle="modal" style="outline: none;"><%= t '.add_problem' %></a>
     </li>
