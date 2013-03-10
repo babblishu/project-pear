@@ -133,7 +133,6 @@ GEM
     uglifier (1.3.0)
       execjs (>= 0.3.0)
       multi_json (~> 1.0, >= 1.0.2)
-    vidibus-routing_error (0.2.2)
     yard (0.8.5.2)
 
 PLATFORMS
@@ -151,4 +150,3 @@ DEPENDENCIES
   sass-rails (~> 3.2.3)
   simpleconfig
   uglifier (>= 1.0.3)
-  vidibus-routing_error

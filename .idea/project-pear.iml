@@ -71,7 +71,6 @@
     <orderEntry type="library" scope="PROVIDED" name="treetop (v1.4.12, ruby-1.9.3-p327) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="tzinfo (v0.3.35, ruby-1.9.3-p327) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="uglifier (v1.3.0, ruby-1.9.3-p327) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="vidibus-routing_error (v0.2.2, ruby-1.9.3-p327) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="yard (v0.8.5.2, ruby-1.9.3-p327) [gem]" level="application" />
   </component>
   <component name="RModuleSettingsStorage">

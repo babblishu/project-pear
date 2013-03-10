@@ -13,8 +13,6 @@ class ApplicationController < ActionController::Base
   before_filter :inspect_notification
   before_filter :inspect_message
 
-  rescue_from ActionController::RoutingError, with: :render_404_page
-  rescue_from ActiveRecord::RecordNotFound, with: :render_404_page
   rescue_from AppExceptions::InvalidPageNumber, with: :render_404_page
   rescue_from AppExceptions::InvalidUserHandle, with: :render_404_page
   rescue_from AppExceptions::InvalidProblemId, with: :render_404_page
@@ -28,13 +26,13 @@ class ApplicationController < ActionController::Base
   rescue_from AppExceptions::RequireLoginError, with: :render_require_login_page
   rescue_from AppExceptions::NoPrivilegeError, with: :render_no_privilege_page
 
-  private
   def render_404_page
     @some_wrong = true
     @title = t('global.something_wrong')
     render 'errors/404', status: 404
   end
 
+  private
   def render_require_login_page
     redirect_to root_url, notice: t('global.require_login')
   end
