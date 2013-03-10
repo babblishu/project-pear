@@ -16,6 +16,7 @@ zh_CN:
     something_wrong: '杯具啦~~'
     require_login: '此操作需要先登录'
     no_privilege: '你没有权限访问本页面'
+    invalid_operation: '非法操作'
     submit_too_fast: '提交间隔至少为%{t}秒'
     unknown: '未知'
 

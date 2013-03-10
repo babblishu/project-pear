@@ -32,8 +32,13 @@
       }
     }
     #avatar-div {
-      padding: 18px 10px;
-      text-align: center;
+      div {
+        margin: 20px 0;
+        img {
+          margin: 0 auto;
+          display: block;
+        }
+      }
     }
   }
 }

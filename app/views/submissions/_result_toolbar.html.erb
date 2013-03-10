@@ -1,5 +1,5 @@
 <ul class="nav pull-right">
-  <% if !@submission.share && @current_user && @submission.user.id == @current_user.id %>
+  <% if !@submission.hidden && !@submission.share && @submission.status == 'judged' && !@result[:compile_message] && owner?(@submission) %>
     <li><%= link_to t('.share'), submissions_share_path(@submission.id), confirm: t('.share_confirm') %></li>
   <% end %>
   <% if @current_user && @current_user.role == 'admin' %>

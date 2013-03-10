@@ -37,10 +37,12 @@ class SubmissionsController < ApplicationController
   def share
     @submission = Submission.find_by_id params[:submission_id]
     raise AppExceptions::InvalidSubmissionId unless @submission
-    if @submission.hidden
-      raise AppExceptions::NoPrivilegeError unless @current_user && @current_user.role == 'admin'
-    end
+    raise AppExceptions::InvalidOperation if @submission.share
+    raise AppExceptions::InvalidOperation if @submission.hidden
+    raise AppExceptions::InvalidOperation unless @submission.status == 'judged'
     raise AppExceptions::NoPrivilegeError unless @submission.user.id == @current_user.id
+    result = JSON.parse(@submission.result, symbolize_names: true)
+    raise AppExceptions::InvalidOperation if result[:compile_message]
     @submission.update_attribute :share, true
     redirect_to :back, notice: t('submissions.operation.success')
   end

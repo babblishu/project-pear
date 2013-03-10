@@ -22,8 +22,8 @@ class ApplicationController < ActionController::Base
   rescue_from AppExceptions::InvalidTopicId, with: :render_404_page
   rescue_from AppExceptions::InvalidPrimaryReplyId, with: :render_404_page
   rescue_from AppExceptions::InvalidSecondaryReplyId, with: :render_404_page
-  rescue_from AppExceptions::NoTestDataError, with: :render_404_page
-  rescue_from AppExceptions::InvalidOperation, with: :render_404_page
+  rescue_from AppExceptions::NoTestDataError, with: :render_invalid_operation_page
+  rescue_from AppExceptions::InvalidOperation, with: :render_invalid_operation_page
 
   rescue_from AppExceptions::RequireLoginError, with: :render_require_login_page
   rescue_from AppExceptions::NoPrivilegeError, with: :render_no_privilege_page
@@ -41,6 +41,10 @@ class ApplicationController < ActionController::Base
 
   def render_no_privilege_page
     redirect_to root_url, notice: t('global.no_privilege')
+  end
+
+  def render_invalid_operation
+    redirect_to root_url, notice: t('global.invalid_operation')
   end
 
   protected
