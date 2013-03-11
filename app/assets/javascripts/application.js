@@ -7,4 +7,5 @@
 //= require jquery.form.js
 //= require google.prettify.js
 //= require google.prettify.lang-pascal.js
+//= require google.prettify.lang-basic.js
 //= require_tree .

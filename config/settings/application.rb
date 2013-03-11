@@ -18,7 +18,8 @@ SimpleConfig.for :application do
       c: 'C',
       cpp: 'C++',
       pas: 'Pascal',
-      java: 'Java'
+      java: 'Java',
+      basic: 'Basic'
   }
   set :judge_platforms, {
       windows: 'Windows',
