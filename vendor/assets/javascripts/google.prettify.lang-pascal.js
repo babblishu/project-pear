@@ -29,4 +29,4 @@ PR.registerLangHandler(
           [PR.PR_LITERAL,       /^(?:\$[a-f0-9]+|(?:\d+(?:\.\d*)?|\.\d+)(?:e[+\-]?\d+)?)/i,  null, '0123456789'],
           [PR.PR_PUNCTUATION,   /^.[^\s\w\.$@\'\/]*/, null]
         ]),
-    ['pascal']);
+    ['pas']);

@@ -29,4 +29,4 @@ PR.registerLangHandler(
           [PR.PR_PUNCTUATION,   /^.[^\s\w\.$%"]*/, null]
           // [PR.PR_PUNCTUATION,   /^[-,:;!<>=\+^\/\*]+/]
         ]),
-    ['basic','cbm']);
+    ['bas']);
