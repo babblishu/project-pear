@@ -125,3 +125,71 @@
     }
   }
 }
+
+.global .add_problem_help {
+  h2, h3 {
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", SimHei, sans-serif;
+  }
+  h2 {
+    text-align: center;
+  }
+}
+
+.global .markdown_help {
+  width: 75%;
+  margin: 0 auto;
+  h2, h3 {
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", SimHei, sans-serif;
+  }
+  h2 {
+    text-align: center;
+  }
+  .markdown-example {
+    .preview:after, .markdown:after, .html:after {
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      padding: 3px 7px;
+      font-size: 12px;
+      font-weight: bold;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      color: #9da0a4;
+
+    }
+    .preview {
+      position: relative;
+      margin: 15px 0;
+      padding: 39px 19px 14px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px 4px 0 0;
+    }
+    .preview:after {
+      content: "Preview";
+      border-radius: 4px 0 4px 0;
+    }
+    .markdown {
+      position: relative;
+      margin-top: -20px;
+      padding-top: 35px;
+      padding-bottom: 20px;
+      border-radius: 0;
+      background: white;
+    }
+    .markdown:after {
+      content: "Markdown";
+      border-radius: 0 0 4px 0;
+    }
+    .html {
+      position: relative;
+      margin-top: -20px;
+      padding-top: 35px;
+      border-radius: 0 0 4px 4px;
+    }
+    .html:after {
+      content: "HTML";
+      border-radius: 0 0 4px 0;
+    }
+  }
+}

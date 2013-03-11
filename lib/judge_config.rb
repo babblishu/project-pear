@@ -48,17 +48,21 @@ module JudgeConfig
 
         when :contestant_input_file_name
           raise InvalidConfig unless value.is_a? String
+          raise InvalidConfig if ['_in', '_out', '_err'].include? value
           config[:contestant_input_file_name] = value
 
         when :contestant_output_file_name
           raise InvalidConfig unless value.is_a? String
+          raise InvalidConfig if ['_in', '_out', '_err'].include? value
           config[:contestant_output_file_name] = value
 
         when :time_limit
           raise InvalidConfig unless value.is_a? Fixnum
+          raise InvalidConfig unless 0 <= value
 
         when :memory_limit
           raise InvalidConfig unless value.is_a? Fixnum
+          raise InvalidConfig unless 0 <= value
 
         when :enable_O2_option
           raise InvalidConfig unless value.is_a?(TrueClass) || value.is_a?(FalseClass)
@@ -81,6 +85,7 @@ module JudgeConfig
           raise InvalidConfig unless value.is_a? Array
           value.each do |x|
             raise InvalidConfig unless x.is_a? Fixnum
+            raise InvalidConfig unless 0 <= x && x <= 100
           end
           raise InvalidConfig unless value.reduce(:+) == 100
 
@@ -94,8 +99,10 @@ module JudgeConfig
               case a
                 when :time_limit
                   raise InvalidConfig unless b.is_a? Fixnum
+                  raise InvalidConfig unless 0 <= b
                 when :memory_limit
                   raise InvalidConfig unless b.is_a? Fixnum
+                  raise InvalidConfig unless 0 <= b
                 else
                   raise InvalidConfig
               end

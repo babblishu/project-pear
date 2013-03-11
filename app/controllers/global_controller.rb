@@ -1,5 +1,6 @@
 class GlobalController < ApplicationController
   before_filter :require_login, only: [ :captcha_verify ]
+  before_filter :require_admin, only: [ :add_problem_help ]
 
   def home
     role = @current_user ? @current_user.role : 'normal_user'
@@ -29,5 +30,11 @@ class GlobalController < ApplicationController
     else
       redirect_to :back, notice: t('home.captcha_verify.wrong_captcha')
     end
+  end
+
+  def add_problem_help
+  end
+
+  def markdown_help
   end
 end

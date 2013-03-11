@@ -13,6 +13,7 @@ ProjectPear::Application.routes.draw do
   post 'users/create' => 'users#create'
 
   get 'faq' => 'global#faq'
+  get 'markdown' => 'global#markdown_help'
 
   get 'discuss/list(/:page)' => 'discuss#list', page: /\d+/, as: 'discuss_list'
   get 'discuss/:topic_id/show(/:page)' => 'discuss#show', topic_id: /\d+/, page: /\d+/, as: 'discuss_show'
@@ -45,6 +46,7 @@ ProjectPear::Application.routes.draw do
       problem_id: /\d{4}/, as: 'problems_download_test_data'
   get 'problems/:problem_id/rejudge' => 'problems#rejudge', problem_id: /\d{4}/, as: 'problems_rejudge'
   get 'search_problem' => 'problems#search', as: 'problems_search'
+  get 'problems/help' => 'global#add_problem_help'
 
   post 'submissions/create' => 'submissions#create'
   get 'submissions/list(/:page)' => 'submissions#list', page: /\d+/, as: 'submissions_list'

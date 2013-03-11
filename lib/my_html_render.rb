@@ -8,6 +8,9 @@ class MyHTMLRender < Redcarpet::Render::HTML
     else
       "<pre>\n#{code.gsub(/\t/, '    ')}</pre>"
     end
+  end
 
+  def preprocess(text)
+    text.gsub(/^#/, '\\#').gsub(/^-/, '\\-').gsub(/\n=/, ' =').gsub(/^>/, '\\>')
   end
 end

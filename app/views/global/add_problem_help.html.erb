@@ -1,0 +1,217 @@
+<div>
+  <h2>如何添加题目？</h2>
+
+  <h3>编辑题面</h3>
+
+  <p>
+    在题目列表界面结点右上角的“添加题目”，会出现对话框，除了“题目来源”可以为空，其他都是必填项。
+  </p>
+
+  <p>
+    注意这里的时间限制和空间限制只是显示在题面中的，测试时的时空限制要在配置文件中设置，因此假如不同测试点限制不同，
+    你可以填写诸如<code>1~2s</code>的时间限制或诸如<code>64~128MB</code>的空间限制。
+  </p>
+
+  <p>
+    添加好题目之后进入题目，点击右上角其他操作菜单，选择“编辑题面”，这里可以进行详细的编辑。
+  </p>
+
+  <p>
+    标签一栏中可以填写若干空格隔开的标签，这些标签用于筛选题目，你可以填写题目来源或者主要算法之类的关键词。
+  </p>
+
+  <p>
+    其中附件一栏中可以上传一个zip压缩包，里面的内容会被解压缩到<code>/attachment/[problem_id]/</code>目录下，
+    注意每次重新上传会删除本题原来所有的附件文件。附件中的文件可以在题面中引用。
+  </p>
+
+  <p>
+    题面的显示中可以选择开启Markdown，假如不开启Markdown就必须直接写HTML代码，通常建议开启。
+    Markdown的使用说明请看<a href="<%= markdown_path %>">这里</a>，还有这里的Markdown可以内嵌HTML代码。
+    LaTeX的话，主要是用来在题面描述中内嵌公式，也就是使用<code>$</code>包裹公式代码。
+    在单独的段落里也可以用<code>$$</code>包裹或者<code>displaymath</code>显示居中的成段公式。
+  </p>
+
+  <h3>上传测试数据</h3>
+
+  <p>
+    进入题目之后，点击右上角其他操作菜单，可以看到“上传测试数据”。所有测试数据和配置文件应该放在一起并且用zip压缩后上传。
+  </p>
+
+  <p>
+    配置文件为<code>config.txt</code>，内容为一个<a href="http://www.json.org/json-zh.html">JSON</a>字符串，
+    最外层是一个object，具体解释见下表：
+  </p>
+
+  <table class="table table-bordered">
+    <thead>
+    <tr>
+      <th>key</th>
+      <th style="width: 160px;">value类型</th>
+      <th style="width: 90px;">value默认值</th>
+      <th>说明</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr>
+      <td><code>"input_file_prefix"</code></td>
+      <td>string</td>
+      <td>空字符串</td>
+      <td>输入文件名的前缀。</td>
+    </tr>
+
+    <tr>
+      <td><code>"answer_file_prefix"</code></td>
+      <td>string</td>
+      <td>空字符串</td>
+      <td>输出文件名的前缀。</td>
+    </tr>
+
+    <tr>
+      <td><code>"input_file_extension"</code></td>
+      <td>string</td>
+      <td><code>"in"</code></td>
+      <td>输入文件的扩展名。</td>
+    </tr>
+
+    <tr>
+      <td><code>"answer_file_extension"</code></td>
+      <td>string</td>
+      <td><code>"out"</code></td>
+      <td>输出文件的扩展名。</td>
+    </tr>
+
+    <tr>
+      <td><code>"sample_input_prefix"</code></td>
+      <td>string</td>
+      <td><code>"sample"</code></td>
+      <td>样例输入文件名的前缀。</td>
+    </tr>
+
+    <tr>
+      <td><code>"sample_output_prefix"</code></td>
+      <td>string</td>
+      <td><code>"sample"</code></td>
+      <td>样例输出文件名的前缀。</td>
+    </tr>
+
+    <tr>
+      <td><code>"contestant_input_file_name"</code></td>
+      <td><code>null</code>或string</td>
+      <td><code>null</code></td>
+      <td>
+        评测时选手程序的输入文件名，<code>null</code>或者没有表示使用标准输入，
+        注意不能使用<code>"_in"</code>、<code>"_out"</code>、<code>"_err"</code>。
+      </td>
+    </tr>
+
+    <tr>
+      <td><code>"contestant_output_file_name"</code></td>
+      <td><code>null</code>或string</td>
+      <td><code>null</code></td>
+      <td>
+        评测时选手程序的输出文件名，<code>null</code>或者没有表示使用标准输出，
+        注意不能使用<code>"_in"</code>、<code>"_out"</code>、<code>"_err"</code>。
+      </td>
+    </tr>
+
+    <tr>
+      <td><code>"time_limit"</code></td>
+      <td>非负int</td>
+      <td><code>1000</code></td>
+      <td>每个测试点默认的时间限制，以毫秒为单位。</td>
+    </tr>
+
+    <tr>
+      <td><code>"memory_limit"</code></td>
+      <td>非负int</td>
+      <td><code>64</code></td>
+      <td>每个测试点默认的空间限制，以MB为单位。</td>
+    </tr>
+
+    <tr>
+      <td><code>"enable_O2_option"</code></td>
+      <td><code>true</code>或<code>false</code>或<code>null</code></td>
+      <td><code>null</code></td>
+      <td>是否开启O2优化，<code>true</code>表示开启，<code>false</code>或<code>null</code>表示不开启。</td>
+    </tr>
+
+    <tr>
+      <td><code>"stack_size"</code></td>
+      <td><code>null</code>或int</td>
+      <td><code>null</code></td>
+      <td>每个测试点默认的栈大小，以MB为单位，<code>null</code>表示使用系统默认值。</td>
+    </tr>
+
+    <tr>
+      <td><code>"enable_special_judge"</code></td>
+      <td><code>true</code>或<code>false</code>或<code>null</code></td>
+      <td><code>null</code></td>
+      <td>是否使用Special Judge，<code>true</code>表示使用，<code>false</code>或<code>null</code>表示不使用。</td>
+    </tr>
+
+    <tr>
+      <td><code>"special_judge_language"</code></td>
+      <td><code>"c"</code>或<code>"cpp"</code>或<code>"pas"</code></td>
+      <td></td>
+      <td>Special Judge程序的语言，如果要使用Special Judge，此项必须要有。</td>
+    </tr>
+
+    <tr>
+      <td><code>"score"</code></td>
+      <td><code>null</code>或array</td>
+      <td><code>null</code></td>
+      <td>
+        每个测试点的分数，如果为<code>null</code>会由系统自动平均分配分数，
+        否则要保证array的长度和测试点个数相同，array中的类型为非负int并且和为100。
+      </td>
+    </tr>
+
+    <tr>
+      <td><code>"detail_config"</code></td>
+      <td><code>null</code>或object</td>
+      <td><code>null</code></td>
+      <td>
+        假如不为<code>null</code>，就可以对某些数据文件单独配置时间限制和空间限制。
+        key为string类型，表示数据编号（不需要带上前缀），value为object类型，
+        key应该为<code>"time_limit"</code>或<code>"memory_limit"</code>，value的要求和前面说明的一样。
+      </td>
+    </tr>
+
+    </tbody>
+  </table>
+
+  <p>
+    输入文件名为配置中的输入文件名前缀加上编号，编号由两部分组成：测试点编号和捆绑数据的编号，
+    测试点编号为正整数，捆绑数据编号为小写英文字母，例如<code>"1a"</code>、<code>"1b"</code>等，
+    这种情况下这两个数据点是捆绑算分的，每个测试点取所有捆绑数据中得分最低的作为该测试点得分。
+    如果每个测试点只捆绑一个数据，可以省略捆绑数据编号。
+  </p>
+
+  <p>
+    样例输入输出文件名为配置中指定的前缀加上编号，编号只包含一个正整数，假如只有一个样例可以不需要编号。
+    扩展名也是用配置文件中指定的相应扩展名。
+  </p>
+
+  <p>
+    假如需要使用Special Judge，就要将<code>"judge.c"</code>、<code>"judge.cpp"</code>或<code>"judge.pas"</code>
+    文件一同打包进去。
+  </p>
+
+  <p>
+    注意object的最后一个member后面不能再有逗号（任何非法JSON串都没法被parser接受）。
+  </p>
+
+  <p>
+    下面给出几个压缩好的数据包以供参考：
+  <p>
+
+  <ul>
+    <li><a href="/help/data1.zip">data1.zip</a> A+B Problem的数据，使用标准输入输出。</li>
+    <li><a href="/help/data2.zip">data2.zip</a> A+B Problem的数据，使用<code>input.txt</code>读入、<code>output.txt</code>输出，并且开启了O2优化、调整了栈大小。</li>
+    <li><a href="/help/data3.zip">data3.zip</a> 一个使用Special Judge的例子。</li>
+    <li><a href="/help/data4.zip">data4.zip</a> 一个使用捆绑测试的例子，并为每个测试点指定了分数，修改了10e、10f的时间、空间限制。</li>
+  </ul>
+
+</div>

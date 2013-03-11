@@ -39,7 +39,7 @@
     <% end %>
   </div>
   <div class="modal-footer">
-    <%= link_to t('.help'), '#', class: 'btn pull-left' %>
+    <%= link_to t('.help'), problems_help_path, class: 'btn pull-left' %>
     <button type="button" data-dismiss="modal" class="btn"><%= t '.close' %></button>
     <button type="submit" class="btn btn-primary" data-disabled="<%= t '.submitting' %>"><%= t '.add' %></button>
   </div>

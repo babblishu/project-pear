@@ -1,0 +1,233 @@
+<div>
+  <h2>Markdown语法帮助</h2>
+
+  <h3>段落</h3>
+
+  <p>
+    一个段落是由一个或多个连续的行构成，段落间靠一个或以上视觉上的空行划分。一般的段落不应该用空格或制表符缩进。
+  </p>
+
+  <div class="markdown-example">
+    <div class="preview">
+      <p>这是一个段落。它有两个句子。</p>
+      <p>这是另一个段落。它也有两个句子。</p>
+    </div>
+<pre class="markdown">
+这是一个段落。它有两个句子。
+
+这是另一个段落。它也有
+两个句子。
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q{<p>这是一个段落。它有两个句子。</p>
+<p>这是另一个段落。它也有两个句子。</p>} %>
+</pre>
+  </div>
+
+  <h3>强调</h3>
+
+  <p>使用星号或者下划线包裹要强调的内容。</p>
+
+  <div class="markdown-example">
+    <div class="preview">
+      <p><em>强调</em> 或者 <em>强调</em></p>
+      <p><strong>加重强调</strong> 或者 <strong>加重强调</strong></p>
+      <p><strong><em>特别强调</em></strong> 或者 <strong><em>特别强调</em></strong></p>
+    </div>
+<pre class="markdown">
+*强调* 或者 _强调_
+
+**加重强调** 或者 __加重强调__
+
+***特别强调*** 或者 ___特别强调___
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q{<p><em>强调</em> 或者 <em>强调</em></p>
+<p><strong>加重强调</strong> 或者 <strong>加重强调</strong></p>
+<p><strong><em>特别强调</em></strong> 或者 <strong><em>特别强调</em></strong></p>} %>
+</pre>
+  </div>
+
+  <h3>代码</h3>
+
+  <p>
+    反引号（1左边那个键）包裹的内容会被<code>code</code>标签包裹。
+  </p>
+
+  <div class="markdown-example">
+    <div class="preview">
+      <p>C语言使用<code>scanf</code>进行读入。</p>
+    </div>
+<pre class="markdown">
+C语言使用`scanf`进行读入。
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q{<p>C语言使用<code>scanf</code>进行读入。</p>} %>
+</pre>
+  </div>
+
+  <p>
+    使用三个或以上的波浪线可以划分多行代码。第一行的波浪线后面可以加上语言名称缩写（c、cpp、pas、java等）。
+    最好只在代码较短（不超过20行）时使用，长的代码请使用附件上传。
+  </p>
+
+  <div class="markdown-example">
+    <div class="preview">
+<pre class="prettyprint lang-c">
+<%= h %q!#include <stdio.h>
+int main() {
+    int a, b;
+    scanf("%d%d", &a, &b);
+    printf("%d\n", a + b);
+    return 0;
+}! %>
+</pre>
+    </div>
+<pre class="markdown">
+<%= h %q!~~~c
+#include <stdio.h>
+int main() {
+    int a, b;
+    scanf("%d%d", &a, &b);
+    printf("%d\n", a + b);
+    return 0;
+}
+~~~! %>
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q!<pre class="prettyprint lang-c">
+#include <stdio.h>
+int main() {
+    int a, b;
+    scanf("%d%d", &a, &b);
+    printf("%d\n", a + b);
+    return 0;
+}
+</pre>! %>
+</pre>
+  </div>
+
+  <h3>列表</h3>
+
+  <p>用星号构建无序列表，二级列表之前至少缩进4个空格。</p>
+
+  <div class="markdown-example">
+    <div class="preview">
+      <ul>
+        <li>
+          无序(没有编号的)列表中的一项
+          <ul>
+            <li>一个子项，要以一个制表符或者4个空格缩进</li>
+          </ul>
+        </li>
+        <li>
+          无序列表中的另一个项
+        </li>
+      </ul>
+    </div>
+<pre class="markdown">
+* 无序(没有编号的)列表中的一项
+    * 一个子项，要以一个制表符或者4个空格缩进
+* 无序列表中的另一个项
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q{<ul>
+  <li>
+    无序(没有编号的)列表中的一项
+    <ul>
+      <li>一个子项，要以一个制表符或者4个空格缩进</li>
+    </ul>
+  </li>
+  <li>
+    无序列表中的另一个项
+  </li>
+</ul>} %>
+</pre>
+  </div>
+
+  <p>用数字构建有序列表。</p>
+
+  <div class="markdown-example">
+    <div class="preview">
+      <ol>
+        <li>有序(排好序，有编号的)列表中的一项</li>
+        <li>有序列表中的另一个项</li>
+      </ol>
+    </div>
+<pre class="markdown">
+1. 有序(排好序，有编号的)列表中的一项
+2. 有序列表中的另一个项
+</pre>
+<pre class="prettyprint lang-html html">
+<%=  h %q{<ol>
+  <li>有序(排好序，有编号的)列表中的一项</li>
+  <li>有序列表中的另一个项</li>
+</ol>} %>
+</pre>
+  </div>
+
+  <h3>链接</h3>
+
+  <p>使用方括号和圆括号的组合插入链接，注意后面的地址需要带上<code>http</code>或其他传输协议标识，或者以<code>/</code>开头，以表示与本域名的相对路径。</p>
+
+  <div class="markdown-example">
+    <div class="preview">
+      <p><a href="http://www.google.com">Google</a></p>
+    </div>
+<pre class="markdown">
+[Google](http://www.google.com)
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q{<p>
+  <a href="http://www.google.com">Google</a>
+</p>} %>
+</pre>
+  </div>
+
+  <p>另一种生成链接的方式是用尖括号，这种情况下链接文字和内容相同，这种形式同时也可用于电子邮箱。</p>
+
+  <div class="markdown-example">
+    <div class="preview">
+      <p><a href="http://www.google.com">http://www.google.com</a></p>
+      <p><a href="mailto:example@example.com">example@example.com</a></p>
+    </div>
+<pre class="markdown">
+<%= h %q{<http://www.google.com>} %>
+
+<%= h %q{<example@example.com>} %>
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q{<p>
+  <a href="http://www.google.com">http://www.google.com</a>
+</p>
+<p>
+  <a href="mailto:example@example.com">example@example.com</a>
+</p>} %>
+</pre>
+  </div>
+
+  <h3>图片</h3>
+
+  <p>和插入链接类似，只是在前面多加一个感叹号。</p>
+
+  <div class="markdown-example">
+    <div class="preview">
+      <p><img src="/img/default_avatar_thumb.png" alt="头像"></p>
+    </div>
+<pre class="markdown">
+[头像](/img/default_avatar_thumb.png)
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q{<p>
+  <img src="/img/default_avatar_thumb.png" alt="头像">
+</p>} %>
+</pre>
+  </div>
+
+  <h3>转义字符</h3>
+  <p>
+    特殊字符<code>\`*-{}[]()#+-.!</code>可以通过反斜杠转义（和C语言中一样）。
+    当你发现生成的样式和你预想的不同时，可以尝试转义某些字符。
+  </p>
+
+</div>
