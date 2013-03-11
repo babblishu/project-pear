@@ -184,7 +184,7 @@
 
   <p>
     输入文件名为配置中的输入文件名前缀加上编号，编号由两部分组成：测试点编号和捆绑数据的编号，
-    测试点编号为正整数，捆绑数据编号为小写英文字母，例如<code>"1a"</code>、<code>"1b"</code>等，
+    测试点编号为正整数，捆绑数据编号为小写英文字母，例如<code>1a</code>、<code>1b</code>等，
     这种情况下这两个数据点是捆绑算分的，每个测试点取所有捆绑数据中得分最低的作为该测试点得分。
     如果每个测试点只捆绑一个数据，可以省略捆绑数据编号。
   </p>
@@ -195,7 +195,7 @@
   </p>
 
   <p>
-    假如需要使用Special Judge，就要将<code>"judge.c"</code>、<code>"judge.cpp"</code>或<code>"judge.pas"</code>
+    假如需要使用Special Judge，就要将<code>judge.c</code>、<code>judge.cpp</code>或<code>judge.pas</code>
     文件一同打包进去。
   </p>
 
@@ -213,5 +213,94 @@
     <li><a href="/help/data3.zip">data3.zip</a> 一个使用Special Judge的例子。</li>
     <li><a href="/help/data4.zip">data4.zip</a> 一个使用捆绑测试的例子，并为每个测试点指定了分数，修改了10e、10f的时间、空间限制。</li>
   </ul>
+
+  <h3>编写Special Judge程序</h3>
+
+  <p>
+    本OJ支持使用C、C++或Pascal编写的Special Judge。评测系统会给Judge程序传送六个参数，
+    按顺序依次表示输入文件、选手输出文件、标准输出文件、本测试点满分、分数输出文件和额外信息文件。
+    其中分数输出文件必须创建，里面包含一个非负整数，表示选手得分。额外信息文件可以选择不创建。
+  </p>
+
+  <p>
+    下面给出C语言和Pascal语言的的具体例子（C++语言可以参考C语言的例子），两个Judge都是简单的实数精度判断：
+  </p>
+
+<pre class="prettyprint linenums lang-c">
+<%= h %q!#include <stdio.h>
+#include <math.h>
+
+const double eps = 1e-4;
+
+int main(int argc, char *argv[]) {
+    FILE *fin = fopen(argv[1], "r");
+    FILE *fout = fopen(argv[2], "r");
+    FILE *ans = fopen(argv[3], "r");
+
+    FILE *score = fopen(argv[5], "w");
+    FILE *msg = fopen(argv[6], "w");
+
+    double yourAnswer, stdAnswer;
+    fscanf(fout, "%lf", &yourAnswer);
+    fscanf(ans, "%lf", &stdAnswer);
+
+    if (fabs(yourAnswer - stdAnswer) < eps) {
+        fprintf(score, "%s\n", argv[4]);
+        fprintf(msg, "Correct answer\n");
+    } else {
+        fprintf(score, "0\n");
+        fprintf(msg, "Wrong answer\n");
+    }
+
+    fclose(fin);
+    fclose(fout);
+    fclose(ans);
+    fclose(score);
+    fclose(msg);
+
+    return 0;
+}! %>
+</pre>
+
+<pre class="prettyprint linenums lang-pas">
+<%= h %q!const
+  eps = 1e-4;
+
+var
+  yourAnswer, stdAnswer : double;
+  fin, fout, ans, score, msg : text;
+
+begin
+  assign(fin, ParamStr(1));
+  reset(fin);
+  assign(fout, ParamStr(2));
+  reset(fout);
+  assign(ans, ParamStr(3));
+  reset(ans);
+  assign(score, ParamStr(5));
+  rewrite(score);
+  assign(msg, ParamStr(6));
+  rewrite(msg);
+
+  readln(fout, yourAnswer);
+  readln(ans, stdAnswer);
+  if abs(yourAnswer - stdAnswer) < eps then
+    begin
+      writeln(score, ParamStr(3));
+      writeln(msg, 'Correct answer');
+    end
+  else
+    begin
+      writeln(score, 0);
+      writeln(msg, 'Wrong answer');
+    end;
+
+  close(fin);
+  close(fout);
+  close(ans);
+  close(score);
+  close(msg);
+end.! %>
+</pre>
 
 </div>

@@ -23,6 +23,8 @@ zh_CN:
       problem: '题目编号'
       min_score: '分数最小值'
       max_score: '分数最大值'
+      language: '语言'
+      platform: '平台'
       filter: '筛选'
 
     result:
