@@ -6,9 +6,11 @@
 </div>
 
 <div>
-  <div id="problem-tags" class="pull-right">
-    <%= t('.tags') + @tags %>
-  </div>
+  <% unless @tags.empty? %>
+    <div id="problem-tags" class="pull-right">
+      <%= t('.tags') + @tags %>
+    </div>
+  <% end %>
 
   <% unless @problem.content.background.empty? %>
     <div>

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130304032753) do
+ActiveRecord::Schema.define(:version => 20130311051658) do
 
   create_table "messages", :force => true do |t|
     t.integer  "user_from",                                    :null => false
@@ -75,7 +75,7 @@ ActiveRecord::Schema.define(:version => 20130304032753) do
 
   create_table "problems", :force => true do |t|
     t.string   "status",              :limit => 20,  :default => "hidden", :null => false
-    t.string   "title",               :limit => 20,                        :null => false
+    t.string   "title",               :limit => 100,                       :null => false
     t.string   "source",              :limit => 100, :default => "",       :null => false
     t.datetime "test_data_timestamp"
     t.datetime "created_at",                                               :null => false

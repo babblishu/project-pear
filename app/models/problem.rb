@@ -19,7 +19,7 @@ class Problem < ActiveRecord::Base
   attr_accessible :sample_test_datas
 
   validates :title, presence: true
-  validates :title, length: { maximum: 20 }
+  validates :title, length: { maximum: 100 }
   validates :source, length: { maximum: 100 }
 
   def test_attachment_file(zip_file)
