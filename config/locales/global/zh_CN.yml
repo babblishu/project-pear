@@ -34,3 +34,9 @@ zh_CN:
       captcha: '验证码'
       submit: '提交'
       wrong_captcha: '验证码错误'
+
+    markdown_help:
+      title: 'Markdown语法帮助'
+
+    add_problem_help:
+      title: '如何添加题目'

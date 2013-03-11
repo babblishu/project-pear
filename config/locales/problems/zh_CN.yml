@@ -120,7 +120,7 @@ zh_CN:
       attachment_file: '附件'
       select: '选择文件'
       change: '更换文件'
-      enable_markdown: '启用Markdown'
+      enable_markdown: '启用<a href="%{help_link}" target="_blank">Markdown</a>'
       enable_latex: '启用LaTeX'
       cannot_unzip_attachment_file: '无法解压附件文件'
       tag_too_long: '每个标签不能超过20个字符'

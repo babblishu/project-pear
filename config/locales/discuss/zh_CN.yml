@@ -27,7 +27,7 @@ zh_CN:
       hidden: '仅管理员可见'
       top: '置顶'
       no_reply: '禁止回复'
-      enable_markdown: '启用Markdown'
+      enable_markdown: '启用<a href="%{help_link}" target="_blank">Markdown</a>'
       content: '内容'
       attachment: '附件'
       source: '源程序'

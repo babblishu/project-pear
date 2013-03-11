@@ -52,7 +52,7 @@
           <div class="control-group" style="padding-left: 10px; padding-right: 10px;">
             <label class="checkbox">
               <%= f.check_box :enable_markdown %>
-              <span><%= t '.enable_markdown' %></span>
+              <span><%= raw t '.enable_markdown', help_link: markdown_path %></span>
             </label>
             <%= f.text_area :content, rows: 13, class: 'editor', maxlength: APP_CONFIG.primary_reply_length_limit %>
             <span class="help-inline" data-errors="content"></span>

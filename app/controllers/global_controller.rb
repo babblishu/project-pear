@@ -33,8 +33,10 @@ class GlobalController < ApplicationController
   end
 
   def add_problem_help
+    @title = t 'global.add_problem_help.title'
   end
 
   def markdown_help
+    @title = t 'global.markdown_help.title'
   end
 end
