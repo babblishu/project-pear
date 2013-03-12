@@ -25,7 +25,7 @@ class ProblemsController < ApplicationController
     end
     @tags = @problem.tags.map(&:name).join(APP_CONFIG.tags_input_separate_char)
     @enable_latex = @problem.content.enable_latex
-    @markdown = Redcarpet::Markdown.new ProblemMarkdownHTMLRender, no_intra_emphasis: true, fenced_code_blocks: true
+    @markdown = Redcarpet::Markdown.new ProblemMarkdownHTMLRender, no_intra_emphasis: true, fenced_code_blocks: true, lax_spacing: true
     @title = @problem.title
     @problem_active = true
   end

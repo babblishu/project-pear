@@ -6,15 +6,6 @@
   <%= stylesheet_link_tag "application" %>
   <%= javascript_include_tag "application" %>
   <% if @enable_latex %>
-    <script type="text/javascript">
-      jsMath = {
-        'styles': {
-          '.typeset': {
-            'font-family': '"Times New Roman", Times, serif'
-          }
-        }
-      }
-    </script>
     <script type="text/javascript" src="/jsMath/easy/load.js"></script>
   <% end %>
   <% if notice && !notice.empty? %>

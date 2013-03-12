@@ -66,7 +66,8 @@ class DiscussController < ApplicationController
         DiscussMarkdownHTMLRender.new(escape_html: true, no_styles: true, safe_links_only: true),
         no_intra_emphasis: true,
         fenced_code_blocks: true,
-        autolink: true
+        autolink: true,
+        lax_spacing: true
     )
     @discuss_active = true
     @title = @topic.title
