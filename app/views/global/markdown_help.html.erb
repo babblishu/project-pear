@@ -5,12 +5,13 @@
 
   <p>
     一个段落是由一个或多个连续的行构成，段落间靠一个或以上视觉上的空行划分。一般的段落不应该用空格或制表符缩进。
+    同一段落中换行的话，中间会加上一个空格，因此不太建议同一段落内换行。
   </p>
 
   <div class="markdown-example">
     <div class="preview">
       <p>这是一个段落。它有两个句子。</p>
-      <p>这是另一个段落。它也有两个句子。</p>
+      <p>这是另一个段落。它也有 两个句子。</p>
     </div>
 <pre class="markdown">
 这是一个段落。它有两个句子。
@@ -20,7 +21,7 @@
 </pre>
 <pre class="prettyprint lang-html html">
 <%= h %q{<p>这是一个段落。它有两个句子。</p>
-<p>这是另一个段落。它也有两个句子。</p>} %>
+<p>这是另一个段落。它也有 两个句子。</p>} %>
 </pre>
   </div>
 
@@ -103,6 +104,41 @@ int main() {
     printf("%d\n", a + b);
     return 0;
 }
+</pre>! %>
+</pre>
+  </div>
+
+  <p>你会发现Markdown会将多个连续空格缩为一个空格，因此假如你需要它按照原文输出某些非程序内容，可以考虑用多行代码模式。</p>
+
+  <div class="markdown-example">
+    <div class="preview">
+<pre>
+<%= h %q!                   Today's price
+                   |   Tomorrow's price
+                   |   |  Two days hence
+             Stock |   |  |
+              1    10 15 15
+              2    13 11 20! %>
+</pre>
+    </div>
+<pre class="markdown">
+<%= h %q!~~~
+                   Today's price
+                   |   Tomorrow's price
+                   |   |  Two days hence
+             Stock |   |  |
+              1    10 15 15
+              2    13 11 20
+~~~! %>
+</pre>
+<pre class="prettyprint lang-html html">
+<%= h %q!<pre>
+                   Today's price
+                   |   Tomorrow's price
+                   |   |  Two days hence
+             Stock |   |  |
+              1    10 15 15
+              2    13 11 20
 </pre>! %>
 </pre>
   </div>

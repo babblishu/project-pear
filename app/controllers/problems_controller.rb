@@ -1,4 +1,15 @@
-require 'my_html_render'
+require 'cgi'
+
+class ProblemMarkdownHTMLRender < Redcarpet::Render::HTML
+  def block_code(code, language)
+    code = CGI::escapeHTML code
+    if APP_CONFIG.program_languages.keys.include? language
+      "<pre class=\"prettyprint lang-#{language}\">\n#{code.gsub(/\t/, '    ')}</pre>"
+    else
+      "<pre>\n#{code.gsub(/\t/, '    ')}</pre>"
+    end
+  end
+end
 
 class ProblemsController < ApplicationController
   before_filter :require_admin, only: [ :create, :update, :edit, :upload_test_data, :rejudge ]
@@ -14,7 +25,7 @@ class ProblemsController < ApplicationController
     end
     @tags = @problem.tags.map(&:name).join(APP_CONFIG.tags_input_separate_char)
     @enable_latex = @problem.content.enable_latex
-    @markdown = Redcarpet::Markdown.new MyHTMLRender, no_intra_emphasis: true, fenced_code_blocks: true
+    @markdown = Redcarpet::Markdown.new ProblemMarkdownHTMLRender, no_intra_emphasis: true, fenced_code_blocks: true
     @title = @problem.title
     @problem_active = true
   end

@@ -1,4 +1,39 @@
-require 'my_html_render'
+require 'cgi'
+
+class DiscussMarkdownHTMLRender < Redcarpet::Render::HTML
+  def block_code(code, language)
+    code = CGI::escapeHTML code
+    if APP_CONFIG.program_languages.keys.include? language
+      "<pre class=\"prettyprint lang-#{language}\">\n#{code.gsub(/\t/, '    ')}</pre>"
+    else
+      "<pre>\n#{code.gsub(/\t/, '    ')}</pre>"
+    end
+  end
+
+  def preprocess(text)
+    text = text.gsub(/\r\n/, "\n").gsub(/\r/, "\n")
+    flag = false
+    res = ''
+    text.each_line do |line|
+      if flag
+        flag = false if line =~ /\A\s{0,3}~~~\Z/
+      else
+        flag = true if line =~ /\A\s{0,3}~~~\s*\w*\s*\Z/
+      end
+      if flag
+        res += line
+      else
+        if !line.empty? && line[0] == '=' && res.last == "\n"
+          res.chop!
+          res += line
+        else
+          res += line.gsub(/^\s*#/, "\\#").gsub(/^\s*-/, "\\-").gsub(/^\s*>/, "\\>")
+        end
+      end
+    end
+    res
+  end
+end
 
 class DiscussController < ApplicationController
   before_filter :require_login, only: [ :topic, :primary_reply, :secondary_reply ]
@@ -28,7 +63,7 @@ class DiscussController < ApplicationController
     @primary_reply = PrimaryReply.new
 
     @markdown = Redcarpet::Markdown.new(
-        MyHTMLRender.new(escape_html: true, no_styles: true, safe_links_only: true),
+        DiscussMarkdownHTMLRender.new(escape_html: true, no_styles: true, safe_links_only: true),
         no_intra_emphasis: true,
         fenced_code_blocks: true,
         autolink: true
