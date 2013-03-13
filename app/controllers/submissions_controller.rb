@@ -1,3 +1,5 @@
+require 'rchardet19'
+
 class SubmissionsController < ApplicationController
   before_filter :require_login, only: [ :create, :share ]
   before_filter :require_judge_client, only: [ :get_waiting, :receive_result ]
@@ -105,10 +107,13 @@ class SubmissionsController < ApplicationController
   end
 
   def create
-    program = params[:program].respond_to?(:read) ? params[:program].read : ''
     problem = Problem.find_by_id(params[:problem_id])
     raise AppExceptions::InvalidProblemId unless problem
     raise AppExceptions::NoTestDataError unless problem.test_data_timestamp
+
+    program = params[:program].respond_to?(:read) ? params[:program].read : ''
+    encoding = CharDet.detect(program)['encoding']
+    program = program.encode 'UTF-8', encoding
 
     @submission = Submission.new(
         remote_ip: request.remote_ip,

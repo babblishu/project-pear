@@ -30,7 +30,7 @@ class ProblemsController < ApplicationController
         no_intra_emphasis: true,
         fenced_code_blocks: true,
         lax_spacing: true,
-        superscript: true
+        superscript: !@enable_latex
     )
     @title = @problem.title
     @problem_active = true
