@@ -41,6 +41,7 @@ class Problem < ActiveRecord::Base
     dest_dir = Rails.root.join('public', 'attachment', id.to_s)
     dest_dir.rmtree if dest_dir.exist?
     system("unzip -o -q #{dir + 'attachment.zip'} -d #{dest_dir}")
+    dir.rmtree
   end
 
   def unzip_test_data_file(zip_file)
