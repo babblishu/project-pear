@@ -29,7 +29,8 @@ class ProblemsController < ApplicationController
         ProblemMarkdownHTMLRender,
         no_intra_emphasis: true,
         fenced_code_blocks: true,
-        lax_spacing: true
+        lax_spacing: true,
+        superscript: true
     )
     @title = @problem.title
     @problem_active = true
