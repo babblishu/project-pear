@@ -85,16 +85,20 @@ class Problem < ActiveRecord::Base
   end
 
   def update_tags(tag_list)
-    tags.delete_all
-    tag_list.each do |name|
-      tag = Tag.find_by_name name
-      unless tag
-        tag = Tag.create name: name
+    Tag.transaction do
+      tags.delete_all
+      tag_list.each do |name|
+        tag = Tag.lock(true).find_by_name name
+        unless tag
+          tag = Tag.create name: name
+        end
+        tags << tag
       end
-      tags << tag
+      save
+      Tag.lock(true).all.each do |tag|
+        tag.delete if tag.problems.size == 0
+      end
     end
-    save
-    Tag.clear_empty
   end
 
   def accepted_users

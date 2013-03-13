@@ -8,10 +8,4 @@ class Tag < ActiveRecord::Base
   validates :name, uniqueness: true
   validates :name, presence: true
   validates :name, length: { maximum: 20 }
-
-  def self.clear_empty
-    Tag.all.each do |tag|
-      tag.delete if tag.problems.size == 0
-    end
-  end
 end

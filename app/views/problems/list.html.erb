@@ -5,7 +5,7 @@
     <ul>
       <% from.upto(to) do |x| %>
         <li<%= raw(x == @page ? %q{ class="active"} : '') %>>
-          <%= link_to x.to_s, problems_list_path(x.to_s) %>
+          <%= link_to x.to_s, problems_list_path(x.to_s, @tag_hash) %>
         </li>
       <% end %>
     </ul>
@@ -66,7 +66,7 @@
     <ul>
       <% from.upto(to) do |x| %>
         <li<%= raw(x == @page ? %q{ class="active"} : '') %>>
-          <%= link_to x.to_s, problems_list_path(x.to_s) %>
+          <%= link_to x.to_s, problems_list_path(x.to_s, @tag_hash) %>
         </li>
       <% end %>
     </ul>
