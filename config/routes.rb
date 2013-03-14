@@ -1,6 +1,8 @@
 ProjectPear::Application.routes.draw do
   captcha_route
 
+  get 'ip_test' => 'global#ip_test'
+
   root :to => 'global#home'
 
   get 'captcha_verify' => 'global#captcha_verify'

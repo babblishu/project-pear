@@ -39,4 +39,7 @@ class GlobalController < ApplicationController
   def markdown_help
     @title = t 'global.markdown_help.title'
   end
+
+  def ip_test
+  end
 end
