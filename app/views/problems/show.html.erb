@@ -72,7 +72,9 @@
         <h3 class="title"><%= t('.sample_input') %></h3>
       <% end %>
       <div class="problem-block input-output-block">
-        <%= raw sample_test_data.input.gsub(/(?:\n\r?|\r\n?)/, '<br>') %>
+<pre>
+<%= raw sample_test_data.input.chomp %>
+</pre>
       </div>
     </div>
     <div>
@@ -82,7 +84,9 @@
         <h3 class="title"><%= t('.sample_output') %></h3>
       <% end %>
       <div class="problem-block input-output-block">
-        <%= raw sample_test_data.output.gsub(/(?:\n\r?|\r\n?)/, '<br>') %>
+<pre>
+<%= raw sample_test_data.output.chomp %>
+</pre>
       </div>
     </div>
   <% end %>
