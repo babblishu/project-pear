@@ -1,5 +1,3 @@
-require 'custom_logger'
-
 ProjectPear::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
@@ -68,8 +66,6 @@ ProjectPear::Application.configure do
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
 
   config.exceptions_app = ->(env) { ApplicationController.action(:render_404_page).call(env) }
-
-  config.middleware.swap Rails::Rack::Logger, CustomLogger
 end
 
 Paperclip.options[:command_path] = '/usr/bin'
