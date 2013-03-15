@@ -70,7 +70,6 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.4.0)
       mime-types
-    pg (0.14.1)
     pg (0.14.1-x86-mingw32)
     polyglot (0.3.3)
     rack (1.4.5)
@@ -117,6 +116,8 @@ GEM
       railties (~> 3.2.0)
       sass (>= 3.1.10)
       tilt (~> 1.3)
+    silencer (0.1.0)
+      railties (~> 3)
     simpleconfig (2.0.0)
     simplecov (0.7.1)
       multi_json (~> 1.0)
@@ -152,5 +153,6 @@ DEPENDENCIES
   rchardet19
   redcarpet
   sass-rails (~> 3.2.3)
+  silencer
   simpleconfig
   uglifier (>= 1.0.3)
