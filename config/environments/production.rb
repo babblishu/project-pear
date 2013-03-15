@@ -69,7 +69,7 @@ ProjectPear::Application.configure do
 
   config.exceptions_app = ->(env) { ApplicationController.action(:render_404_page).call(env) }
 
-  config.middleware.swap Rails::Rack::Logger, CustomLogger, :silenced => [%r{\A/submissions/get_waiting}]
+  config.middleware.swap Rails::Rack::Logger, CustomLogger
 end
 
 Paperclip.options[:command_path] = '/usr/bin'

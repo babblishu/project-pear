@@ -2,7 +2,7 @@ class CustomLogger < Rails::Rack::Logger
   def initialize(app, opts = {})
     @app = app
     @opts = opts
-    @opts[:silenced] ||= []
+    @silenced = [%r{\A/submissions/get_waiting}]
     super
   end
 
@@ -17,7 +17,7 @@ class CustomLogger < Rails::Rack::Logger
   end
 
   def silence_request(path)
-    @opts[:silenced].each do |regexp|
+    @silenced.each do |regexp|
       return true if path =~ regexp
     end
     false
