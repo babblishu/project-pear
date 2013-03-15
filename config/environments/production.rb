@@ -1,4 +1,4 @@
-require 'silencer/logger'
+require 'custom_logger'
 
 ProjectPear::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
@@ -69,7 +69,7 @@ ProjectPear::Application.configure do
 
   config.exceptions_app = ->(env) { ApplicationController.action(:render_404_page).call(env) }
 
-  config.middleware.swap Rails::Rack::Logger, Silencer::Logger, :silence => [%r{^/submissions/get_waiting}]
+  config.middleware.swap Rails::Rack::Logger, CustomLogger, :silenced => [%r{\A/submissions/get_waiting}]
 end
 
 Paperclip.options[:command_path] = '/usr/bin'
