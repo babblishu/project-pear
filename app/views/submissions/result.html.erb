@@ -105,7 +105,11 @@
                   <% if index2 == 0 %>
                     <td rowspan="<%= test_case.size %>">#<%= index1 + 1 %></td>
                   <% end %>
-                  <td><%= t '.' + single_case[:status] %></td>
+                  <% if single_case[:message] && !single_case[:message].empty? %>
+                    <td><%= t '.' + single_case[:status] %> <a href="javascript:void(0)" onclick="alert('<%= single_case[:message].gsub(/(?:\n\r?|\r\n?)/, "\\n") %>');">(..)</a></td>
+                  <% else %>
+                    <td><%= t '.' + single_case[:status] %></td>
+                  <% end %>
                   <td><%= format_time_used single_case[:time_used] %></td>
                   <td><%= format_memory_used single_case[:memory_used] %></td>
                   <% if index2 == 0 %>
