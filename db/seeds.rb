@@ -13,6 +13,7 @@ def generate_user(from, to)
             signature: 'test signature',
         )
     )
+    user.last_submit = Time.now
     user.save!
   end
   puts 'user ok'
@@ -80,6 +81,41 @@ def generate_submission(num)
       attr[:score] = rand(20) * 5
     end
     Submission.create! attr
+  end
+  puts 'submission ok'
+end
+
+def generate_submission_sql(no, num, start_time)
+  File.open("E:/tmp#{no}.sql", 'w') do |f|
+    f.print('INSERT INTO submissions (user_id, problem_id, program, language, platform, time_used, memory_used, code_size, code_length, status, result, created_at, updated_at, score) VALUES ')
+    users = User.all.to_a
+    problems = Problem.all.to_a
+    num.times do |x|
+      f.print('(')
+      f.print("#{users[rand(users.size)].id}, ")
+      f.print("#{problems[rand(problems.size)].id}, ")
+      f.print("'hello, world', ")
+      f.print("'#{APP_CONFIG.program_languages.keys[rand(3)].to_s}', ")
+      f.print("'#{APP_CONFIG.judge_platforms.keys[rand(2)].to_s}', ")
+      f.print("#{rand(5000) + 1000}, ")
+      f.print("#{rand(5000) + 1000}, ")
+      f.print("#{rand(5000) + 500}, ")
+      f.print("#{rand(200) + 50}, ")
+      f.print("'judged', ")
+      f.print("'', ")
+      f.print("'#{start_time + 90 * x}', ")
+      f.print("'#{start_time + 90 * x}', ")
+      if rand(2) == 0
+        f.print("100)")
+      else
+        f.print("#{rand(20) * 5})")
+      end
+      if x == num - 1
+        f.print(';')
+      else
+        f.print(',')
+      end
+    end
   end
   puts 'submission ok'
 end
@@ -167,6 +203,10 @@ def generate_message(to, num)
 end
 
 def main
+  cur_time = Time.now
+  1.upto(10) do |x|
+    generate_submission_sql x, 100000, cur_time - (6 - x) * 100000 * 90
+  end
 end
 
 main

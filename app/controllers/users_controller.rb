@@ -195,7 +195,7 @@ class UsersController < ApplicationController
   def search
     if params[:ajax]
       pattern = '%' + params[:handle].to_s + '%'
-      users = User.where('handle LIKE :pattern', pattern: pattern).limit(9).map(&:handle)
+      users = User.where('handle ILIKE :pattern', pattern: pattern).limit(9).map(&:handle)
       users = [] unless users.size < 9
       render json: users
     else
