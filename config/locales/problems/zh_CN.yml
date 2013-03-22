@@ -81,7 +81,7 @@ zh_CN:
       input_file: '输入文件'
       output_file: '答案文件'
       time_limit: '时间限制'
-      memory_limit: '空间限制'
+      memory_limit: '内存限制'
       score: '分数'
       sample_test_data: '样例'
 
