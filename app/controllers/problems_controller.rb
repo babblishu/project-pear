@@ -62,7 +62,7 @@ class ProblemsController < ApplicationController
       end
     end
 
-    @page = (params[:page] || '1').to_i
+    @page = (params[:page] || cookies[:page_no] || '1').to_i
     page_size = APP_CONFIG.page_size[:problems_list]
     role = @current_user ? @current_user.role : 'normal_user'
     @total_page = calc_total_page Problem.count_for_role(role, tag_ids), page_size
@@ -78,6 +78,7 @@ class ProblemsController < ApplicationController
     @attempted_ids = @current_user.attempted_problem_ids if @current_user
     @problem_active = true
     @title = t 'problems.list.problems_list'
+    cookies[:page_no] = { value: @page.to_s, expires: 1.year.from_now, path: '/problems/list' }
   end
 
   def create
