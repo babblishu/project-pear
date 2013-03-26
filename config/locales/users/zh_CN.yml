@@ -57,7 +57,6 @@ zh_CN:
       attempted_submissions: '提交数'
       accept_ratio: '通过比率'
       accepted_problems: '通过的题目'
-      upto_advanced_user_title: '提升%{handle}为高级用户'
       upto_admin_title: '提升%{handle}为管理员'
       block_user_title: '锁定用户%{handle}'
       unblock_user_title: '解除用户%{handle}的锁定'
@@ -73,7 +72,6 @@ zh_CN:
       send_message: '发消息'
       compare_with_me: '和我比较'
       edit_profile: '编辑用户信息'
-      upto_advanced_user: '提升为高级用户'
       upto_admin: '提升为管理员'
       block_user: '锁定该用户'
       unblock_user: '解除锁定'
@@ -132,15 +130,17 @@ zh_CN:
       not_exist: '用户%{handle}不存在'
       not_normal_user: '%{handle}不是普通用户'
       blocked_user: '用户%{handle}已被锁定'
+      cancel_confirm: '确定从列表中删除用户%{handle}？'
 
     add_advanced_users:
       title: '添加高级用户'
-      search_user: '输入用户名，回车添加'
+      search_user: '输入用户名，回车添加到列表'
       handle: '用户名'
       real_name: '真实姓名'
       school: '学校'
       cancel: '取消'
       submit: '确定添加'
+      submit_confirm: '确定将列表中的用户提升为高级用户？'
 
     admin_advanced_users:
       have_blocked_users: '包含锁定用户'

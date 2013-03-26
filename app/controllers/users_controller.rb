@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_filter :require_login, only: [ :logout, :edit, :edit_password, :update, :update_password, :compare ]
-  before_filter :require_admin, only: [ :admin, :add_advanced_users, :manage_advanced_users, :admin_advanced_users ]
+  before_filter :require_admin, only: [ :admin, :add_advanced_users, :admin_advanced_users ]
   before_filter :inspect_submit_interval, only: [ :update, :update_password ]
 
   def login
@@ -193,7 +193,8 @@ class UsersController < ApplicationController
             success: true,
             handle: user.handle,
             real_name: user.information.real_name,
-            school: user.information.school
+            school: user.information.school,
+            cancel_confirm: t('users.search.cancel_confirm', handle: user.handle)
         }
       else
         pattern = '%' + params[:handle].to_s + '%'
@@ -219,10 +220,6 @@ class UsersController < ApplicationController
 
   def add_advanced_users
     @title = t 'users.add_advanced_users.title'
-  end
-
-  def manage_advanced_users
-
   end
 
   def admin_advanced_users

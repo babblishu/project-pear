@@ -29,6 +29,9 @@ zh_CN:
         replies: '回复数'
         top: '置顶'
 
+    home_toolbar:
+      add_advanced_users: '添加高级用户'
+
     captcha_verify:
       title: '输入验证码以继续操作'
       captcha: '验证码'

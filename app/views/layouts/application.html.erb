@@ -65,11 +65,6 @@
                 <li><%= link_to t('.change_profile'), users_edit_path(@current_user.handle) %></li>
                 <li><%= link_to t('.change_password'), users_edit_password_path %></li>
                 <li class="divider"></li>
-                <% if admin? %>
-                  <li><%= link_to t('.add_advanced_users'), users_add_advanced_users_path %></li>
-                  <li><%= link_to t('.manage_advanced_users'), users_manage_advanced_users_path %></li>
-                  <li class="divider"></li>
-                <% end %>
                 <li><a href="<%= logout_path %>"><%= t '.logout' %></a></li>
               </ul>
             </li>

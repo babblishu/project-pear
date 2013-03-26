@@ -73,7 +73,6 @@ ProjectPear::Application.routes.draw do
   get 'search_user' => 'users#search', as: 'users_search'
   get 'rank/:span(/:page)' => 'users#list', span: /all|year|month|week|day/, page: /\d+/, as: 'rank'
   get 'users/add_advanced_users' => 'users#add_advanced_users'
-  get 'users/manage_advanced_users' => 'users#manage_advanced_users'
   post 'users/admin_advanced_users/:operation' => 'users#admin_advanced_users',
       operation: /add|remove/, as: 'users_admin_advanced_users'
 end

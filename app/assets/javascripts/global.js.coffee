@@ -122,11 +122,12 @@ $ ->
   container = $('.global .home')
   return unless container.length
 
+  search_url = container.find('#user-search').data('search-url')
   container.find('#user-search').typeahead
     minLength: 2
     source: (query, process) ->
       $.ajax
-        url: '/search_user'
+        url: search_url
         data:
           ajax: true
           handle: query

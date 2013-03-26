@@ -82,7 +82,8 @@
         </div>
         <div class="span7">
           <form style="margin: 0;" class="form-inline" action="<%= users_search_path %>" method="get">
-            <input id="user-search" name="handle" type="text" class="span12 search-query" maxlength="15" placeholder="<%= t '.search_block.search_user' %>">
+            <input id="user-search" name="handle" type="text" class="span12 search-query" maxlength="15"
+                   placeholder="<%= t '.search_block.search_user' %>" data-search-url="<%= users_search_path %>">
           </form>
         </div>
       </div>

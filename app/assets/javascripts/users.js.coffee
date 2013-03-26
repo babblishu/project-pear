@@ -52,11 +52,12 @@ $ -> #add_advanced_users
   container = $('.users .add_advanced_users')
   return unless container.length
 
+  search_url = container.find('#user-search').data('search-url')
   container.find('#user-search').typeahead
     minLength: 2
     source: (query, process) ->
       $.ajax
-        url: '/search_user'
+        url: search_url
         data:
           ajax: true
           add_advanced_users_auto_complete: true
@@ -91,9 +92,10 @@ $ -> #add_advanced_users
           block.find('td.handle').html(response.handle)
           block.find('td.real-name').html(response.real_name)
           block.find('td.school').html(response.school)
+          block.find('td button.cancel').data('confirm', response.cancel_confirm)
           submit_button.removeClass('hidden')
           block.find('td button.cancel').click ->
-            if confirm('Remove ' + $(this).parents('tr').find('td.handle').text() + '?')
+            if confirm($(this).data('confirm'))
               $(this).parents('tr').remove()
               submit_button.addClass('hidden') if users_table.find('tbody tr').length == 1
       else
@@ -103,11 +105,13 @@ $ -> #add_advanced_users
       add_users_form.find('input').val('')
 
   submit_button.click ->
+    return unless confirm($(this).data('confirm'))
     handles = []
     users_table.find('tbody tr').each ->
       handles.push($(this).data('handle')) unless $(this).hasClass('hidden')
+    url = $(this).data('url')
     $.ajax
-      url: '/users/admin_advanced_users/add'
+      url: url
       dataType: 'json'
       timeout: 10000
       type: 'POST'

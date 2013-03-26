@@ -1,5 +1,6 @@
 <form id="add-users" action="<%= users_search_path %>" method="get">
-  <input name="handle" id="user-search" type="text" class="search-query" maxlength="15" placeholder="<%= t '.search_user' %>">
+  <input name="handle" id="user-search" type="text" class="search-query" maxlength="15"
+         placeholder="<%= t '.search_user' %>" data-search-url="<%= users_search_path %>">
 </form>
 
 <table id="users-table" class="table">
@@ -21,4 +22,7 @@
   </tbody>
 </table>
 
-<button id="submit-button" type="button" class="btn btn-primary hidden"><%= t '.submit' %></button>
+<button id="submit-button" type="button" class="btn btn-primary hidden"
+        data-url="<%= users_admin_advanced_users_path('add') %>" data-confirm="<%= t '.submit_confirm' %>">
+  <%= t '.submit' %>
+</button>
