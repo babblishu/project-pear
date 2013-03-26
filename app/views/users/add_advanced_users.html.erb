@@ -1,0 +1,24 @@
+<form id="add-users" action="<%= users_search_path %>" method="get">
+  <input name="handle" id="user-search" type="text" class="search-query" maxlength="15" placeholder="<%= t '.search_user' %>">
+</form>
+
+<table id="users-table" class="table">
+  <thead>
+  <tr>
+    <th><%= t '.handle' %></th>
+    <th><%= t '.real_name' %></th>
+    <th><%= t '.school' %></th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr class="hidden template">
+    <td class="handle"></td>
+    <td class="real-name"></td>
+    <td class="school"></td>
+    <td><button type="button" class="act act-warning cancel"><%= t '.cancel' %></button></td>
+  </tr>
+  </tbody>
+</table>
+
+<button id="submit-button" type="button" class="btn btn-primary hidden"><%= t '.submit' %></button>

@@ -65,11 +65,15 @@ ProjectPear::Application.routes.draw do
   get 'users/:user_handle/edit' => 'users#edit', user_handle: /[a-z0-9\._]{3,15}/i, as: 'users_edit'
   post 'users/:user_handle/update' => 'users#update', user_handle: /[a-z0-9\._]{3,15}/i, as: 'users_update'
   get 'users/:user_handle/admin/:operation' => 'users#admin', user_handle: /[a-z0-9\._]{3,15}/i,
-      operation: /upto_advanced_user|upto_admin|block_user|unblock_user/, as: 'users_admin'
+      operation: /upto_admin|block_user|unblock_user/, as: 'users_admin'
   get 'edit_password' => 'users#edit_password', as: 'users_edit_password'
   post 'update_password' => 'users#update_password', as: 'users_update_password'
   get 'users/:user_handle' => 'users#show', user_handle: /[a-z0-9\._]{3,15}/i, as: 'users_show'
   get 'users/:user_handle/compare' => 'users#compare', user_handle: /[a-z0-9\._]{3,15}/i, as: 'users_compare'
   get 'search_user' => 'users#search', as: 'users_search'
   get 'rank/:span(/:page)' => 'users#list', span: /all|year|month|week|day/, page: /\d+/, as: 'rank'
+  get 'users/add_advanced_users' => 'users#add_advanced_users'
+  get 'users/manage_advanced_users' => 'users#manage_advanced_users'
+  post 'users/admin_advanced_users/:operation' => 'users#admin_advanced_users',
+      operation: /add|remove/, as: 'users_admin_advanced_users'
 end

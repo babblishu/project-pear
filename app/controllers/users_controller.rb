@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_filter :require_login, only: [ :logout, :edit, :edit_password, :update, :update_password, :compare ]
-  before_filter :require_admin, only: [ :admin ]
+  before_filter :require_admin, only: [ :admin, :add_advanced_users, :manage_advanced_users, :admin_advanced_users ]
   before_filter :inspect_submit_interval, only: [ :update, :update_password ]
 
   def login
@@ -167,16 +167,6 @@ class UsersController < ApplicationController
     raise AppExceptions::InvalidUserHandle unless user
     if @current_user.authenticate params[:password]
       case params[:operation]
-        when 'upto_advanced_user'
-          user.update_attribute :role, 'advanced_user'
-          Notification.create(
-              user: user,
-              content: t(
-                  'users.notification.upto_advanced_user',
-                  admin_link: users_show_path(@current_user.handle),
-                  handle: @current_user.handle
-              )
-          )
         when 'upto_admin'
           user.update_attribute :role, 'admin'
         when 'block_user'
@@ -194,10 +184,29 @@ class UsersController < ApplicationController
 
   def search
     if params[:ajax]
-      pattern = '%' + params[:handle].to_s + '%'
-      users = User.select(:handle).where('handle ILIKE :pattern', pattern: pattern).limit(9).map(&:handle)
-      users = [] unless users.size < 9
-      render json: users
+      if params[:add_advanced_users]
+        user = User.includes(:information).find_by_handle(params[:handle])
+        return render json: { success: false, notice: t('users.search.not_exist', handle: params[:handle]) } unless user
+        return render json: { success: false, notice: t('users.search.not_normal_user', handle: user.handle)} unless user.role == 'normal_user'
+        return render json: { success: false, notice: t('users.search.blocked_user', handle: user.handle)} if user.blocked
+        render json: {
+            success: true,
+            handle: user.handle,
+            real_name: user.information.real_name,
+            school: user.information.school
+        }
+      else
+        pattern = '%' + params[:handle].to_s + '%'
+        if params[:add_advanced_users_auto_complete]
+          users = User.select(:handle).where("role = 'normal_user' AND handle ILIKE :pattern AND NOT blocked", pattern: pattern).
+              limit(9).map(&:handle)
+        else
+          users = User.select(:handle).where('handle ILIKE :pattern AND NOT blocked', pattern: pattern).
+              limit(9).map(&:handle)
+        end
+        users = [] unless users.size < 9
+        render json: users
+      end
     else
       user = User.find_by_handle params[:handle]
       if user
@@ -205,6 +214,42 @@ class UsersController < ApplicationController
       else
         redirect_to :back, notice: t('users.search.not_exist', handle: params[:handle])
       end
+    end
+  end
+
+  def add_advanced_users
+    @title = t 'users.add_advanced_users.title'
+  end
+
+  def manage_advanced_users
+
+  end
+
+  def admin_advanced_users
+    if params[:operation] == 'add'
+      handles = params[:handles]
+      unless User.where('blocked AND handle IN (:handles)', handles: handles).empty?
+        return render json: { success: false, notice: t('users.admin_advanced_users.have_blocked_users') }
+      end
+      unless User.where("role <> 'normal_user' AND handle IN (:handles)", handles: handles).empty?
+        return render json: { success: false, notice: t('users.admin_advanced_users.have_not_normal_users') }
+      end
+      unless User.where('handle IN (:handles)', handles: handles).size == handles.size
+        return render json: { success: false, notice: t('users.admin_advanced_users.have_invalid_handle') }
+      end
+      handles.each do |handle|
+        user = User.find_by_handle handle
+        user.update_attribute :role, 'advanced_user'
+        Notification.create(
+            user: user,
+            content: t(
+                'users.notification.upto_advanced_user',
+                admin_link: users_show_path(@current_user.handle),
+                handle: @current_user.handle
+            )
+        )
+      end
+      render json: { success: true, redirect_url: root_url, notice: t('users.admin_advanced_users.success') }
     end
   end
 end

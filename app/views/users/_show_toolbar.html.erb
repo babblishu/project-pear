@@ -11,13 +11,6 @@
         <% if @current_user.role == 'admin' && @user.role != 'admin' %>
           <li class="divider"></li>
           <li><%= link_to t('.edit_profile'), users_edit_path(@user.handle) %></li>
-          <% if @user.role == 'normal_user' %>
-            <li>
-              <a id="upto-advanced-user-button" href="#upto-advanced-user-dialog" data-toggle="modal">
-                <%= t '.upto_advanced_user' %>
-              </a>
-            </li>
-          <% end %>
           <li>
             <a id="upto-admin-button" href="#upto-admin-dialog" data-toggle="modal">
               <%= t '.upto_admin' %>

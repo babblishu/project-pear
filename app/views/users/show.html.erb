@@ -77,14 +77,6 @@
 
 <% if admin? %>
   <% unless @user.blocked %>
-    <% if @user.role == 'normal_user' %>
-      <%= render partial: 'users/confirm_operation_dialog', locals: {
-              name: 'upto-advanced-user',
-              title: t('.upto_advanced_user_title', handle: @user.handle),
-              submit_path: users_admin_path(@user.handle, 'upto_advanced_user'),
-              errors_hash: flash[:upto_advanced_user_errors]
-      } %>
-    <% end %>
     <%= render partial: 'users/confirm_operation_dialog', locals: {
             name: 'upto-admin',
             title: t('.upto_admin_title', handle: @user.handle),

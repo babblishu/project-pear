@@ -58,3 +58,23 @@
     }
   }
 }
+
+.users .add_advanced_users {
+  #add-users {
+    text-align: center;
+    .typeahead {
+      text-align: left;
+    }
+  }
+  #users-table {
+    width: 500px;
+    margin: 0 auto 10px auto;
+    th, td {
+      text-align: center;
+    }
+  }
+  #submit-button {
+    display: block;
+    margin: 0 auto;
+  }
+}

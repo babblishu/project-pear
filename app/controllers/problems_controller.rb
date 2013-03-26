@@ -62,11 +62,18 @@ class ProblemsController < ApplicationController
       end
     end
 
-    @page = (params[:page] || cookies[:page_no] || '1').to_i
     page_size = APP_CONFIG.page_size[:problems_list]
     role = @current_user ? @current_user.role : 'normal_user'
     @total_page = calc_total_page Problem.count_for_role(role, tag_ids), page_size
-    validate_page_number @page, @total_page
+    if params[:page]
+      @page = params[:page].to_i
+      validate_page_number @page, @total_page
+    elsif tag_ids.empty? && cookies[:page_no]
+      @page = cookies[:page_no].to_i
+      @page = 1 unless 1 <= @page && @page <= @total_page
+    else
+      @page = 1
+    end
 
     if @current_user && @current_user.role == 'admin'
       @problem = Problem.new flash[:problem] || {}
@@ -78,7 +85,9 @@ class ProblemsController < ApplicationController
     @attempted_ids = @current_user.attempted_problem_ids if @current_user
     @problem_active = true
     @title = t 'problems.list.problems_list'
-    cookies[:page_no] = { value: @page.to_s, expires: 1.year.from_now, path: '/problems/list' }
+    if tag_ids.empty?
+      cookies[:page_no] = { value: @page.to_s, expires: 1.year.from_now, path: '/problems/list' }
+    end
   end
 
   def create
