@@ -8,8 +8,7 @@
   </p>
 
   <p>
-    注意这里的时间限制和空间限制只是显示在题面中的，测试时的时空限制要在配置文件中设置，因此假如不同测试点限制不同，
-    你可以填写诸如<code>1~2s</code>的时间限制或诸如<code>64~128MB</code>的空间限制。
+    注意这里的时间限制和空间限制只是显示在题面中的，测试时的时空限制要在配置文件中设置，因此假如不同测试点限制不同，你可以填写诸如<code>1~2s</code>的时间限制或诸如<code>64~128MB</code>的空间限制。
   </p>
 
   <p>
@@ -21,15 +20,12 @@
   </p>
 
   <p>
-    其中附件一栏中可以上传一个zip压缩包，里面的内容会被解压缩到<code>/attachment/[problem_id]/</code>目录下，
-    注意每次重新上传会删除本题原来所有的附件文件。附件中的文件可以在题面中引用。
+    其中附件一栏中可以上传一个zip压缩包，里面的内容会被解压缩到<code>/attachment/[problem_id]/</code>目录下，注意每次重新上传会删除本题原来所有的附件文件。附件中的文件可以在题面中引用。
   </p>
 
   <p>
-    题面的显示中可以选择开启Markdown，假如不开启Markdown就必须直接写HTML代码，通常建议开启。
-    Markdown的使用说明请看<a href="<%= markdown_path %>">这里</a>，还有这里的Markdown可以内嵌HTML代码。
-    LaTeX的话，主要是用来在题面描述中内嵌公式，也就是使用<code>$</code>包裹公式代码。
-    在单独的段落里也可以用<code>$$</code>包裹或者<code>displaymath</code>显示居中的成段公式。
+    题面的显示中可以选择开启Markdown，假如不开启Markdown就必须直接写HTML代码，通常建议开启。Markdown的使用说明请看<a href="<%= markdown_path %>">这里</a>，还有这里的Markdown可以内嵌HTML代码。
+    LaTeX的话，主要是用来在题面描述中内嵌公式，也就是使用<code>$</code>包裹公式代码。在单独的段落里也可以用<code>$$</code>包裹或者<code>displaymath</code>显示居中的成段公式。
   </p>
 
   <h3>上传测试数据</h3>
@@ -39,8 +35,7 @@
   </p>
 
   <p>
-    配置文件为<code>config.txt</code>，内容为一个<a href="http://www.json.org/json-zh.html">JSON</a>字符串，
-    最外层是一个object，具体解释见下表：
+    配置文件为<code>config.txt</code>，内容为一个<a href="http://www.json.org/json-zh.html">JSON</a>字符串，最外层是一个object，具体解释见下表：
   </p>
 
   <table class="table table-bordered">
@@ -163,8 +158,7 @@
       <td><code>null</code>或array</td>
       <td><code>null</code></td>
       <td>
-        每个测试点的分数，如果为<code>null</code>会由系统自动平均分配分数，
-        否则要保证array的长度和测试点个数相同，array中的类型为非负int并且和为100。
+        每个测试点的分数，如果为<code>null</code>会由系统自动平均分配分数，否则要保证array的长度和测试点个数相同，array中的类型为非负int并且和为100。
       </td>
     </tr>
 
@@ -173,9 +167,7 @@
       <td><code>null</code>或object</td>
       <td><code>null</code></td>
       <td>
-        假如不为<code>null</code>，就可以对某些数据文件单独配置时间限制和空间限制。
-        key为string类型，表示数据编号（不需要带上前缀），value为object类型，
-        key应该为<code>"time_limit"</code>或<code>"memory_limit"</code>，value的要求和前面说明的一样。
+        假如不为<code>null</code>，就可以对某些数据文件单独配置时间限制和空间限制。key为string类型，表示数据编号（不需要带上前缀），value为object类型，key应该为<code>"time_limit"</code>或<code>"memory_limit"</code>，value的要求和前面说明的一样。
       </td>
     </tr>
 
@@ -183,20 +175,15 @@
   </table>
 
   <p>
-    输入文件名为配置中的输入文件名前缀加上编号，编号由两部分组成：测试点编号和捆绑数据的编号，
-    测试点编号为正整数，捆绑数据编号为小写英文字母，例如<code>1a</code>、<code>1b</code>等，
-    这种情况下这两个数据点是捆绑算分的，每个测试点取所有捆绑数据中得分最低的作为该测试点得分。
-    如果每个测试点只捆绑一个数据，可以省略捆绑数据编号。
+    输入文件名为配置中的输入文件名前缀加上编号，编号由两部分组成：测试点编号和捆绑数据的编号，测试点编号为正整数，捆绑数据编号为小写英文字母，例如<code>1a</code>、<code>1b</code>等，这种情况下这两个数据点是捆绑算分的，每个测试点取所有捆绑数据中得分最低的作为该测试点得分。如果每个测试点只捆绑一个数据，可以省略捆绑数据编号。
   </p>
 
   <p>
-    样例输入输出文件名为配置中指定的前缀加上编号，编号只包含一个正整数，假如只有一个样例可以不需要编号。
-    扩展名也是用配置文件中指定的相应扩展名。
+    样例输入输出文件名为配置中指定的前缀加上编号，编号只包含一个正整数，假如只有一个样例可以不需要编号。扩展名也是用配置文件中指定的相应扩展名。
   </p>
 
   <p>
-    假如需要使用Special Judge，就要将<code>judge.c</code>、<code>judge.cpp</code>或<code>judge.pas</code>
-    文件一同打包进去。
+    假如需要使用Special Judge，就要将<code>judge.c</code>、<code>judge.cpp</code>或<code>judge.pas</code>文件一同打包进去。
   </p>
 
   <p>
@@ -217,9 +204,7 @@
   <h3>编写Special Judge程序</h3>
 
   <p>
-    本OJ支持使用C、C++或Pascal编写的Special Judge。评测系统会给Judge程序传送六个参数，
-    按顺序依次表示输入文件、选手输出文件、标准输出文件、本测试点满分、分数输出文件和额外信息文件。
-    其中分数输出文件必须创建，里面包含一个非负整数，表示选手得分。额外信息文件可以选择不创建。
+    本OJ支持使用C、C++或Pascal编写的Special Judge。评测系统会给Judge程序传送六个参数，按顺序依次表示输入文件、选手输出文件、标准输出文件、本测试点满分、分数输出文件和额外信息文件。其中分数输出文件必须创建，里面包含一个非负整数，表示选手得分。额外信息文件可以选择不创建。
   </p>
 
   <p>

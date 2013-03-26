@@ -16,6 +16,7 @@ class GlobalController < ApplicationController
 
   def faq
     @faq_active = true
+    @title = t 'global.faq.title'
   end
 
   def captcha_verify

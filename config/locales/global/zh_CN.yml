@@ -43,3 +43,6 @@ zh_CN:
 
     add_problem_help:
       title: '如何添加题目'
+
+    faq:
+      title: 'FAQ'

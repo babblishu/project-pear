@@ -1,12 +1,142 @@
 <div style="width: 75%; margin: 0 auto;">
 
   <div class="item">
-    <div class="title">
-
-    </div>
+    <div class="title">为什么有些页面在我的浏览器中没法正常显示？</div>
     <div class="content">
       <p>
+        请更新你的浏览器到最新版本以支持最新的HTML、CSS标准。
+      </p>
+      <p>
+        如果你在使用Internet Explorer浏览器，根据我的测试只有IE10能够无问题显示本网站页面。对于Windows 7 (with SP1)操作系统，你可以选择升级到IE10（点击<a href="http://windows.microsoft.com/en-US/internet-explorer/downloads/ie-10/worldwide-languages">这里</a>下载），更早版本的Windows暂时没法升级。
+      </p>
+      <p>
+        如果你是用的是某些基于IE内核的浏览器，那么现实也可能出现问题，某些双内核浏览器有基于WebKit的渲染模式（一般叫急速模式），切换到这个模式或许能够正常显示页面（开发者没做过这方面测试，不能保证有效果）。
+      </p>
+      <p>
+        假如前面说的还是没法解决问题，推荐你使用下面浏览器的最新版本（排名不分先后）：
+      </p>
+      <ul>
+        <li><a href="http://www.google.com/chrome/">Google Chrome</a></li>
+        <li><a href="http://www.mozilla.org/en-US/firefox/new/">Mozilla Firefox</a></li>
+        <li><a href="http://www.opera.com/computer/windows">Opera</a></li>
+      </ul>
+      <p>
+        某些题目的描述中使用了jsMath插件显示LaTeX公式，建议安装相关字体以获得最佳显示效果：
+      </p>
+      <ul>
+        <li>
+          对于Windows用户，请下载<a href="/font/TeX-fonts-25.zip">TeX-fonts-25.zip</a>，将压缩包内的ttf文件解压缩到<code>C:\Windows\Fonts</code>目录下。
+        </li>
+        <li>
+          对于Ubuntu用户，如果你是用的是Firefox浏览器，请下载<a href="/font/TeX-fonts-25.zip">TeX-fonts-linux.tgz</a>，否则下载和Windows用户一样的文件。将ttf文件解压到<code>~/.fonts</code>目录下，然后进入这个目录执行<code>sudo fc-cache -fv</code>。
+        </li>
+        <li>
+          如果使用其他系统平台，请参加jsMath的<a href="http://www.math.union.edu/~dpvc/jsmath/download/jsMath-fonts.html">相关页面</a>。
+        </li>
+      </ul>
+    </div>
+  </div>
 
+  <div class="item">
+    <div class="title">为什么我的程序在本机可以编译通过，但是交上去却CE了？</div>
+    <div class="content">
+      <p>
+        如果你使用C++语言，很可能是因为你本机使用Dev-C++附带的g++编译器，那个编译器版本很旧，它的C++头文件有嵌套包含，也就是说iostream头文件还包含了许多别的头文件，相当于include了iostream的同时，也附带include了许多其他头文件。较新版本的g++编译器却不是这样的，也就是说你需要写全所有程序中需要用的头文件。
+      </p>
+      <p>
+        下面给出各平台下编译器的版本信息：
+      </p>
+      <table class="table table-bordered" style="width: 500px; margin: 0 auto 10px auto;">
+        <thead>
+        <tr>
+          <th colspan="2" style="text-align: center;">Windows (Windows XP with Service Pack 3)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>C</td>
+          <td>GNU Compiler Collection (gcc) 4.7.2 (Target: mingw32)</td>
+        </tr>
+        <tr>
+          <td>C++</td>
+          <td>GNU Compiler Collection (g++) 4.7.2 (Target: mingw32)</td>
+        </tr>
+        <tr>
+          <td>Pascal</td>
+          <td>Free Pascal Compiler version 2.6.0 [2011/12/25] for i386</td>
+        </tr>
+        <tr>
+          <td>Java</td>
+          <td>Oracle jdk version 1.7.0_17</td>
+        </tr>
+        <tr>
+          <td>BASIC</td>
+          <td>FreeBASIC Compiler version 0.24.0 (08-19-2012) for win32</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <!--
+      <table class="table table-bordered" style="width: 500px; margin: 0 auto 10px auto;">
+        <thead>
+        <tr>
+          <th colspan="2" style="text-align: center;">Linux (Ubuntu 12.04.2 LTS Desktop i386)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>C</td>
+          <td>GNU Compiler Collection (gcc) 4.6.3 (Target: i686-linux-gnu)</td>
+        </tr>
+        <tr>
+          <td>C++</td>
+          <td>GNU Compiler Collection (g++) 4.6.3 (Target: i686-linux-gnu)</td>
+        </tr>
+        <tr>
+          <td>Pascal</td>
+          <td>Free Pascal Compiler version 2.4.4-3.1 [2012/01/04] for i386</td>
+        </tr>
+        <tr>
+          <td>Java</td>
+          <td>Oracle jdk version 1.7.0_17</td>
+        </tr>
+        <tr>
+          <td>BASIC</td>
+          <td>FreeBASIC Compiler version 0.24.0 (08-19-2012) for linux</td>
+        </tr>
+        </tbody>
+      </table>
+      -->
+
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="title">为什么我的程序在本机测试可以AC，交上去就没法AC？</div>
+    <div class="content">
+      <p>
+        请看清楚你选择的测试平台，如果和你本机测试平台不同，可能是由于系统平台的差异性造成的。
+      </p>
+      <p>
+        如果你使用C或C++语言，并且用<code>scanf</code>和<code>printf</code>读入输出，对于<code>long long</code>类型，在Windows平台下请使用<code>%I64d</code>；在Linux平台下请使用<code>%lld</code>。
+      </p>
+      <p>
+        对于没有Special Judge的题目，所有输出都是被严格比较的，也就是说行末不能有多余的空格，并且最后一行后需要有换行符。当然如果题目对这点有其他说明，请以题目说明为准。
+      </p>
+      <p>
+        如果测试结果中显示Forbidden system call或Open protected file，并且你觉得你的程序没有做奇怪的事，请与管理员联系。
+      </p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="title">为什么我的程序显示的运行时间没有超过时限，但是被判定为运行超时？</div>
+    <div class="content">
+      <p>
+        评测结果中的运行时间显示的是进程的用户时间，但有些情况下程序运行的时间（从程序开始执行计算）可能远远超过这个值，例如大部分时间可能花费在IO上，系统层IO的执行时间并不被算在进程用户时间内。造成这种情况最常见的原因是读入时出现了某些问题。
+      </p>
+      <p>
+        评测系统使用的策略是，允许进程运行的时间会比时间限制多一些，超过允许的运行时间就会被判为超时，否则会根据获取的用户时间判断是否超时。
       </p>
     </div>
   </div>
@@ -14,9 +144,7 @@
 </div>
 
 <div class="item hidden">
-  <div class="title">
-
-  </div>
+  <div class="title"></div>
   <div class="content">
     <p>
 
