@@ -12,7 +12,7 @@
         </ul>
         <div class="pill-content">
           <div class="pill-pane active" id="hint">
-            <div class="problem-block statement-block">
+            <div class="statement-block" style="padding:10px 10px 0 10px;">
               <% if @problem.content.enable_markdown %>
                 <%= raw @markdown.render @problem.content.solution %>
               <% else %>
@@ -27,7 +27,7 @@
           </div>
         </div>
       <% else %>
-        <div class="problem-block statement-block">
+        <div class="statement-block" style="padding:10px 10px 0 10px;">
           <% if @problem.content.enable_markdown %>
             <%= raw @markdown.render @problem.content.solution %>
           <% else %>
