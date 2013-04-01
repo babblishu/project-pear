@@ -6,6 +6,7 @@ class SubmissionSweeper < ActionController::Caching::Sweeper
     1.upto(total_page) do |x|
       expire_action controller: 'problems', action: 'status', problem_id: submission.problem.id.to_s, page: x.to_s
     end
-    submission.problem.clear_counter_cache
+    submission.problem.clear_statistics_cache
+    submission.user.clear_statistics_cache
   end
 end

@@ -137,8 +137,7 @@ class SubmissionsController < ApplicationController
   def get_waiting
     submission = nil
     Submission.transaction do
-      submission = Submission.select('id, problem_id, language, program').
-          where("platform = :platform AND status = 'waiting'", platform: params[:platform]).order('id ASC').lock(true).first
+      submission = Submission.where("platform = :platform AND status = 'waiting'", platform: params[:platform]).order('id ASC').lock(true).first
       submission.update_attribute :status, 'running' if submission
     end
     result = {}

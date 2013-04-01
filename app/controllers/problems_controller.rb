@@ -21,10 +21,10 @@ class ProblemsController < ApplicationController
   def list
     tag_ids = []
     @tag_hash = {}
-    Tag.all.each do |tag|
-      if params["tag_#{tag.id}"]
-        tag_ids << tag.id
-        @tag_hash["tag_#{tag.id}"] = '1'
+    Tag.valid_ids.each do |id|
+      if params["tag_#{id}"]
+        tag_ids << id
+        @tag_hash["tag_#{id}"] = '1'
       end
     end
     raise AppExceptions::InvalidOperation if tag_ids.size > 5
@@ -42,14 +42,7 @@ class ProblemsController < ApplicationController
       @page = 1
     end
 
-    if role == 'admin'
-      @problem = Problem.new
-      @problem_content = ProblemContent.new
-    end
-
-    @problems = Problem.list_for_role role, tag_ids, @page, page_size
-    @accepted_ids = @current_user.accepted_problem_ids if @current_user
-    @attempted_ids = @current_user.attempted_problem_ids if @current_user
+    @ids = Problem.list_for_role role, tag_ids, @page, page_size
     if tag_ids.empty?
       cookies[:page_no] = { value: @page.to_s, expires: 1.year.from_now, path: '/problems/list' }
     end

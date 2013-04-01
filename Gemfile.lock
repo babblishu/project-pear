@@ -40,6 +40,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.4.0)
+    dalli (2.6.2)
     diff-lcs (1.2.1)
     easy_captcha (0.6.3)
       bundler (>= 1.1.0)
@@ -163,6 +164,7 @@ PLATFORMS
 DEPENDENCIES
   bcrypt-ruby (~> 3.0.0)
   coffee-rails (~> 3.2.1)
+  dalli
   easy_captcha
   jquery-rails
   paperclip (~> 3.0)
@@ -170,8 +172,9 @@ DEPENDENCIES
   rails (= 3.2.11)
   rchardet19
   redcarpet
+  redis
   redis-rails
   sass-rails (~> 3.2.3)
-  second_level_cache (~> 1.5)
+  second_level_cache
   simpleconfig
   uglifier (>= 1.0.3)

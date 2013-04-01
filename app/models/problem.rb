@@ -90,18 +90,21 @@ class Problem < ActiveRecord::Base
 
   def update_tags(tag_list)
     Tag.transaction do
+      connection.execute('LOCK TABLE tags')
       tags.delete_all
+      exist_tags = Tag.find_by_sql([
+          %q{
+             SELECT x.name
+             FROM tags AS x
+             INNER JOIN problems_tags AS y ON x.id = y.tag_id AND y.problem_id = :problem_id
+             WHERE x.name IN (:tag_list)
+          },
+          problem_id: id, tag_list: tag_list
+      ]).map(&:name)
       tag_list.each do |name|
-        tag = Tag.lock(true).find_by_name name
-        unless tag
-          tag = Tag.create name: name
-        end
-        tags << tag
+        tags << Tag.create(name: name) unless exist_tags.include? name
       end
       save
-      Tag.lock(true).all.each do |tag|
-        tag.delete if tag.problems.size == 0
-      end
     end
   end
 
@@ -127,7 +130,7 @@ class Problem < ActiveRecord::Base
     end
   end
 
-  def clear_counter_cache
+  def clear_statistics_cache
     Rails.cache.delete "model/problem/#{id}/accepted_submissions"
     Rails.cache.delete "model/problem/#{id}/attempted_submissions"
   end
@@ -172,28 +175,15 @@ class Problem < ActiveRecord::Base
 
   def self.list_for_role(role, tags, page, page_size)
     if tags.empty?
-      list = connection.execute(sanitize_sql_array([
-          %q{
-             SELECT id, title, source, status
-             FROM problems
-             WHERE status IN (:set)
-             ORDER BY id
-             OFFSET :offset LIMIT :limit
-          },
-          set: status_set_for_role(role),
-          offset: (page - 1) * page_size, limit: page_size
-      ])).map do |row|
-        OpenStruct.new(
-            id: row['id'].to_i,
-            title: row['title'],
-            source: row['source'],
-            status: row['status']
-        )
+      list = Rails.cache.fetch("model/problem/list/#{role}") do
+        Problem.select('id').where('status IN (:set)', set: status_set_for_role(role)).order('id').map(&:id)
       end
+      list = list[(page - 1) * page_size, page_size]
+      list = [] unless list
     else
       list = connection.execute(sanitize_sql_array([
           %q{
-             SELECT x.id, x.title, x.source, x.status
+             SELECT x.id
              FROM problems AS x
              INNER JOIN (
                  SELECT problem_id
@@ -208,37 +198,7 @@ class Problem < ActiveRecord::Base
           },
           set: status_set_for_role(role), tag_ids: tags, tags_size: tags.size,
           offset: (page - 1) * page_size, limit: page_size
-      ])).map do |row|
-        OpenStruct.new(
-            id: row['id'].to_i,
-            title: row['title'],
-            source: row['source'],
-            status: row['status']
-        )
-      end
-    end
-    ids = list.map { |x| x.id }
-    accepted_submissions = Hash[connection.execute(sanitize_sql_array([
-        %q{
-           SELECT problem_id AS id, COUNT(*) AS count
-           FROM submissions
-           WHERE problem_id IN (:ids) AND score = 100 AND status = 'judged' AND NOT hidden
-           GROUP BY problem_id
-        },
-        ids: ids
-    ])).map { |row| [row['id'].to_i, row['count'].to_i] }]
-    attempted_submissions = Hash[connection.execute(sanitize_sql_array([
-        %q{
-           SELECT problem_id AS id, COUNT(*) AS count
-           FROM submissions
-           WHERE problem_id IN (:ids) AND status = 'judged' AND NOT hidden
-           GROUP BY problem_id
-        },
-        ids: ids
-    ])).map { |row| [row['id'].to_i, row['count'].to_i] }]
-    list.each do |problem|
-      problem.accepted_submissions = accepted_submissions[problem.id] || 0
-      problem.attempted_submissions = attempted_submissions[problem.id] || 0
+      ])).map { |row| row['id'] }
     end
     list
   end
@@ -247,6 +207,10 @@ class Problem < ActiveRecord::Base
     Rails.cache.delete 'model/problem/count_for_role/normal_user'
     Rails.cache.delete 'model/problem/count_for_role/advanced_user'
     Rails.cache.delete 'model/problem/count_for_role/admin'
+
+    Rails.cache.delete 'model/problem/list/normal_user'
+    Rails.cache.delete 'model/problem/list/advanced_user'
+    Rails.cache.delete 'model/problem/list/admin'
   end
 
   def self.status_list_count(problem)

@@ -31,6 +31,7 @@
     <orderEntry type="library" scope="PROVIDED" name="coffee-rails (v3.2.2, ruby-1.9.3-p327) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="coffee-script (v2.2.0, ruby-1.9.3-p327) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="coffee-script-source (v1.4.0, ruby-1.9.3-p327) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="dalli (v2.6.2, ruby-1.9.3-p327) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="diff-lcs (v1.2.1, ruby-1.9.3-p327) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="easy_captcha (v0.6.3, ruby-1.9.3-p327) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="erubis (v2.7.0, ruby-1.9.3-p327) [gem]" level="application" />

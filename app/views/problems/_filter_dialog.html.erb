@@ -6,9 +6,10 @@
   <div class="modal-body">
     <%= form_tag problems_list_path, method: :get, id: 'filter-form' do %>
       <div class="row-fluid">
+        <% tags = Tag.valid_entry %>
         <% 4.times do |x| %>
           <div class="span3">
-            <% Tag.all.each_with_index do |tag, index| %>
+            <% tags.each_with_index do |tag, index| %>
               <% if index % 4 == x %>
                 <label class="checkbox">
                   <%= check_box_tag tag.id.to_s, '1', @tag_hash["tag_#{tag.id}"], name: "tag_#{tag.id}", id: "tag_#{tag.id}" %>

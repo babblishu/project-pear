@@ -54,56 +54,93 @@ class User < ActiveRecord::Base
 
   def accepted_problems(time = nil)
     if time
-      Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden AND created_at >= :time",
-                       user_id: id, time: time).
-          count(:problem_id, distinct: true)
+      Rails.cache.fetch("model/user/#{id}/accepted_problems/#{time.to_i}", expires_in: 1.day) do
+        Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden AND created_at >= :time",
+                         user_id: id, time: time).
+            count(:problem_id, distinct: true)
+      end
     else
-      Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).
-          count(:problem_id, distinct: true)
+      Rails.cache.fetch("model/user/#{id}/accepted_problems") do
+        Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).
+            count(:problem_id, distinct: true)
+      end
     end
-
   end
 
   def attempted_problems(time = nil)
     if time
-      Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden AND NOT hidden AND created_at >= :time",
-                       user_id: id, time: time).
-          count(:problem_id, distinct: true)
+      Rails.cache.fetch("model/user/#{id}/attempted_problems/#{time.to_i}", expires_in: 1.day) do
+        Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden AND NOT hidden AND created_at >= :time",
+                         user_id: id, time: time).
+            count(:problem_id, distinct: true)
+      end
     else
-      Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).
-          count(:problem_id, distinct: true)
+      Rails.cache.fetch("model/user/#{id}/attempted_problems") do
+        Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).
+            count(:problem_id, distinct: true)
+      end
     end
   end
 
   def accepted_submissions(time = nil)
     if time
-      Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden AND created_at >= :time",
-                       user_id: id, time: time).count
+      Rails.cache.fetch("model/user/#{id}/accepted_submissions/#{time.to_i}", expires_in: 1.day) do
+        Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden AND created_at >= :time",
+                         user_id: id, time: time).count
+      end
     else
-      Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).count
+      Rails.cache.fetch("model/user/#{id}/accepted_submissions") do
+        Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).count
+      end
     end
   end
 
   def attempted_submissions(time = nil)
     if time
-      Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden AND created_at >= :time",
-                       user_id: id, time: time).count
+      Rails.cache.fetch("model/user/#{id}/attempted_submissions/#{time.to_i}", expires_in: 1.day) do
+        Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden AND created_at >= :time",
+                         user_id: id, time: time).count
+      end
     else
-      Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).count
+      Rails.cache.fetch("model/user/#{id}/attempted_submissions") do
+        Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).count
+      end
     end
-
   end
 
   def accepted_problem_ids
-    Submission.select('DISTINCT(problem_id)').
-        where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).
-        order('problem_id ASC').map(&:problem_id)
+    Rails.cache.fetch("model/user/#{id}/accepted_problem_ids") do
+      Submission.select('DISTINCT(problem_id)').
+          where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).
+          order('problem_id ASC').map(&:problem_id)
+    end
   end
 
   def attempted_problem_ids
-    Submission.select('DISTINCT(problem_id)').
-        where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).
-        order('problem_id ASC').map(&:problem_id)
+    Rails.cache.fetch("model/user/#{id}/attempted_problem_ids") do
+      Submission.select('DISTINCT(problem_id)').
+          where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).
+          order('problem_id ASC').map(&:problem_id)
+    end
+  end
+
+  def clear_statistics_cache
+    time = Time.now.beginning_of_day
+
+    Rails.cache.delete "model/user/#{id}/accepted_problems/#{time.to_i}"
+    Rails.cache.delete "model/user/#{id}/accepted_problems"
+
+    Rails.cache.delete "model/user/#{id}/attempted_problems/#{time.to_i}"
+    Rails.cache.delete "model/user/#{id}/attempted_problems"
+
+    Rails.cache.delete "model/user/#{id}/accepted_submissions/#{time.to_i}"
+    Rails.cache.delete "model/user/#{id}/accepted_submissions"
+
+    Rails.cache.delete "model/user/#{id}/attempted_submissions/#{time.to_i}"
+    Rails.cache.delete "model/user/#{id}/attempted_submissions"
+
+    Rails.cache.delete "model/user/#{id}/accepted_problem_ids"
+    Rails.cache.delete "model/user/#{id}/attempted_problem_ids"
   end
 
   def self.get_user_rank(accepted_problems, user_id)

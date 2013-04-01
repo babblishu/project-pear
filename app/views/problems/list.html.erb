@@ -30,7 +30,8 @@
   </tr>
   </thead>
   <tbody>
-  <% @problems.each do |problem| %>
+  <% @ids.each do |id| %>
+    <% problem = Problem.find_by_id id %>
     <tr>
       <% if @current_user %>
         <% if admin? %>
@@ -42,9 +43,11 @@
             <td></td>
           <% end %>
         <% else %>
-          <% if @accepted_ids.include? problem.id %>
+          <% accepted_ids = @current_user.accepted_problem_ids %>
+          <% attempted_ids = @current_user.attempted_problem_ids %>
+          <% if accepted_ids.include? problem.id %>
             <td style="color: limegreen;" class="icon"><i class="iconic-check"></i></td>
-          <% elsif @attempted_ids.include? problem.id %>
+          <% elsif attempted_ids.include? problem.id %>
             <td style="color: lightcoral;" class="icon"><i class="iconic-x"></i></td>
           <% else %>
             <td></td>
@@ -56,9 +59,11 @@
       <td class="center"><%= problem.id %></td>
       <td class="title"><%= link_to problem.title, problems_show_path(problem.id), target: '_blank' %></td>
       <td><%= problem.source %></td>
-      <td class="center"><%= problem_accepted_submissions_link problem.accepted_submissions, problem.id %></td>
-      <td class="center"><%= problem_attempted_submissions_link problem.attempted_submissions, problem.id %></td>
-      <td class="center"><%= ratio_str problem.accepted_submissions, problem.attempted_submissions %></td>
+      <% accepted_submissions = problem.accepted_submissions %>
+      <% attempted_submissions = problem.attempted_submissions %>
+      <td class="center"><%= problem_accepted_submissions_link accepted_submissions, problem.id %></td>
+      <td class="center"><%= problem_attempted_submissions_link attempted_submissions, problem.id %></td>
+      <td class="center"><%= ratio_str accepted_submissions, attempted_submissions %></td>
     </tr>
   <% end %>
   </tbody>
@@ -79,12 +84,12 @@
 <% end %>
 
 <% if admin? %>
-  <%= render 'problems/new_dialog' %>
+  <% cache(action_suffix: 'new_dialog') do %>
+    <%= render 'problems/new_dialog' %>
+  <% end %>
 <% end %>
 
-<% if Tag.count > 0 %>
-  <%= render 'problems/filter_dialog' %>
-<% end %>
+<%= render 'problems/filter_dialog' %>
 
 <div id="toolbar" class="hidden">
   <ul class="nav pull-right">
@@ -93,10 +98,8 @@
         <a id="new-problem-button" href="#new-problem-dialog" data-toggle="modal" style="outline: none;"><%= t '.add_problem' %></a>
       </li>
     <% end %>
-    <% if Tag.count > 0 %>
-      <li>
-        <a id="filter-button" href="#filter-dialog" data-toggle="modal" style="outline: none;"><%= t '.filter' %></a>
-      </li>
-    <% end %>
+    <li>
+      <a id="filter-button" href="#filter-dialog" data-toggle="modal" style="outline: none;"><%= t '.filter' %></a>
+    </li>
   </ul>
 </div>
