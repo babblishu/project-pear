@@ -130,6 +130,24 @@ class Problem < ActiveRecord::Base
     end
   end
 
+  def self.accepted_submissions(id)
+    res = $redis.get("model/problem/#{id}/accepted_submissions")
+    unless res
+      res = Submission.where("problem_id = :problem_id AND score = 100 AND status = 'judged' AND NOT hidden", problem_id: id).count
+      $redis.set("model/problem/#{id}/accepted_submissions", res)
+    end
+    res.to_i
+  end
+
+  def self.attempted_submissions(id)
+    res = $redis.get("model/problem/#{id}/attempted_submissions")
+    unless res
+      res = Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).count
+      $redis.set("model/problem/#{id}/attempted_submissions", res)
+    end
+    res.to_i
+  end
+
   def clear_statistics_cache
     Rails.cache.delete "model/problem/#{id}/accepted_submissions"
     Rails.cache.delete "model/problem/#{id}/attempted_submissions"
@@ -174,6 +192,54 @@ class Problem < ActiveRecord::Base
   end
 
   def self.list_for_role(role, tags, page, page_size)
+    if tags.empty?
+      list = Rails.cache.fetch("model/problem/list/#{role}") do
+        connection.execute(sanitize_sql_array([
+            %q{
+               SELECT id, title, source, status
+               FROM problems
+               WHERE status IN (:set)
+               ORDER BY id
+            },
+            set: status_set_for_role(role),
+        ])).map do |row|
+          OpenStruct.new(
+              id: row['id'].to_i,
+              title: row['title'],
+              source: row['source'],
+              status: row['status']
+          )
+        end
+      end
+      list = list[(page - 1) * page_size, page_size]
+      list = [] unless list
+    else
+      list = connection.execute(sanitize_sql_array([
+          %q{
+             SELECT x.id, x.title, x.source, x.status
+             FROM problems AS x
+             INNER JOIN (
+                 SELECT problem_id
+                 FROM problems_tags
+                 WHERE tag_id IN (:tag_ids)
+                 GROUP BY problem_id
+                 HAVING COUNT(*) = :tags_size
+             ) AS y ON y.problem_id = x.id
+             WHERE x.status IN (:set)
+             ORDER BY x.id
+             OFFSET :offset LIMIT :limit
+          },
+          set: status_set_for_role(role), tag_ids: tags, tags_size: tags.size,
+          offset: (page - 1) * page_size, limit: page_size
+      ])).map do |row|
+        OpenStruct.new(
+            id: row['id'].to_i,
+            title: row['title'],
+            source: row['source'],
+            status: row['status']
+        )
+      end
+    end
     if tags.empty?
       list = Rails.cache.fetch("model/problem/list/#{role}") do
         Problem.select('id').where('status IN (:set)', set: status_set_for_role(role)).order('id').map(&:id)

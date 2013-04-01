@@ -30,8 +30,11 @@
   </tr>
   </thead>
   <tbody>
-  <% @ids.each do |id| %>
-    <% problem = Problem.find_by_id id %>
+  <% if @current_user && !admin? %>
+    <% accepted_ids = @current_user.accepted_problem_ids %>
+    <% attempted_ids = @current_user.attempted_problem_ids %>
+  <% end %>
+  <% @problems.each do |problem| %>
     <tr>
       <% if @current_user %>
         <% if admin? %>
@@ -43,8 +46,6 @@
             <td></td>
           <% end %>
         <% else %>
-          <% accepted_ids = @current_user.accepted_problem_ids %>
-          <% attempted_ids = @current_user.attempted_problem_ids %>
           <% if accepted_ids.include? problem.id %>
             <td style="color: limegreen;" class="icon"><i class="iconic-check"></i></td>
           <% elsif attempted_ids.include? problem.id %>
@@ -59,8 +60,8 @@
       <td class="center"><%= problem.id %></td>
       <td class="title"><%= link_to problem.title, problems_show_path(problem.id), target: '_blank' %></td>
       <td><%= problem.source %></td>
-      <% accepted_submissions = problem.accepted_submissions %>
-      <% attempted_submissions = problem.attempted_submissions %>
+      <% accepted_submissions = 0 || Problem.accepted_submissions(problem.id) %>
+      <% attempted_submissions = 0 || Problem.attempted_submissions(problem.id) %>
       <td class="center"><%= problem_accepted_submissions_link accepted_submissions, problem.id %></td>
       <td class="center"><%= problem_attempted_submissions_link attempted_submissions, problem.id %></td>
       <td class="center"><%= ratio_str accepted_submissions, attempted_submissions %></td>

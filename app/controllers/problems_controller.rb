@@ -42,7 +42,7 @@ class ProblemsController < ApplicationController
       @page = 1
     end
 
-    @ids = Problem.list_for_role role, tag_ids, @page, page_size
+    @problems = Problem.list_for_role role, tag_ids, @page, page_size
     if tag_ids.empty?
       cookies[:page_no] = { value: @page.to_s, expires: 1.year.from_now, path: '/problems/list' }
     end
