@@ -1,55 +1,21 @@
-require 'cgi'
-
-class ProblemMarkdownHTMLRender < Redcarpet::Render::HTML
-  def block_code(code, language)
-    code = CGI::escapeHTML code
-    if APP_CONFIG.program_languages.keys.map(&:to_s).include? language
-      "<pre class=\"prettyprint lang-#{language}\">\n#{code.gsub(/\t/, '    ')}</pre>"
-    else
-      "<pre>\n#{code.gsub(/\t/, '    ')}</pre>"
-    end
-  end
-end
-
 class ProblemsController < ApplicationController
   before_filter :require_admin, only: [ :create, :update, :edit, :upload_test_data, :rejudge ]
+  before_filter :check_view_privilege, only: [ :status ]
+  caches_action :status, layout: false
+  cache_sweeper :problem_sweeper
 
   def show
-    @problem = Problem.includes(:tags, :content).find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless @problem
-
-    begin
-      check_view_privilege @current_user, @problem
-    rescue AppExceptions::NoPrivilegeError
-      return render 'problems/no_privilege'
-    end
-    @tags = @problem.tags.map(&:name).join(APP_CONFIG.tags_input_separate_char)
-    @enable_latex = @problem.content.enable_latex
-    @markdown = Redcarpet::Markdown.new(
-        ProblemMarkdownHTMLRender,
-        no_intra_emphasis: true,
-        fenced_code_blocks: true,
-        lax_spacing: true,
-        superscript: !@enable_latex
-    )
-    @title = @problem.title
-    @problem_active = true
+    @problem = Problem.find_by_id! params[:problem_id]
+    render 'problems/no_privilege' unless @problem.has_view_privilege(@current_user)
   end
 
   def status
-    @problem = Problem.find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless @problem
-
-    check_view_privilege @current_user, @problem
-
-    @page = (params[:page] || '1').to_i
+    @problem = Problem.find_by_id! params[:problem_id]
+    @page = params[:page].to_i
     @page_size = APP_CONFIG.page_size[:problem_status_list]
     @total_page = calc_total_page Problem.status_list_count(@problem), @page_size
     validate_page_number @page, @total_page
-
     @status_list = Problem.status_list @problem, @page, @page_size
-    @problem_active = true
-    @title = t('problems.status.status_id', id: @problem.id)
   end
 
   def list
@@ -61,6 +27,7 @@ class ProblemsController < ApplicationController
         @tag_hash["tag_#{tag.id}"] = '1'
       end
     end
+    raise AppExceptions::InvalidOperation if tag_ids.size > 5
 
     page_size = APP_CONFIG.page_size[:problems_list]
     role = @current_user ? @current_user.role : 'normal_user'
@@ -75,16 +42,14 @@ class ProblemsController < ApplicationController
       @page = 1
     end
 
-    if @current_user && @current_user.role == 'admin'
-      @problem = Problem.new flash[:problem] || {}
-      @problem_content = ProblemContent.new flash[:@problem_content] || {}
+    if role == 'admin'
+      @problem = Problem.new
+      @problem_content = ProblemContent.new
     end
 
     @problems = Problem.list_for_role role, tag_ids, @page, page_size
     @accepted_ids = @current_user.accepted_problem_ids if @current_user
     @attempted_ids = @current_user.attempted_problem_ids if @current_user
-    @problem_active = true
-    @title = t 'problems.list.problems_list'
     if tag_ids.empty?
       cookies[:page_no] = { value: @page.to_s, expires: 1.year.from_now, path: '/problems/list' }
     end
@@ -101,23 +66,12 @@ class ProblemsController < ApplicationController
   end
 
   def edit
-    @problem = Problem.includes(:tags, :content).find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless @problem
-
+    @problem = Problem.find_by_id! params[:problem_id]
     @tags = @problem.tags.map(&:name).join(APP_CONFIG.tags_input_separate_char)
-    @tags = flash[:tags] || @tags
-
-    @problem.attributes = flash[:problem] if flash[:problem]
-    @problem.content.attributes = flash[:problem_content] if flash[:problem_content]
-
-    @title = t 'problems.edit.edit_problem', id: @problem.id
-    @problem_active = true
   end
 
   def update
-    problem = Problem.includes(:content).find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless problem
-
+    problem = Problem.includes.find_by_id! params[:problem_id]
     problem.attributes = params[:problem]
     problem.content.attributes = params[:problem_content]
 
@@ -163,7 +117,6 @@ class ProblemsController < ApplicationController
     if @config[:errors]
       return redirect_to problems_show_path(@problem.id), notice: @config[:errors]
     end
-    @problem_active = true
   end
 
   def download_test_data
@@ -180,7 +133,7 @@ class ProblemsController < ApplicationController
     problem = Problem.find_by_id params[:problem_id]
     raise AppExceptions::InvalidProblemId unless problem
     raise AppExceptions::NoTestDataError unless problem.test_data_timestamp
-    Submission.lock(true).update_all("status = 'waiting', time_used = null, memory_used = null, score = null, result = null",
+    Submission.lock(true).update_all("status = 'waiting', time_used = NULL, memory_used = NULL, score = NULL",
                                      ['problem_id = :problem_id', problem_id: problem.id])
     redirect_to :back, notice: t('problems.rejudge.success')
   end
@@ -195,13 +148,8 @@ class ProblemsController < ApplicationController
   end
 
   private
-  def check_view_privilege(user, problem)
-    role = user ? user.role : 'normal_user'
-    if problem.status == 'hidden' && role != 'admin'
-      raise AppExceptions::NoPrivilegeError
-    end
-    if problem.status == 'advanced' && role == 'normal_user'
-      raise AppExceptions::NoPrivilegeError
-    end
+  def check_view_privilege
+    problem = Problem.find_by_id! params[:problem_id]
+    raise AppExceptions::NoPrivilegeError unless problem.has_view_privilege(@current_user)
   end
 end

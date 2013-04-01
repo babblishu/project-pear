@@ -1,11 +1,14 @@
 class Submission < ActiveRecord::Base
+  acts_as_cached version: 1, expires_in: 1.week
+
   belongs_to :user
   belongs_to :problem
+
+  has_one :detail, class_name: 'SubmissionDetail', autosave: true
 
   attr_accessible :remote_ip
   attr_accessible :user
   attr_accessible :problem
-  attr_accessible :program
   attr_accessible :code_length
   attr_accessible :code_size
   attr_accessible :language
@@ -14,14 +17,13 @@ class Submission < ActiveRecord::Base
   attr_accessible :status
   attr_accessible :time_used
   attr_accessible :memory_used
-  attr_accessible :result
   attr_accessible :share
   attr_accessible :hidden
+  attr_accessible :detail
 
   validates_associated :user
   validates_associated :problem
 
-  validates :program, presence: true
   validates :language, presence: true
   validates :platform, presence: true
   validates :code_size, inclusion: { in: 0..APP_CONFIG.program_size_limit }
@@ -40,7 +42,7 @@ class Submission < ActiveRecord::Base
     params = {}
     unless filter[:handle].empty?
       str << 'user_id = :user_id'
-      params[:user_id] = User.find_by_handle(filter[:handle]).id
+      params[:user_id] = User.fetch_by_uniq_key(filter[:handle], :handle).id
     end
     unless filter[:problem_id].empty?
       str << 'problem_id = :problem_id'

@@ -6,6 +6,8 @@ require 'fileutils'
 include JudgeConfig
 
 class Problem < ActiveRecord::Base
+  acts_as_cached version: 1, expires_in: 1.week
+
   has_many :sample_test_datas, order: 'case_no ASC'
   has_and_belongs_to_many :tags, order: 'name ASC'
   has_one :content, class_name: 'ProblemContent', autosave: true
@@ -114,12 +116,20 @@ class Problem < ActiveRecord::Base
   end
 
   def accepted_submissions
-    Submission.where("problem_id = :problem_id AND score = 100 AND status = 'judged' AND NOT hidden", problem_id: id).
-        count
+    Rails.cache.fetch("model/problem/#{id}/accepted_submissions") do
+      Submission.where("problem_id = :problem_id AND score = 100 AND status = 'judged' AND NOT hidden", problem_id: id).count
+    end
   end
 
   def attempted_submissions
-    Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).count
+    Rails.cache.fetch("model/problem/#{id}/attempted_submissions") do
+      Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).count
+    end
+  end
+
+  def clear_counter_cache
+    Rails.cache.delete "model/problem/#{id}/accepted_submissions"
+    Rails.cache.delete "model/problem/#{id}/attempted_submissions"
   end
 
   def average_score
@@ -129,9 +139,18 @@ class Problem < ActiveRecord::Base
     res
   end
 
+  def has_view_privilege(user)
+    role = user ? user.role : 'normal_user'
+    return false if status == 'hidden' && role != 'admin'
+    return false if status == 'advanced' && role == 'normal_user'
+    true
+  end
+
   def self.count_for_role(role, tags)
     if tags.empty?
-      Problem.where('status IN (:set)', set: status_set_for_role(role)).count
+      Rails.cache.fetch("model/problem/count_for_role/#{role}") do
+        Problem.where('status IN (:set)', set: status_set_for_role(role)).count
+      end
     else
       connection.execute(sanitize_sql_array([
           %q{
@@ -222,6 +241,12 @@ class Problem < ActiveRecord::Base
       problem.attempted_submissions = attempted_submissions[problem.id] || 0
     end
     list
+  end
+
+  def self.clear_list_cache
+    Rails.cache.delete 'model/problem/count_for_role/normal_user'
+    Rails.cache.delete 'model/problem/count_for_role/advanced_user'
+    Rails.cache.delete 'model/problem/count_for_role/admin'
   end
 
   def self.status_list_count(problem)

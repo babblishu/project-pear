@@ -2,6 +2,10 @@ class GlobalController < ApplicationController
   before_filter :require_login, only: [ :captcha_verify ]
   before_filter :require_admin, only: [ :add_problem_help ]
 
+  caches_action :faq, layout: false
+  caches_action :add_problem_help, layout: false
+  caches_action :markdown_help, layout: false
+
   def home
     role = @current_user ? @current_user.role : 'normal_user'
     @discuss = Topic.list_for_role role, 1, 13
@@ -15,8 +19,6 @@ class GlobalController < ApplicationController
   end
 
   def faq
-    @faq_active = true
-    @title = t 'global.faq.title'
   end
 
   def captcha_verify
@@ -34,11 +36,9 @@ class GlobalController < ApplicationController
   end
 
   def add_problem_help
-    @title = t 'global.add_problem_help.title'
   end
 
   def markdown_help
-    @title = t 'global.markdown_help.title'
   end
 
   def ip_test

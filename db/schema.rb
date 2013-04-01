@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130311051658) do
+ActiveRecord::Schema.define(:version => 20130330075530) do
 
   create_table "messages", :force => true do |t|
     t.integer  "user_from",                                    :null => false
@@ -115,16 +115,24 @@ ActiveRecord::Schema.define(:version => 20130311051658) do
   add_index "secondary_replies", ["created_at"], :name => "index_secondary_replies_on_created_at"
   add_index "secondary_replies", ["primary_reply_id"], :name => "index_secondary_replies_on_primary_reply_id"
 
+  create_table "submission_details", :force => true do |t|
+    t.integer  "submission_id", :null => false
+    t.text     "program",       :null => false
+    t.text     "result"
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
+  end
+
+  add_index "submission_details", ["submission_id"], :name => "index_submission_details_on_submission_id"
+
   create_table "submissions", :force => true do |t|
     t.string   "remote_ip",   :limit => 30
-    t.text     "program",                                          :null => false
     t.string   "language",    :limit => 10,                        :null => false
     t.string   "platform",    :limit => 20,                        :null => false
     t.integer  "user_id",                                          :null => false
     t.integer  "problem_id",                                       :null => false
     t.integer  "score"
     t.string   "status",      :limit => 20, :default => "waiting", :null => false
-    t.text     "result"
     t.integer  "time_used"
     t.integer  "memory_used"
     t.integer  "code_size",                                        :null => false

@@ -14,6 +14,7 @@ class ApplicationController < ActionController::Base
   before_filter :inspect_message
 
   rescue_from AppExceptions::InvalidPageNumber, with: :render_404_page
+  rescue_from ActiveRecord::RecordNotFound, with: :render_404_page
   rescue_from AppExceptions::InvalidUserHandle, with: :render_404_page
   rescue_from AppExceptions::InvalidProblemId, with: :render_404_page
   rescue_from AppExceptions::InvalidSubmissionId, with: :render_404_page
@@ -29,7 +30,7 @@ class ApplicationController < ActionController::Base
   def render_404_page
     @some_wrong = true
     @title = t('global.something_wrong')
-    render 'errors/404', status: 404
+    render 'errors/404', layout: 'application', status: 404
   end
 
   private
@@ -54,8 +55,8 @@ class ApplicationController < ActionController::Base
 
   def inspect_current_user
     if session[:user_handle]
-      @current_user = User.find_by_handle session[:user_handle]
-      if @current_user
+      @current_user = User.fetch_by_uniq_key session[:user_handle], :handle
+      if @current_user && request.remote_ip != @current_user.remote_ip
         @current_user.update_attribute :remote_ip, request.remote_ip
       end
     end

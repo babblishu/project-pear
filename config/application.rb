@@ -60,5 +60,9 @@ module ProjectPear
     config.assets.version = '1.0'
 
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+
+    config.autoload_paths += %W( #{Rails.root}/path/to/sweepers )
+
+    config.cache_store = :redis_store, 'redis://localhost:6379/0', { expires_in: 1.week }
   end
 end

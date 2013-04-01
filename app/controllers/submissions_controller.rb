@@ -7,6 +7,7 @@ class SubmissionsController < ApplicationController
   skip_before_filter :inspect_login_cookie, only: [ :get_waiting, :receive_result ]
   skip_before_filter :inspect_current_user, only: [ :get_waiting, :receive_result ]
   before_filter :inspect_submit_interval, only: [ :create ]
+  cache_sweeper :submission_sweeper
 
   def result
     @submission = Submission.find_by_id params[:submission_id]
@@ -17,7 +18,7 @@ class SubmissionsController < ApplicationController
     unless @submission.share || @current_user && (@submission.user.id == @current_user.id || @current_user.role == 'admin')
       raise AppExceptions::NoPrivilegeError
     end
-    @result = JSON.parse(@submission.result, symbolize_names: true) if @submission.status == 'judged'
+    @result = JSON.parse(@submission.detail.result, symbolize_names: true) if @submission.status == 'judged'
     @submission_active = true
     @title = t('submissions.result.submission_result', id: @submission.id)
   end
@@ -57,8 +58,7 @@ class SubmissionsController < ApplicationController
           status: 'waiting',
           score: nil,
           time_used: nil,
-          memory_used: nil,
-          result: nil
+          memory_used: nil
       )
     end
     redirect_to :back, notice: t('submissions.operation.success')
@@ -119,7 +119,7 @@ class SubmissionsController < ApplicationController
         remote_ip: request.remote_ip,
         language: params[:language],
         platform: params[:platform],
-        program: program,
+        detail: SubmissionDetail.new(program: program),
         user: @current_user,
         problem: problem,
         code_length: program.lines.count,
@@ -148,7 +148,7 @@ class SubmissionsController < ApplicationController
       result[:test_data_timestamp] = Problem.select('test_data_timestamp').
           find_by_id(submission.problem_id).test_data_timestamp
       result[:language] = submission.language
-      result[:program] = submission.program
+      result[:program] = submission.detail.program
     else
       result[:no_waiting_submission] = true
     end
@@ -163,10 +163,10 @@ class SubmissionsController < ApplicationController
     end
     result = JSON.parse params[:result], symbolize_names: true
     if result[:compile_message]
-      score = 0
-      Submission.transaction do
-        submission.lock!.update_attributes result: params[:result], status: 'judged', score: score
-      end
+      submission.score = 0
+      submission.status = 'judged'
+      submission.detail.result = params[:result]
+      submission.save
       render text: 'success'
       return
     end
@@ -179,15 +179,14 @@ class SubmissionsController < ApplicationController
         memory_used = [memory_used, single_case[:memory_used]].max
       end
     end
-    Submission.transaction do
-      submission.lock!.update_attributes(
-          result: params[:result],
-          status: 'judged',
-          score: score,
-          time_used: time_used,
-          memory_used: memory_used
-      )
-    end
+    submission.detail.result = params[:result]
+    submission.attributes = {
+        status: 'judged',
+        score: score,
+        time_used: time_used,
+        memory_used: memory_used
+    }
+    submission.save
     render text: 'success'
   end
 
@@ -204,7 +203,8 @@ class SubmissionsController < ApplicationController
 
   def validate_filter(filter)
     unless filter[:handle].empty?
-      return false unless filter[:handle] =~ /\A[a-z0-9\._]{3,20}\Z/i && User.find_by_handle(filter[:handle])
+      return false unless filter[:handle] =~ /\A[a-z0-9\._]{3,20}\Z/i
+      return false unless User.fetch_by_uniq_key filter[:handle], :handle
     end
     unless filter[:problem_id].empty?
       return false unless filter[:problem_id] =~ /\A\d{4}\Z/ && Problem.find_by_id(filter[:problem_id])

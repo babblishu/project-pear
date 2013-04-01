@@ -1,6 +1,8 @@
 require 'ostruct'
 
 class Message < ActiveRecord::Base
+  acts_as_cached version: 1, expires_in: 1.week
+
   belongs_to :from, foreign_key: 'user_from', class_name: 'User'
   belongs_to :to, foreign_key: 'user_to', class_name: 'User'
 

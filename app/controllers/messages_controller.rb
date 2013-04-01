@@ -44,7 +44,7 @@ class MessagesController < ApplicationController
   end
 
   def show
-    @user = User.find_by_handle params[:handle]
+    @user = User.fetch_by_uniq_key params[:handle], :handle
     raise AppExceptions::InvalidUserHandle unless @user
     raise AppExceptions::InvalidOperation if @user.id == @current_user.id
     page_size = APP_CONFIG.page_size[:messages_show_list]
@@ -81,7 +81,7 @@ class MessagesController < ApplicationController
   end
 
   def create
-    user = User.find_by_handle params[:handle]
+    user = User.fetch_by_uniq_key params[:handle], :handle
     raise AppExceptions::InvalidUserHandle unless user
     raise AppExceptions::InvalidOperation if user.id == @current_user.id
     message = Message.new content: params[:content], from: @current_user, to: user

@@ -32,6 +32,10 @@ gem 'easy_captcha'
 
 gem 'rchardet19'
 
+gem 'redis-rails'
+
+gem "second_level_cache", "~> 1.5"
+
 # To use ActiveModel has_secure_password
 gem 'bcrypt-ruby', '~> 3.0.0'
 

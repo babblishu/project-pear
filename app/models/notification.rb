@@ -1,4 +1,6 @@
 class Notification < ActiveRecord::Base
+  acts_as_cached version: 1, expires_in: 1.week
+
   belongs_to :user
 
   attr_accessible :user

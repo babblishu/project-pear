@@ -1,3 +1,8 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.problems_list' %></div>
+  <div class="problem-active">true</div>
+</div>
+
 <% if @total_page > 1 %>
   <% from = [@page - 7, 1].max %>
   <% to = [from + 15, @total_page].min %>
@@ -80,3 +85,18 @@
 <% if Tag.count > 0 %>
   <%= render 'problems/filter_dialog' %>
 <% end %>
+
+<div id="toolbar" class="hidden">
+  <ul class="nav pull-right">
+    <% if admin? %>
+      <li>
+        <a id="new-problem-button" href="#new-problem-dialog" data-toggle="modal" style="outline: none;"><%= t '.add_problem' %></a>
+      </li>
+    <% end %>
+    <% if Tag.count > 0 %>
+      <li>
+        <a id="filter-button" href="#filter-dialog" data-toggle="modal" style="outline: none;"><%= t '.filter' %></a>
+      </li>
+    <% end %>
+  </ul>
+</div>

@@ -8,8 +8,6 @@ zh_CN:
       accepted_submissions: '通过提交数'
       attempted_submissions: '提交数'
       accepted_ratio: '通过比率'
-
-    list_toolbar:
       add_problem: '添加题目'
       filter: '筛选'
 
@@ -30,21 +28,6 @@ zh_CN:
       filter_alert: '最多选择五个标签'
       close: '关闭'
       submit: '确定'
-
-    show_toolbar:
-      submit: '提交程序'
-      other_operations: '其他操作'
-      my_submissions: '我的提交'
-      discuss: '讨论本题'
-      status: '提交情况'
-      solution: '标准解答'
-      solution_confirm: '你确定要查看解答？'
-      edit_content: '编辑题面'
-      edit_tags: '编辑标签'
-      upload_test_data: '上传测试数据'
-      download_test_data: '下载测试数据'
-      rejudge: '重测本题所有提交'
-      rejudge_confirm: '你确定执行此操作？'
 
     submit_dialog:
       submit_program: '提交程序'
@@ -84,16 +67,14 @@ zh_CN:
       memory_limit: '内存限制'
       score: '分数'
       sample_test_data: '样例'
+      back_to_problem: '返回题面'
+      reupload: '重新上传'
 
     solution_dialog:
       solution: '标准解答'
       hint: '解题思路'
       standard_program: '参考程序'
       close: '关闭'
-
-    upload_test_data_toolbar:
-      back_to_problem: '返回题面'
-      upload_test_data: '重新上传'
 
     edit:
       edit_problem: '编辑题目%{id}'
@@ -126,8 +107,6 @@ zh_CN:
       tag_too_long: '每个标签不能超过20个字符'
       program_too_long: '源程序不能超过50KB'
       leave_confirm_message: '修改尚未保存，你确定离开此页？'
-
-    edit_toolbar:
       submit: '提交'
 
     show:
@@ -143,6 +122,20 @@ zh_CN:
       sample_illustration: '样例说明'
       additional_information: '附加说明'
       source: '题目来源'
+      toolbar:
+        submit: '提交程序'
+        other_operations: '其他操作'
+        my_submissions: '我的提交'
+        discuss: '讨论本题'
+        status: '提交情况'
+        solution: '标准解答'
+        solution_confirm: '你确定要查看解答？'
+        edit_content: '编辑题面'
+        edit_tags: '编辑标签'
+        upload_test_data: '上传测试数据'
+        download_test_data: '下载测试数据'
+        rejudge: '重测本题所有提交'
+        rejudge_confirm: '你确定执行此操作？'
 
     status:
       status: '《%{title}》的提交情况'
@@ -159,8 +152,6 @@ zh_CN:
       submit_time: '提交时间'
       last_page: '上一页'
       next_page: '下一页'
-
-    status_toolbar:
       view_problem: '查看题目'
       statistics: '统计信息'
       accepted_users: '通过人数'

@@ -41,7 +41,7 @@ class DiscussController < ApplicationController
   before_filter :inspect_submit_interval, only: [ :topic, :primary_reply, :secondary_reply ]
 
   def show
-    @topic = Topic.includes(:user, :problem).find_by_id params[:topic_id]
+    @topic = Topic.find_by_id params[:topic_id]
     raise AppExceptions::InvalidTopicId unless @topic
     check_view_privilege @current_user, @topic
 
@@ -57,8 +57,8 @@ class DiscussController < ApplicationController
       offset = @page_size * (@page - 1) - 1
       limit = @page_size
     end
-    @replies = PrimaryReply.includes(:user, {:secondary_replies => :user}).
-        where('topic_id = :id', id: @topic.id).order('created_at ASC, id ASC').offset(offset).limit(limit)
+    @replies = PrimaryReply.where('topic_id = :id', id: @topic.id).order('created_at ASC, id ASC').
+        offset(offset).limit(limit)
 
     @primary_reply = PrimaryReply.new
 
@@ -110,7 +110,7 @@ class DiscussController < ApplicationController
     if params[:operation] == 'create'
       topic = Topic.new user: @current_user
     else
-      topic = Topic.includes(:user, :problem).find_by_id params[:topic_id]
+      topic = Topic.find_by_id params[:topic_id]
       raise AppExceptions::InvalidTopicId unless topic
       check_view_privilege @current_user, topic
       check_update_privilege @current_user, topic
@@ -156,13 +156,13 @@ class DiscussController < ApplicationController
 
   def primary_reply
     if params[:operation] == 'create'
-      topic = Topic.includes(:problem, :user).find_by_id params[:topic_id]
+      topic = Topic.find_by_id params[:topic_id]
       raise AppExceptions::InvalidTopicId unless topic
       raise AppExceptions::NoPrivilegeError if topic.no_reply
       check_view_privilege @current_user, topic
       primary_reply = PrimaryReply.new user: @current_user, topic: topic
     else
-      primary_reply = PrimaryReply.includes({:topic => :problem}, :user).find_by_id params[:primary_reply_id]
+      primary_reply = PrimaryReply.find_by_id params[:primary_reply_id]
       raise AppExceptions::InvalidPrimaryReplyId unless primary_reply
       raise AppExceptions::NoPrivilegeError if primary_reply.hidden
       check_view_privilege @current_user, primary_reply.topic
@@ -194,16 +194,15 @@ class DiscussController < ApplicationController
 
   def secondary_reply
     if params[:operation] == 'create'
-      primary_reply = PrimaryReply.includes(:topic => :problem).find_by_id params[:primary_reply_id]
+      primary_reply = PrimaryReply.find_by_id params[:primary_reply_id]
       raise AppExceptions::InvalidPrimaryReplyId unless primary_reply
       raise AppExceptions::NoPrivilegeError if primary_reply.topic.no_reply
       check_view_privilege @current_user, primary_reply.topic
-      reply_to = User.find_by_handle params[:reply_to]
+      reply_to = User.fetch_by_uniq_key params[:reply_to], :handle
       raise AppExceptions::InvalidUserHandle unless reply_to
       secondary_reply = SecondaryReply.new user: @current_user, primary_reply: primary_reply
     else
-      secondary_reply = SecondaryReply.includes({:primary_reply => {:topic => :problem}}, :user).
-          find_by_id params[:secondary_reply_id]
+      secondary_reply = SecondaryReply.find_by_id params[:secondary_reply_id]
       raise AppExceptions::InvalidSecondaryReplyId unless secondary_reply
       raise AppExceptions::NoPrivilegeError if secondary_reply.hidden
       check_view_privilege @current_user, secondary_reply.primary_reply.topic
@@ -227,12 +226,12 @@ class DiscussController < ApplicationController
 
   def locate
     if params[:type] == 'primary_reply'
-      primary_reply = PrimaryReply.includes(:topic).find_by_id params[:id]
+      primary_reply = PrimaryReply.find_by_id params[:id]
       raise AppExceptions::InvalidPrimaryReplyId unless primary_reply
       topic = primary_reply.topic
       suffix = "#primary_reply_#{primary_reply.id}"
     else
-      secondary_reply = SecondaryReply.includes(:primary_reply => :topic).find_by_id params[:id]
+      secondary_reply = SecondaryReply.find_by_id params[:id]
       raise AppExceptions::InvalidSecondaryReplyId unless secondary_reply
       primary_reply = secondary_reply.primary_reply
       topic = primary_reply.topic
@@ -269,13 +268,13 @@ class DiscussController < ApplicationController
 
   def admin
     if params[:primary_reply_id]
-      modal = PrimaryReply.includes(:topic).find_by_id params[:primary_reply_id]
+      modal = PrimaryReply.find_by_id params[:primary_reply_id]
       topic = modal.topic
       raise AppExceptions::InvalidPrimaryReplyId unless modal
     end
 
     if params[:secondary_reply_id]
-      modal = SecondaryReply.includes(:primary_reply => :topic).find_by_id params[:secondary_reply_id]
+      modal = SecondaryReply.find_by_id params[:secondary_reply_id]
       topic = modal.primary_reply.topic
       raise AppExceptions::InvalidSecondaryReplyId unless modal
     end

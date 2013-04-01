@@ -115,10 +115,7 @@ $.fn.containerFormHelper = (options) ->
   button.click ->
     form.submit()
 
-$ ->
-  $('#login-dropdown form').inlineFormSubmitHelper()
-
-$ ->
+$ -> # home
   container = $('.global .home')
   return unless container.length
 
@@ -143,3 +140,24 @@ $ -> # captcha_verify
   captcha_url = container.find('#captcha').prop('src')
   container.find('#captcha').click ->
     $(this).prop('src', captcha_url + '&t=' + new Date().getTime())
+
+$ ->
+  $('#login-dropdown form').inlineFormSubmitHelper()
+
+  toolbar = $('#toolbar')
+  if toolbar.length
+    toolbar.insertAfter('#main-nav')
+    toolbar.removeClass('hidden')
+
+  page_config = $('#page-config')
+  if page_config.length
+    page_title = page_config.find('.title')
+    if page_title.length
+      oj_name = $('head title').html()
+      $('head title').html(page_title.html() + ' - ' + oj_name)
+
+    navbar = $('#main-nav')
+    navbar.children('li').each ->
+      tmp = page_config.find('.' + $(this).data('name') + '-active')
+      if tmp.length && tmp.html() == 'true'
+        $(this).addClass('active')

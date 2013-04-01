@@ -1,6 +1,8 @@
 require 'ostruct'
 
 class User < ActiveRecord::Base
+  acts_as_cached version: 1, expires_in: 1.week
+
   has_secure_password
   has_attached_file :avatar, {
       styles: { large: '200x200', medium: '100x100', thumb: '75x75' },

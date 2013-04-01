@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   before_filter :inspect_submit_interval, only: [ :update, :update_password ]
 
   def login
-    user = User.find_by_handle params[:handle]
+    user = User.fetch_by_uniq_key params[:handle], :handle
     if user
       if user.authenticate(params[:password])
         if user.blocked
@@ -57,13 +57,13 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = User.includes(:information).find_by_handle params[:user_handle]
+    @user = User.fetch_by_uniq_key params[:handle], :handle
     raise AppExceptions::InvalidUserHandle unless @user
     @title = @user.handle
   end
 
   def compare
-    @user = User.includes(:information).find_by_handle params[:user_handle]
+    @user = User.fetch_by_uniq_key params[:handle], :handle
     raise AppExceptions::InvalidUserHandle unless @user
     @you_accepted = @current_user.accepted_problem_ids
     @he_accepted = @user.accepted_problem_ids
@@ -74,14 +74,14 @@ class UsersController < ApplicationController
   end
 
   def edit
-    @user = User.includes(:information).find_by_handle params[:user_handle]
+    @user = User.fetch_by_uniq_key params[:handle], :handle
     raise AppExceptions::InvalidUserHandle unless @user
     raise AppExceptions::NoPrivilegeError if @current_user.id != @user.id && @current_user.role != 'admin'
     @title = t 'users.edit.edit_profile'
   end
 
   def update
-    user = User.includes(:information).find_by_handle params[:user_handle]
+    user = User.fetch_by_uniq_key params[:handle], :handle
     raise AppExceptions::InvalidUserHandle unless user
     raise AppExceptions::NoPrivilegeError if @current_user.id != user.id && @current_user.role != 'admin'
     if params[:user]
@@ -163,7 +163,7 @@ class UsersController < ApplicationController
   end
 
   def admin
-    user = User.find_by_handle params[:user_handle]
+    user = User.fetch_by_uniq_key params[:handle], :handle
     raise AppExceptions::InvalidUserHandle unless user
     if @current_user.authenticate params[:password]
       case params[:operation]
@@ -185,7 +185,7 @@ class UsersController < ApplicationController
   def search
     if params[:ajax]
       if params[:add_advanced_users]
-        user = User.includes(:information).find_by_handle(params[:handle])
+        user = User.fetch_by_uniq_key params[:handle], :handle
         return render json: { success: false, notice: t('users.search.not_exist', handle: params[:handle]) } unless user
         return render json: { success: false, notice: t('users.search.not_normal_user', handle: user.handle)} unless user.role == 'normal_user'
         return render json: { success: false, notice: t('users.search.blocked_user', handle: user.handle)} if user.blocked
@@ -209,7 +209,7 @@ class UsersController < ApplicationController
         render json: users
       end
     else
-      user = User.find_by_handle params[:handle]
+      user = User.fetch_by_uniq_key params[:handle], :handle
       if user
         redirect_to users_show_url(user.handle)
       else
@@ -235,7 +235,7 @@ class UsersController < ApplicationController
         return render json: { success: false, notice: t('users.admin_advanced_users.have_invalid_handle') }
       end
       handles.each do |handle|
-        user = User.find_by_handle handle
+        user = User.fetch_by_uniq_key handle, :handle
         user.update_attribute :role, 'advanced_user'
         Notification.create(
             user: user,

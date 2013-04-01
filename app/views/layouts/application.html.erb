@@ -2,12 +2,12 @@
 <html>
 
 <head>
-  <title><%= page_title @title %></title>
+  <title><%= APP_CONFIG.oj_name %></title>
   <%= stylesheet_link_tag "application" %>
   <%= javascript_include_tag "application" %>
-  <% if @enable_latex %>
-    <script type="text/javascript" src="/jsMath/easy/load.js"></script>
-  <% end %>
+  <%# if @enable_latex %>
+    <!---->
+  <%# end %>
   <% if notice && !notice.empty? %>
     <script type="text/javascript">
       alert("<%= notice %>");
@@ -23,16 +23,16 @@
     <div class="container">
       <%= link_to APP_CONFIG.oj_name, root_path, class: 'brand' %>
       <div class="nav-collapse collapse">
-        <ul class="nav">
-          <li class="<%= 'active' if @discuss_active %>"><%= link_to t('.discuss'), discuss_list_path %></li>
-          <li class="<%= 'active' if @problem_active %>"><%= link_to t('.problems'), problems_list_path %></li>
-          <li class="<%= 'active' if @submission_active %>"><%= link_to t('.submissions'), submissions_list_path(choose_all: '1') %></li>
-          <li class="<%= 'active' if @rank_active %>"><%= link_to t('.rank_list'), rank_path('all') %></li>
-          <li class="<%= 'active' if @faq_active %>"><%= link_to t('.faq'), faq_path %></li>
+        <ul id="main-nav" class="nav">
+          <li data-name="discuss"><%= link_to t('.discuss'), discuss_list_path %></li>
+          <li data-name="problem"><%= link_to t('.problems'), problems_list_path %></li>
+          <li data-name="submission"><%= link_to t('.submissions'), submissions_list_path(choose_all: '1') %></li>
+          <li data-name="rank"><%= link_to t('.rank_list'), rank_path('all') %></li>
+          <li data-name="faq"><%= link_to t('.faq'), faq_path %></li>
         </ul>
-        <% if !@some_wrong && lookup_context.exists?(controller.action_name + '_toolbar', controller.controller_name, true) %>
-          <%= render controller.controller_name + '/' + controller.action_name + '_toolbar' %>
-        <% end %>
+        <%# if !@some_wrong && lookup_context.exists?(controller.action_name + '_toolbar', controller.controller_name, true) %>
+          <%# render controller.controller_name + '/' + controller.action_name + '_toolbar' %>
+        <%# end %>
         <ul class="nav pull-right">
           <% if @current_user %>
             <li class="dropdown">
