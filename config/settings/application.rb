@@ -42,8 +42,8 @@ SimpleConfig.for :application do
       problem_accepted_user_ids: 'c/',
       problem_attempted_user_ids: 'd/',
 
-      user_accepted_problems: 'e/',
-      user_attempted_problems: 'f/',
+      user_accepted_submissions: 'e/',
+      user_attempted_submissions: 'f/',
       user_accepted_problem_ids: 'g/',
       user_attempted_problem_ids: 'h/',
       user_unread_messages: 'i/',
