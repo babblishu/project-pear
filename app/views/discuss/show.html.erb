@@ -1,228 +1,273 @@
-<% if @page == 1 %>
-  <div style="margin-top: 15px;">
-    <a name="<%= "topic_#{@topic.id}" %>" style="padding-top: 55px; margin-top: -55px; display: block;"></a>
-    <div id="main-block" class="primary-block block topic">
-      <div class="pull-left left-block">
-        <div class="user-avatar"><%= user_avatar_link @topic.user, :medium %></div>
-        <div class="user-handle"><%= user_link @topic.user.handle %></div>
-      </div>
-      <div class="right-block clearfix">
-        <div class="content">
-          <h4><%= @topic.title %></h4>
-          <% if @topic.enable_markdown %>
-            <%= raw @markdown.render @topic.content %>
-          <% else %>
-            <%= simple_format h @topic.content %>
-          <% end %>
-        </div>
-        <hr>
-        <div class="pull-left information">
-          <span class="time"><%= format_datetime @topic.created_at %></span>
-        </div>
-        <div class="pull-right operations">
-          <% if @topic.program && !@topic.program.empty? %>
-            <button type="button" data-target="#owner-program-dialog" class="act" data-toggle="modal" style="outline: none;">
-              <%= t '.attachment' %>
-            </button>
-            <%= render partial: 'discuss/program_dialog', locals: {
-                    id: 'owner-program-dialog',
-                    language: @topic.language,
-                    program: @topic.program,
-                    download_path: discuss_download_code_path('topic', @topic.id)
-            } %>
-          <% end %>
-          <% if admin? || owner?(@topic) %>
-            <button type="button" id="edit-topic-button" data-target="#edit-topic-dialog" data-toggle="modal" class="act" style="outline: none;">
-              <%= t '.edit' %>
-            </button>
-            <%= render partial: 'discuss/content_edit_dialog', locals: {
-                    name: 'edit-topic',
-                    title: t('.edit_topic'),
-                    modal: @topic,
-                    submit_path: discuss_topic_path('update', topic_id: @topic.id),
-                    create_mode: false
-            } %>
-          <% end %>
-          <% if @current_user && !@topic.no_reply %>
-            <button type="button" data-target="#reply-topic-dialog" data-toggle="modal" class="act" style="outline: none;">
-              <%= t '.reply' %>
-            </button>
-          <% end %>
-        </div>
-      </div>
-      <div class="floor"><%= t '.owner' %></div>
-    </div>
+<% cache(page: @page, action_suffix: show_cache_name(@current_user)) do %>
 
+  <div id="page-config" class="hidden">
+    <div class="discuss-active">true</div>
+    <div class="title"><%= @topic.title %></div>
   </div>
-<% end %>
 
-<% @replies.each_with_index do |reply, index| %>
-  <div style="margin-top: <%= @page > 1 && index == 0 ? 15 : 25 %>px;">
+  <% if @page == 1
+       offset = 0
+       limit = @page_size - 1
+     else
+       offset = @page_size * (@page - 1) - 1
+       limit = @page_size
+     end %>
+  <% @replies = PrimaryReply.where('topic_id = :id', id: @topic.id).order('created_at ASC, id ASC').
+          offset(offset).limit(limit) %>
+  <% @markdown = new_markdown %>
 
-    <a name="<%= "primary_reply_#{reply.id}" %>" style="padding-top: 55px; margin-top: -55px; display: block;"></a>
-    <div class="primary-block block reply">
-      <div class="pull-left left-block">
-        <div class="user-avatar"><%= user_avatar_link reply.user, :medium %></div>
-        <div class="user-handle"><%= user_link reply.user.handle %></div>
-      </div>
-      <div class="right-block clearfix">
-        <div class="content">
-          <% if reply.hidden %>
-            <p style="color: grey;"><%= t '.hidden' %></p>
-          <% else %>
-            <% if reply.enable_markdown %>
-              <%= raw @markdown.render reply.content %>
+  <% if @page == 1 %>
+    <div style="margin-top: 15px;">
+      <a name="<%= "topic_#{@topic.id}" %>" style="padding-top: 55px; margin-top: -55px; display: block;"></a>
+
+      <div id="main-block" class="primary-block block topic" data-owner="<%= @topic.user.handle %>">
+        <div class="pull-left left-block">
+          <div class="user-avatar"><%= user_avatar_link @topic.user, :medium %></div>
+          <div class="user-handle"><%= user_link @topic.user.handle %></div>
+        </div>
+        <div class="right-block clearfix">
+          <div class="content">
+            <h4><%= @topic.title %></h4>
+            <% if @topic.enable_markdown %>
+              <%= raw @markdown.render @topic.content %>
             <% else %>
-              <%= simple_format h reply.content %>
+              <%= simple_format h @topic.content %>
             <% end %>
-          <% end %>
-        </div>
-        <hr>
-        <div class="pull-left information">
-          <span class="time"><%= format_datetime reply.created_at %></span>
-        </div>
-        <div class="inline-edit operations pull-right">
-          <div class="pull-right">
-            <% if !reply.hidden %>
-              <% if reply.program && !reply.program.empty? %>
-                <button type="button" data-target="#program-dialog-<%= reply.id %>" data-toggle="modal" class="act" style="outline: none;">
-                  <%= t '.attachment' %>
-                </button>
-                <%= render partial: 'discuss/program_dialog', locals: {
-                        id: "program-dialog-#{reply.id}",
-                        language: reply.language,
-                        program: reply.program,
-                        download_path: discuss_download_code_path('primary_reply', reply.id)
-                } %>
-              <% end %>
-              <% if admin? %>
-                <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
-                        data-href="<%= discuss_admin_path('hide', primary_reply_id: reply.id) %>"
-                        style="outline: none;"><%= t '.hide' %></button>
-              <% end %>
-              <% if admin? || owner?(reply) %>
-                <button type="button" id="edit-reply-<%= reply.id %>-button" data-target="#edit-reply-<%= reply.id %>-dialog"
-                        data-toggle="modal" class="act" style="outline: none;"><%= t '.edit' %></button>
-                <%= render partial: 'discuss/content_edit_dialog', locals: {
-                        name: "edit-reply-#{reply.id}",
-                        title: t('.edit_reply'),
-                        modal: reply,
-                        submit_path: discuss_primary_reply_path('update', primary_reply_id: reply.id),
-                        create_mode: false
-                } %>
-              <% end %>
-            <% elsif admin? %>
-              <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
-                      data-href="<%= discuss_admin_path('show', primary_reply_id: reply.id) %>"
-                      style="outline: none;"><%= t '.cancel_hide' %></button>
+          </div>
+          <hr>
+          <div class="pull-left information">
+            <span class="time"><%= format_datetime @topic.created_at %></span>
+          </div>
+          <div class="pull-right operations">
+            <% if @topic.program && !@topic.program.empty? %>
+              <button type="button" data-target="#owner-program-dialog" class="act" data-toggle="modal" style="outline: none;">
+                <%= t '.attachment' %>
+              </button>
+              <%= render partial: 'discuss/program_dialog', locals: {
+                      id: 'owner-program-dialog',
+                      language: @topic.language,
+                      program: @topic.program,
+                      download_path: discuss_download_code_path('topic', @topic.id)
+              } %>
+            <% end %>
+            <% if @current_user %>
+              <button type="button" id="edit-topic-button" data-target="#edit-topic-dialog" data-toggle="modal"
+                      class="act edit-button hidden" style="outline: none;">
+                <%= t '.edit' %>
+              </button>
+              <%= render partial: 'discuss/content_edit_dialog', locals: {
+                      name: 'edit-topic',
+                      title: t('.edit_topic'),
+                      modal: @topic,
+                      submit_path: discuss_topic_path('update', topic_id: @topic.id),
+                      create_mode: false
+              } %>
             <% end %>
             <% if @current_user && !@topic.no_reply %>
-              <button type="button" class="reply act" style="outline: none;"><%= t '.reply' %></button>
-              <button type="button" class="cancel-reply hidden act" style="outline: none;"><%= t '.cancel' %></button>
-              <button type="button" class="submit-reply hidden act" style="outline: none;"><%= t '.submit' %></button>
+              <button type="button" data-target="#reply-topic-dialog" data-toggle="modal" class="act" style="outline: none;">
+                <%= t '.reply' %>
+              </button>
             <% end %>
           </div>
-          <% if @current_user && !@topic.no_reply %>
-            <div class="reply-area hidden">
-              <%= form_tag discuss_secondary_reply_path('create', primary_reply_id: reply.id, reply_to: reply.user.handle), method: :post do %>
-                <textarea name="content" maxlength="<%= APP_CONFIG.secondary_reply_length_limit %>"></textarea>
-              <% end %>
-            </div>
-          <% end %>
         </div>
+        <div class="floor"><%= t '.owner' %></div>
       </div>
-      <div class="floor">
-        <% if @page == 1 %>
-          <%= t '.floor', floor: index + 1 %>
-        <% else %>
-          <%= t '.floor', floor: @page_size * (@page - 1) + index %>
-        <% end %>
-      </div>
-    </div>
 
-    <% reply.secondary_replies.each do |secondary_reply| %>
-      <div style="margin-top: 15px;">
-        <a name="<%= "secondary_reply_#{secondary_reply.id}" %>" style="padding-top: 55px; margin-top: -55px; display: block;"></a>
-        <div class="secondary-block block">
-          <div class="pull-left left-block">
-            <div class="user-avatar"><%= user_avatar_link secondary_reply.user, :thumb %></div>
-            <div class="user-handle"><%= user_link secondary_reply.user.handle %></div>
-          </div>
-          <div class="right-block clearfix">
-            <div class="content">
-              <% if secondary_reply.hidden %>
-                <p style="color: grey;"><%= t '.hidden' %></p>
+    </div>
+  <% end %>
+
+  <% @replies.each_with_index do |reply, index| %>
+    <div style="margin-top: <%= @page > 1 && index == 0 ? 15 : 25 %>px;">
+
+      <a name="<%= "primary_reply_#{reply.id}" %>" style="padding-top: 55px; margin-top: -55px; display: block;"></a>
+
+      <div class="primary-block block reply" data-owner="<%= reply.user.handle %>">
+        <div class="pull-left left-block">
+          <div class="user-avatar"><%= user_avatar_link reply.user, :medium %></div>
+          <div class="user-handle"><%= user_link reply.user.handle %></div>
+        </div>
+        <div class="right-block clearfix">
+          <div class="content">
+            <% if reply.hidden %>
+              <p style="color: grey;"><%= t '.hidden' %></p>
+            <% else %>
+              <% if reply.enable_markdown %>
+                <%= raw @markdown.render reply.content %>
               <% else %>
-                <%= simple_format h secondary_reply.content %>
+                <%= simple_format h reply.content %>
+              <% end %>
+            <% end %>
+          </div>
+          <hr>
+          <div class="pull-left information">
+            <span class="time"><%= format_datetime reply.created_at %></span>
+          </div>
+          <div class="inline-edit operations pull-right">
+            <div class="pull-right">
+              <% if !reply.hidden %>
+                <% if reply.program && !reply.program.empty? %>
+                  <button type="button" data-target="#program-dialog-<%= reply.id %>" data-toggle="modal" class="act" style="outline: none;">
+                    <%= t '.attachment' %>
+                  </button>
+                  <%= render partial: 'discuss/program_dialog', locals: {
+                          id: "program-dialog-#{reply.id}",
+                          language: reply.language,
+                          program: reply.program,
+                          download_path: discuss_download_code_path('primary_reply', reply.id)
+                  } %>
+                <% end %>
+                <% if admin? %>
+                  <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
+                          data-href="<%= discuss_admin_path('hide', primary_reply_id: reply.id) %>"
+                          style="outline: none;"><%= t '.hide' %></button>
+                <% end %>
+                <% if @current_user %>
+                  <button type="button" id="edit-reply-<%= reply.id %>-button" data-target="#edit-reply-<%= reply.id %>-dialog"
+                          data-toggle="modal" class="act edit-button hidden" style="outline: none;"><%= t '.edit' %></button>
+                  <%= render partial: 'discuss/content_edit_dialog', locals: {
+                          name: "edit-reply-#{reply.id}",
+                          title: t('.edit_reply'),
+                          modal: reply,
+                          submit_path: discuss_primary_reply_path('update', primary_reply_id: reply.id),
+                          create_mode: false
+                  } %>
+                <% end %>
+              <% elsif admin? %>
+                <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
+                        data-href="<%= discuss_admin_path('show', primary_reply_id: reply.id) %>"
+                        style="outline: none;"><%= t '.cancel_hide' %></button>
+              <% end %>
+              <% if @current_user && !@topic.no_reply %>
+                <button type="button" class="reply act" style="outline: none;"><%= t '.reply' %></button>
+                <button type="button" class="cancel-reply hidden act" style="outline: none;"><%= t '.cancel' %></button>
+                <button type="button" class="submit-reply hidden act" style="outline: none;"><%= t '.submit' %></button>
               <% end %>
             </div>
-            <hr>
-            <div class="pull-left information">
-              <span class="time"><%= format_datetime secondary_reply.created_at %></span>
-            </div>
-            <% if @current_user %>
-              <div class="inline-edit operations pull-right">
-                <div class="pull-right">
-                  <% if !secondary_reply.hidden %>
-                    <% if admin? %>
-                      <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
-                              data-href="<%= discuss_admin_path('hide', secondary_reply_id: secondary_reply.id) %>"
-                              style="outline: none;"><%= t '.hide' %></button>
-                    <% end %>
-                    <% if !secondary_reply.hidden && (admin? || owner?(secondary_reply)) %>
-                      <button type="button" class="edit act" style="outline: none;"><%= t '.edit' %></button>
-                      <button type="button" class="cancel-edit hidden act" style="outline: none;"><%= t '.cancel' %></button>
-                      <button type="button" class="submit-edit hidden act" style="outline: none;"><%= t '.submit' %></button>
-                    <% end %>
-                  <% elsif admin? %>
-                    <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
-                            data-href="<%= discuss_admin_path('show', secondary_reply_id: secondary_reply.id) %>"
-                            style="outline: none;"><%= t '.cancel_hide' %></button>
-                  <% end %>
-                  <% if !owner?(secondary_reply) && !@topic.no_reply %>
-                    <button type="button" class="reply act" style="outline: none;"><%= t '.reply' %></button>
-                    <button type="button" class="cancel-reply hidden act" style="outline: none;"><%= t '.cancel' %></button>
-                    <button type="button" class="submit-reply hidden act" style="outline: none;"><%= t '.submit' %></button>
-                  <% end %>
-                </div>
-                <% if !secondary_reply.hidden && (admin? || owner?(secondary_reply)) %>
-                  <div class="edit-area hidden">
-                    <%= form_tag discuss_secondary_reply_path('update', secondary_reply_id: secondary_reply.id), method: :post do %>
-                      <textarea name="content" maxlength="<%= APP_CONFIG.secondary_reply_length_limit %>"><%= secondary_reply.content %></textarea>
-                    <% end %>
-                  </div>
+            <% if @current_user && !@topic.no_reply %>
+              <div class="reply-area hidden">
+                <%= form_tag discuss_secondary_reply_path('create', primary_reply_id: reply.id, reply_to: reply.user.handle), method: :post do %>
+                  <textarea name="content" maxlength="<%= APP_CONFIG.secondary_reply_length_limit %>"></textarea>
                 <% end %>
-                <div class="reply-area hidden">
-                  <% if !owner?(secondary_reply) && !@topic.no_reply %>
-                    <%= form_tag discuss_secondary_reply_path('create', primary_reply_id: reply.id, reply_to: secondary_reply.user.handle), method: :post do %>
-                      <textarea name="content" maxlength="<%= APP_CONFIG.secondary_reply_length_limit %>"><%= t '.reply_to', handle: secondary_reply.user.handle %></textarea>
-                    <% end %>
-                  <% end %>
-                </div>
               </div>
             <% end %>
           </div>
         </div>
+        <div class="floor">
+          <% if @page == 1 %>
+            <%= t '.floor', floor: index + 1 %>
+          <% else %>
+            <%= t '.floor', floor: @page_size * (@page - 1) + index %>
+          <% end %>
+        </div>
       </div>
+
+      <% reply.secondary_replies.each do |secondary_reply| %>
+        <div style="margin-top: 15px;">
+          <a name="<%= "secondary_reply_#{secondary_reply.id}" %>" style="padding-top: 55px; margin-top: -55px; display: block;"></a>
+
+          <div class="secondary-block block" data-owner="<%= secondary_reply.user.handle %>">
+            <div class="pull-left left-block">
+              <div class="user-avatar"><%= user_avatar_link secondary_reply.user, :thumb %></div>
+              <div class="user-handle"><%= user_link secondary_reply.user.handle %></div>
+            </div>
+            <div class="right-block clearfix">
+              <div class="content">
+                <% if secondary_reply.hidden %>
+                  <p style="color: grey;"><%= t '.hidden' %></p>
+                <% else %>
+                  <%= simple_format h secondary_reply.content %>
+                <% end %>
+              </div>
+              <hr>
+              <div class="pull-left information">
+                <span class="time"><%= format_datetime secondary_reply.created_at %></span>
+              </div>
+              <% if @current_user %>
+                <div class="inline-edit operations pull-right">
+                  <div class="pull-right">
+                    <% if !secondary_reply.hidden %>
+                      <% if admin? %>
+                        <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
+                                data-href="<%= discuss_admin_path('hide', secondary_reply_id: secondary_reply.id) %>"
+                                style="outline: none;"><%= t '.hide' %></button>
+                      <% end %>
+                      <button type="button" class="edit act hidden edit-button" style="outline: none;"><%= t '.edit' %></button>
+                      <button type="button" class="cancel-edit hidden act" style="outline: none;"><%= t '.cancel' %></button>
+                      <button type="button" class="submit-edit hidden act" style="outline: none;"><%= t '.submit' %></button>
+                    <% elsif admin? %>
+                      <button type="button" class="button-link act" data-confirm="<%= t '.confirm' %>"
+                              data-href="<%= discuss_admin_path('show', secondary_reply_id: secondary_reply.id) %>"
+                              style="outline: none;"><%= t '.cancel_hide' %></button>
+                    <% end %>
+                    <% unless @topic.no_reply %>
+                      <button type="button" class="reply act" style="outline: none;"><%= t '.reply' %></button>
+                      <button type="button" class="cancel-reply hidden act" style="outline: none;"><%= t '.cancel' %></button>
+                      <button type="button" class="submit-reply hidden act" style="outline: none;"><%= t '.submit' %></button>
+                    <% end %>
+                  </div>
+                  <% unless secondary_reply.hidden %>
+                    <div class="edit-area hidden">
+                      <%= form_tag discuss_secondary_reply_path('update', secondary_reply_id: secondary_reply.id), method: :post do %>
+                        <textarea name="content" maxlength="<%= APP_CONFIG.secondary_reply_length_limit %>"><%= secondary_reply.content %></textarea>
+                      <% end %>
+                    </div>
+                  <% end %>
+                  <div class="reply-area hidden">
+                    <% unless @topic.no_reply %>
+                      <%= form_tag discuss_secondary_reply_path('create', primary_reply_id: reply.id, reply_to: secondary_reply.user.handle), method: :post do %>
+                        <textarea name="content" maxlength="<%= APP_CONFIG.secondary_reply_length_limit %>"><%= t '.reply_to', handle: secondary_reply.user.handle %></textarea>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <ul class="pager">
+    <% if @page > 1 %>
+      <li><%= link_to t('.last_page'), discuss_show_path(@topic.id, @page - 1) %></li>
     <% end %>
+    <% if @page < @total_page %>
+      <li><%= link_to t('.next_page'), discuss_show_path(@topic.id, @page + 1) %></li>
+    <% end %>
+  </ul>
+
+  <div id="toolbar" class="hidden">
+    <ul class="nav pull-right">
+      <% if @current_user && !@topic.no_reply %>
+        <li><a id="reply-topic-button" href="#reply-topic-dialog" data-toggle="modal" style="outline: none;">
+          <%= t '.reply' %>
+        </a></li>
+      <% end %>
+      <% if @topic.problem %>
+        <li>
+          <a style="outline: none;" target="_blank" href="<%= problems_show_path @topic.problem.id %>">
+            <%= t '.view_problem' %>
+          </a>
+        </li>
+      <% end %>
+    </ul>
   </div>
+
+  <% if @current_user && !@topic.no_reply %>
+    <%= render partial: 'discuss/content_edit_dialog', locals: {
+            name: 'reply-topic',
+            title: t('.reply_topic'),
+            modal: PrimaryReply.new,
+            submit_path: discuss_primary_reply_path('create', topic_id: @topic.id),
+            create_mode: true
+    } %>
+  <% end %>
+
 <% end %>
 
-<ul class="pager">
-  <% if @page > 1 %>
-    <li><%= link_to t('.last_page'), discuss_show_path(@topic.id, @page - 1) %></li>
-  <% end %>
-  <% if @page < @total_page %>
-    <li><%= link_to t('.next_page'), discuss_show_path(@topic.id, @page + 1) %></li>
-  <% end %>
-</ul>
-
-<% if @current_user && !@topic.no_reply %>
-  <%= render partial: 'discuss/content_edit_dialog', locals: {
-          name: 'reply-topic',
-          title: t('.reply_topic'),
-          modal: @primary_reply,
-          submit_path: discuss_primary_reply_path('create', topic_id: @topic.id),
-          create_mode: true
-  } %>
+<% if @current_user %>
+  <%= json_div_tag 'current_user', { handle: @current_user.handle, role: @current_user.role } %>
+<% else %>
+  <%= json_div_tag 'current_user', { handle: '', role: 'normal_user' } %>
 <% end %>

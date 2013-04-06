@@ -10,22 +10,14 @@ class ApplicationController < ActionController::Base
   before_filter :inspect_current_user
   before_filter :inspect_blocked_user
   before_filter :inspect_need_captcha
-  before_filter :inspect_notification
-  before_filter :inspect_message
 
-  rescue_from AppExceptions::InvalidPageNumber, with: :render_404_page
   rescue_from ActiveRecord::RecordNotFound, with: :render_404_page
-  rescue_from AppExceptions::InvalidUserHandle, with: :render_404_page
-  rescue_from AppExceptions::InvalidProblemId, with: :render_404_page
-  rescue_from AppExceptions::InvalidSubmissionId, with: :render_404_page
-  rescue_from AppExceptions::InvalidTopicId, with: :render_404_page
-  rescue_from AppExceptions::InvalidPrimaryReplyId, with: :render_404_page
-  rescue_from AppExceptions::InvalidSecondaryReplyId, with: :render_404_page
-  rescue_from AppExceptions::NoTestDataError, with: :render_invalid_operation_page
+  rescue_from AppExceptions::InvalidPageNumber, with: :render_404_page
   rescue_from AppExceptions::InvalidOperation, with: :render_invalid_operation_page
-
   rescue_from AppExceptions::RequireLoginError, with: :render_require_login_page
   rescue_from AppExceptions::NoPrivilegeError, with: :render_no_privilege_page
+
+  clear_helpers
 
   def render_404_page
     @some_wrong = true
@@ -42,7 +34,7 @@ class ApplicationController < ActionController::Base
     redirect_to root_url, notice: t('global.no_privilege')
   end
 
-  def render_invalid_operation
+  def render_invalid_operation_page
     redirect_to root_url, notice: t('global.invalid_operation')
   end
 
@@ -58,6 +50,7 @@ class ApplicationController < ActionController::Base
       @current_user = User.fetch_by_uniq_key session[:user_handle], :handle
       if @current_user && request.remote_ip != @current_user.remote_ip
         @current_user.update_attribute :remote_ip, request.remote_ip
+        expire_fragment controller: 'users', action: 'show', handle: @current_user.handle, action_suffix: 'admin'
       end
     end
   end
@@ -67,18 +60,6 @@ class ApplicationController < ActionController::Base
       @current_user = nil
       session[:user_handle] = nil
       cookies.delete :user_handle
-    end
-  end
-
-  def inspect_notification
-    if @current_user
-      @notifications_count = Notification.where('user_id = :user_id AND NOT read', user_id: @current_user.id).count
-    end
-  end
-
-  def inspect_message
-    if @current_user
-      @messages_count = Message.where('user_to = :user_id AND NOT read', user_id: @current_user.id).count
     end
   end
 
@@ -114,7 +95,7 @@ class ApplicationController < ActionController::Base
   end
 
   def calc_total_page(count, page_size)
-    [count - 1, 0].max / page_size + 1
+    (count == 0 ? 0 : count - 1) / page_size + 1
   end
 
   def validate_page_number(page, total_page)

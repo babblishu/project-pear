@@ -49,187 +49,537 @@ class User < ActiveRecord::Base
   end
 
   def rank
-    User.get_user_rank accepted_problems, id
+    User.get_rank id
   end
 
-  def accepted_problems(time = nil)
-    if time
-      Rails.cache.fetch("model/user/#{id}/accepted_problems/#{time.to_i}", expires_in: 1.day) do
-        Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden AND created_at >= :time",
-                         user_id: id, time: time).
-            count(:problem_id, distinct: true)
+  def accepted_problems(now = nil, span = 'all')
+    User.accepted_problems([id], now, span).first
+  end
+
+  def attempted_problems(now = nil, span = 'all')
+    User.attempted_problems([id], now, span).first
+  end
+
+  def accepted_submissions(now = nil, span = 'all')
+    User.accepted_submissions([id], now, span).first
+  end
+
+  def attempted_submissions(now = nil, span = 'all')
+    User.attempted_submissions([id], now, span).first
+  end
+
+  def accepted_problem_ids(now = nil, span = 'all')
+    User.accepted_problem_ids(id, now, span)
+  end
+
+  def attempted_problem_ids(now = nil, span = 'all')
+    User.attempted_problem_ids(id, now, span)
+  end
+
+  def self.get_rank(id)
+    key = APP_CONFIG.redis_namespace[:user_rank_list]
+    rebuild_rank_list(nil, 'all') unless $redis.exists(key)
+    res = $redis.zrevrank(key, id)
+    res = res.to_i + 1 if res
+    res
+  end
+
+  def self.accepted_submissions(ids, now, span)
+    return [] if ids.empty?
+    prefix = APP_CONFIG.redis_namespace[:user_accepted_submissions]
+    if span == 'all'
+      res = $redis.mget(ids.map { |id| prefix + id.to_s })
+    else
+      time, dummy = get_time_and_expire now, span
+      res = $redis.mget(ids.map { |id| prefix + id.to_s + "/#{span}/#{time.to_i}" })
+    end
+    ids.each_with_index do |id, index|
+      res[index] = (res[index] || rebuild_accepted_submissions(id, now, span)).to_i
+    end
+    res
+  end
+
+  def self.attempted_submissions(ids, now, span)
+    return [] if ids.empty?
+    prefix = APP_CONFIG.redis_namespace[:user_attempted_submissions]
+    if span == 'all'
+      res = $redis.mget(ids.map { |id| prefix + id.to_s })
+    else
+      time, dummy = get_time_and_expire now, span
+      res = $redis.mget(ids.map { |id| prefix + id.to_s + "/#{span}/#{time.to_i}" })
+    end
+    ids.each_with_index do |id, index|
+      res[index] = (res[index] || rebuild_attempted_submissions(id, now, span)).to_i
+    end
+    res
+  end
+
+  def self.accepted_problems(ids, now, span)
+    return [] if ids.empty?
+    prefix = APP_CONFIG.redis_namespace[:user_accepted_problem_ids]
+    if span == 'all'
+      res = $redis.multi do |multi|
+        ids.each { |id| multi.scard(prefix + id.to_s) }
       end
     else
-      Rails.cache.fetch("model/user/#{id}/accepted_problems") do
-        Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).
-            count(:problem_id, distinct: true)
+      time, dummy = get_time_and_expire now, span
+      res = $redis.multi do |multi|
+        ids.each { |id| multi.scard(prefix + id.to_s + "/#{span}/#{time.to_i}") }
       end
     end
-  end
-
-  def attempted_problems(time = nil)
-    if time
-      Rails.cache.fetch("model/user/#{id}/attempted_problems/#{time.to_i}", expires_in: 1.day) do
-        Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden AND NOT hidden AND created_at >= :time",
-                         user_id: id, time: time).
-            count(:problem_id, distinct: true)
-      end
-    else
-      Rails.cache.fetch("model/user/#{id}/attempted_problems") do
-        Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).
-            count(:problem_id, distinct: true)
-      end
+    ids.each_with_index do |id, index|
+      res[index] = res[index] != 0 ? res[index] - 1 : rebuild_accepted_problem_ids(id, now, span).size
     end
+    res
   end
 
-  def accepted_submissions(time = nil)
-    if time
-      Rails.cache.fetch("model/user/#{id}/accepted_submissions/#{time.to_i}", expires_in: 1.day) do
-        Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden AND created_at >= :time",
-                         user_id: id, time: time).count
+  def self.attempted_problems(ids, now, span)
+    return [] if ids.empty?
+    prefix = APP_CONFIG.redis_namespace[:user_attempted_problem_ids]
+    if span == 'all'
+      res = $redis.multi do |multi|
+        ids.each { |id| multi.scard(prefix + id.to_s) }
       end
     else
-      Rails.cache.fetch("model/user/#{id}/accepted_submissions") do
-        Submission.where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).count
+      time, dummy = get_time_and_expire now, span
+      res = $redis.multi do |multi|
+        ids.each { |id| multi.scard(prefix + id.to_s + "/#{span}/#{time.to_i}") }
+      end
+    end
+    ids.each_with_index do |id, index|
+      res[index] = res[index] != 0 ? res[index] - 1 : rebuild_attempted_problem_ids(id, now, span).size
+    end
+    res
+  end
+
+  def self.accepted_problem_ids(id, now, span)
+    key = APP_CONFIG.redis_namespace[:user_accepted_problem_ids] + id.to_s
+    unless span == 'all'
+      time, dummy = get_time_and_expire now, span
+      key = key + "/#{span}/#{time.to_i}"
+    end
+    rebuild_accepted_problem_ids(id, now, span) unless $redis.exists(key)
+    res = $redis.smembers(key).map(&:to_i)
+    res.delete(-1)
+    res
+  end
+
+  def self.attempted_problem_ids(id, now, span)
+    key = APP_CONFIG.redis_namespace[:user_attempted_problem_ids] + id.to_s
+    unless span == 'all'
+      time, dummy = get_time_and_expire now, span
+      key = key + "/#{span}/#{time.to_i}"
+    end
+    rebuild_attempted_problem_ids(id, now, span) unless $redis.exists(key)
+    res = $redis.smembers(key).map(&:to_i)
+    res.delete(-1)
+    res
+  end
+
+  def self.new_accepted_submission(user_id, problem_id, submit_time)
+    %w{all year month week day}.each do |span|
+      key1 = APP_CONFIG.redis_namespace[:user_accepted_submissions] + user_id.to_s
+      key2 = APP_CONFIG.redis_namespace[:user_accepted_problem_ids] + user_id.to_s
+      unless span == 'all'
+        time, dummy = get_time_and_expire submit_time, span
+        key1 = key1 + "/#{span}/#{time.to_i}"
+        key2 = key2 + "/#{span}/#{time.to_i}"
+      end
+
+      $redis.watch(key1)
+      if $redis.exists(key1)
+        unless $redis.multi { |multi| multi.incr(key1) }
+          rebuild_accepted_submissions(user_id, submit_time, span)
+        end
+      else
+        $redis.unwatch
+        rebuild_accepted_submissions(user_id, submit_time, span)
+      end
+
+      loop do
+        $redis.watch(key2)
+        unless $redis.exists(key2)
+          $redis.unwatch
+          rebuild_accepted_problem_ids(user_id, submit_time, span)
+          break
+        end
+        break if $redis.multi { |multi| multi.sadd(key2, problem_id) }
+      end
+
+      update_rank_list(user_id, submit_time, span)
+    end
+  end
+
+  def self.new_attempted_submission(user_id, problem_id, submit_time)
+    %w{all year month week day}.each do |span|
+      key1 = APP_CONFIG.redis_namespace[:user_attempted_submissions] + user_id.to_s
+      key2 = APP_CONFIG.redis_namespace[:user_attempted_problem_ids] + user_id.to_s
+      unless span == 'all'
+        time, dummy = get_time_and_expire submit_time, span
+        key1 = key1 + "/#{span}/#{time.to_i}"
+        key2 = key2 + "/#{span}/#{time.to_i}"
+      end
+
+      $redis.watch(key1)
+      if $redis.exists(key1)
+        unless $redis.multi { |multi| multi.incr(key1) }
+          rebuild_attempted_submissions(user_id, submit_time, span)
+        end
+      else
+        $redis.unwatch
+        rebuild_attempted_submissions(user_id, submit_time, span)
+      end
+
+      loop do
+        $redis.watch(key2)
+        unless $redis.exists(key2)
+          $redis.unwatch
+          rebuild_attempted_problem_ids(user_id, submit_time, span)
+          break
+        end
+        break if $redis.multi { |multi| multi.sadd(key2, problem_id) }
       end
     end
   end
 
-  def attempted_submissions(time = nil)
-    if time
-      Rails.cache.fetch("model/user/#{id}/attempted_submissions/#{time.to_i}", expires_in: 1.day) do
-        Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden AND created_at >= :time",
-                         user_id: id, time: time).count
+  def self.get_handles(ids)
+    return [] if ids.empty?
+    key = APP_CONFIG.redis_namespace[:user_handles_hash]
+    $redis.hmget(key, ids)
+  end
+
+  def self.refresh_stat_cache(id)
+    now = Time.now
+    %w{all year month week day}.each do |span|
+      rebuild_accepted_submissions id, now, span
+      rebuild_attempted_submissions id, now, span
+      rebuild_accepted_problem_ids id, now, span
+      rebuild_attempted_problem_ids id, now, span
+      update_rank_list id, now, span
+    end
+  end
+
+  def self.clear_stat_cache(ids)
+    now = Time.now
+    $redis.multi do |multi|
+      %w{all year month week day}.each do |span|
+        ids.each do |id|
+          suffix = ''
+          unless span == 'all'
+            time, dummy = get_time_and_expire(now, span)
+            suffix = "/#{span}/#{time.to_i}"
+          end
+          multi.del(APP_CONFIG.redis_namespace[:user_accepted_submissions] + id.to_s + suffix)
+          multi.del(APP_CONFIG.redis_namespace[:user_attempted_submissions] + id.to_s + suffix)
+          multi.del(APP_CONFIG.redis_namespace[:user_accepted_problem_ids] + id.to_s + suffix)
+          multi.del(APP_CONFIG.redis_namespace[:user_attempted_problem_ids] + id.to_s + suffix)
+        end
+        key = APP_CONFIG.redis_namespace[:user_rank_list]
+        unless span == 'all'
+          time, dummy = get_time_and_expire(now, span)
+          key = key + "#{span}/#{time.to_i}"
+        end
+        multi.del(key)
       end
-    else
-      Rails.cache.fetch("model/user/#{id}/attempted_submissions") do
-        Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).count
+    end
+  end
+
+  def self.update_rank_list(id, now, span)
+    key = APP_CONFIG.redis_namespace[:user_rank_list]
+    unless span == 'all'
+      time, dummy = get_time_and_expire now, span
+      key = key + "#{span}/#{time.to_i}"
+    end
+    loop do
+      $redis.watch(key)
+      if $redis.sismember(APP_CONFIG.redis_namespace[:user_blocked_users], id)
+        $redis.unwatch
+        break
+      end
+      unless $redis.exists(key)
+        $redis.unwatch
+        rebuild_rank_list(now, span)
+        break
+      end
+      score = accepted_problems([id], now, span).first
+      break if $redis.multi do |multi|
+        if score > 0
+          multi.zadd(key, score, id)
+        else
+          multi.zrem(key, id)
+        end
       end
     end
   end
 
-  def accepted_problem_ids
-    Rails.cache.fetch("model/user/#{id}/accepted_problem_ids") do
-      Submission.select('DISTINCT(problem_id)').
-          where("user_id = :user_id AND score = 100 AND status = 'judged' AND NOT hidden", user_id: id).
-          order('problem_id ASC').map(&:problem_id)
-    end
+  def self.add_user(user)
+    key = APP_CONFIG.redis_namespace[:user_handles_hash]
+    $redis.hset(key, user.id, user.handle)
+    add_handle_index(:user_index, user.handle)
+    add_handle_index(:normal_user_index, user.handle)
   end
 
-  def attempted_problem_ids
-    Rails.cache.fetch("model/user/#{id}/attempted_problem_ids") do
-      Submission.select('DISTINCT(problem_id)').
-          where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).
-          order('problem_id ASC').map(&:problem_id)
+  def self.block_user(user)
+    user.update_attribute :blocked, true
+    now = Time.now
+    key = APP_CONFIG.redis_namespace[:user_blocked_users]
+    $redis.sadd(key, user.id)
+    %w{all year month week day}.each do |span|
+      key = APP_CONFIG.redis_namespace[:user_rank_list]
+      unless span == 'all'
+        time, dummy = get_time_and_expire now, span
+        key = key + "#{span}/#{time.to_i}"
+      end
+      rebuild_rank_list(now, span) unless $redis.exists(key)
+      $redis.zrem(key, user.id)
     end
+    remove_handle_index(:user_index, user.handle)
+    remove_handle_index(:normal_user_index, user.handle) if user.role == 'normal_user'
   end
 
-  def clear_statistics_cache
-    time = Time.now.beginning_of_day
-
-    Rails.cache.delete "model/user/#{id}/accepted_problems/#{time.to_i}"
-    Rails.cache.delete "model/user/#{id}/accepted_problems"
-
-    Rails.cache.delete "model/user/#{id}/attempted_problems/#{time.to_i}"
-    Rails.cache.delete "model/user/#{id}/attempted_problems"
-
-    Rails.cache.delete "model/user/#{id}/accepted_submissions/#{time.to_i}"
-    Rails.cache.delete "model/user/#{id}/accepted_submissions"
-
-    Rails.cache.delete "model/user/#{id}/attempted_submissions/#{time.to_i}"
-    Rails.cache.delete "model/user/#{id}/attempted_submissions"
-
-    Rails.cache.delete "model/user/#{id}/accepted_problem_ids"
-    Rails.cache.delete "model/user/#{id}/attempted_problem_ids"
+  def self.unblock_user(user)
+    user.update_attribute :blocked, false
+    key = APP_CONFIG.redis_namespace[:user_blocked_users]
+    $redis.srem(key, user.id)
+    refresh_stat_cache(user.id)
+    add_handle_index(:user_index, user.handle)
+    add_handle_index(:normal_user_index, user.handle) if user.role == 'normal_user'
   end
 
-  def self.get_user_rank(accepted_problems, user_id)
-    return nil if accepted_problems == 0
-    connection.execute(sanitize_sql_array([
-        %q{
-           SELECT COUNT(*)
-           FROM (
-               SELECT user_id, COUNT(DISTINCT problem_id) AS accepted_problems
-               FROM submissions
-               WHERE score = 100 AND status = 'judged' AND NOT hidden
-               GROUP BY user_id
-           ) AS x
-           WHERE x.accepted_problems > :cnt OR (x.accepted_problems = :cnt AND x.user_id <= :id)
-        },
-        cnt: accepted_problems, id: user_id
-    ])).first['count'].to_i
+  def self.rank_list_count(now, span)
+    key = APP_CONFIG.redis_namespace[:user_rank_list]
+    unless span == 'all'
+      time, dummy = get_time_and_expire now, span
+      key = key + "#{span}/#{time.to_i}"
+    end
+    rebuild_rank_list(now, span) unless $redis.exists(key)
+    $redis.zcard(key) - 1
   end
 
-  def self.rank_list(time, page, page_size)
-    list = connection.execute(sanitize_sql_array([
-        %q{
-           SELECT user_id AS id, COUNT(DISTINCT problem_id) AS accepted_problems,
-                  COUNT(problem_id) AS accepted_submissions
-           FROM submissions
-           WHERE created_at >= :time AND score = 100 AND status = 'judged' AND NOT hidden
-           GROUP BY user_id
-           ORDER BY accepted_problems DESC, user_id ASC
-           OFFSET :offset LIMIT :limit
-        },
-        time: time, offset: (page - 1) * page_size, limit: page_size + 1
-    ])).map do |row|
-      OpenStruct.new(
-        id: row['id'].to_i,
-        accepted_problems: row['accepted_problems'].to_i,
-        accepted_submissions: row['accepted_submissions'].to_i
-      )
+  def self.rank_list(now, span, page, page_size)
+    key = APP_CONFIG.redis_namespace[:user_rank_list]
+    unless span == 'all'
+      time, dummy = get_time_and_expire now, span
+      key = key + "#{span}/#{time.to_i}"
     end
-    ids = list.map { |user| user.id }
-    tmp_hash = Hash[connection.execute(sanitize_sql_array([
-        %q{
-           SELECT users.id, users.handle, t.attempted_problems, t.attempted_submissions
-           FROM users
-           INNER JOIN (
-               SELECT user_id,
-                      COUNT(DISTINCT problem_id) AS attempted_problems,
-                      COUNT(*) AS attempted_submissions
-               FROM submissions
-               WHERE created_at >= :time AND user_id IN (:ids) AND status = 'judged' AND NOT hidden
-               GROUP BY user_id
-           ) AS t ON users.id = t.user_id
-        },
-        time: time, ids: ids
-    ])).map { |row| [ row['id'].to_i, [row['handle'], row['attempted_problems'].to_i, row['attempted_submissions'].to_i] ] }]
-    list.each do |user|
-      user.handle = tmp_hash[user.id][0]
-      user.attempted_problems = tmp_hash[user.id][1]
-      user.attempted_submissions = tmp_hash[user.id][2]
-    end
+    rebuild_rank_list(now, span) unless $redis.exists(key)
+    ids = $redis.zrevrange(key, (page - 1) * page_size, page * page_size - 1).map(&:to_i)
+    ids.pop if ids.last == -1
+    list = ids.map { |id| OpenStruct.new(id: id) }
+    get_handles(ids).each_with_index { |x, i| list[i].handle = x }
+    accepted_problems(ids, now, span).each_with_index { |x, i| list[i].accepted_problems = x }
+    attempted_problems(ids, now, span).each_with_index { |x, i| list[i].attempted_problems = x }
+    accepted_submissions(ids, now, span).each_with_index { |x, i| list[i].accepted_submissions = x }
+    attempted_submissions(ids, now, span).each_with_index { |x, i| list[i].attempted_submissions = x }
     list
   end
 
-  def self.top_users(time, limit)
-    list = connection.execute(sanitize_sql_array([
-        %q{
-           SELECT user_id AS id, COUNT(DISTINCT problem_id) AS accepted_problems
-           FROM submissions
-           WHERE created_at >= :time AND score = 100 AND status = 'judged' AND NOT hidden
-           GROUP BY user_id
-           ORDER BY accepted_problems DESC, user_id ASC
-           LIMIT :limit
-        },
-        time: time, limit: limit
-    ])).map do |row|
-      OpenStruct.new(
-          id: row['id'].to_i,
-          accepted_problems: row['accepted_problems'].to_i,
-      )
+  def self.add_handle_index(index_name, handle)
+    key = APP_CONFIG.redis_namespace[index_name.to_sym]
+    handle.length.times do |x|
+      $redis.sadd(key + handle[0..x].downcase, handle)
     end
-    ids = list.map { |user| user.id }
-    tmp_hash = Hash[connection.execute(sanitize_sql_array([
-        %q{
-           SELECT users.id, users.handle
-           FROM users
-           WHERE id IN (:ids)
-        },
-        ids: ids
-    ])).map { |row| [ row['id'].to_i, row['handle'] ] }]
-    list.each { |user| user.handle = tmp_hash[user.id] }
-    list
+  end
+
+  def self.remove_handle_index(index_name, handle)
+    key = APP_CONFIG.redis_namespace[index_name.to_sym]
+    handle.length.times do |x|
+      $redis.srem(key + handle[0..x].downcase, handle)
+    end
+  end
+
+  def self.init_handles_hash
+    key = APP_CONFIG.redis_namespace[:user_handles_hash]
+    return if $redis.exists(key)
+    $redis.watch(key)
+    $redis.multi do |multi|
+      multi.del(key)
+      User.all.each { |user| multi.hset(key, user.id, user.handle) }
+    end
+  end
+
+  def self.init_blocked_users
+    key = APP_CONFIG.redis_namespace[:user_blocked_users]
+    return if $redis.exists(key)
+    $redis.watch(key)
+    $redis.multi do |multi|
+      multi.del(key)
+      User.where('blocked').each { |user| multi.sadd(key, user.id) }
+    end
+  end
+
+  def self.init_user_index
+    User.where('NOT blocked').each { |user| add_handle_index :user_index, user.handle }
+  end
+
+  def self.init_normal_user_index
+    User.where("NOT blocked AND role = 'normal_user'").each { |user| add_handle_index :normal_user_index, user.handle }
+  end
+
+  private
+  def self.get_time_and_expire(now, span)
+    case span
+      when 'year'
+        time = now.beginning_of_year
+        expire = now.end_of_year
+      when 'month'
+        time = now.beginning_of_month
+        expire = now.end_of_month
+      when 'week'
+        time = now.beginning_of_week
+        expire = now.end_of_week
+      when 'day'
+        time = now.beginning_of_day
+        expire = now.end_of_day
+    end
+    tmp = Time.now + 600
+    expire = tmp if expire < tmp
+    [time, expire]
+  end
+
+  def self.rebuild_accepted_submissions(id, now, span)
+    key = APP_CONFIG.redis_namespace[:user_accepted_submissions] + id.to_s
+    loop do
+      if span == 'all'
+        $redis.watch(key)
+        value = Submission.where('user_id = :user_id AND score = 100 AND NOT hidden', user_id: id).count
+        return value if $redis.multi { |multi| multi.set(key, value) }
+      else
+        time, expire = get_time_and_expire now, span
+        key = key + "/#{span}/#{time.to_i}"
+        $redis.watch(key)
+        value = Submission.where('user_id = :user_id AND score = 100 AND NOT hidden AND created_at >= :time', user_id: id, time: time).count
+        return value if $redis.multi do |multi|
+          multi.set(key, value)
+          multi.expireat(key, expire.to_i)
+        end
+      end
+    end
+  end
+
+  def self.rebuild_attempted_submissions(id, now, span)
+    key = APP_CONFIG.redis_namespace[:user_attempted_submissions] + id.to_s
+    loop do
+      if span == 'all'
+        $redis.watch(key)
+        value = Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).count
+        return value if $redis.multi { |multi| multi.set(key, value) }
+      else
+        time, expire = get_time_and_expire now, span
+        key = key + "/#{span}/#{time.to_i}"
+        $redis.watch(key)
+        value = Submission.where("user_id = :user_id AND status = 'judged' AND NOT hidden AND created_at >= :time", user_id: id, time: time).count
+        return value if $redis.multi do |multi|
+          multi.set(key, value)
+          multi.expireat(key, expire.to_i)
+        end
+      end
+    end
+  end
+
+  def self.rebuild_accepted_problem_ids(id, now, span)
+    key = APP_CONFIG.redis_namespace[:user_accepted_problem_ids] + id.to_s
+    loop do
+      if span == 'all'
+        $redis.watch(key)
+        value = Submission.select('DISTINCT(problem_id)').
+            where('user_id = :user_id AND score = 100 AND NOT hidden', user_id: id).map(&:problem_id)
+        return value if $redis.multi do |multi|
+          multi.del(key)
+          multi.sadd(key, -1)
+          multi.sadd(key, value) unless value.empty?
+        end
+      else
+        time, expire = get_time_and_expire now, span
+        key = key + "/#{span}/#{time.to_i}"
+        $redis.watch(key)
+        value = Submission.select('DISTINCT(problem_id)').
+            where('user_id = :user_id AND score = 100 AND NOT hidden AND created_at >= :time', user_id: id, time: time).
+            map(&:problem_id)
+        return value if $redis.multi do |multi|
+          multi.del(key)
+          multi.sadd(key, -1)
+          multi.sadd(key, value) unless value.empty?
+          multi.expireat(key, expire.to_i)
+        end
+      end
+    end
+  end
+
+  def self.rebuild_attempted_problem_ids(id, now, span)
+    key = APP_CONFIG.redis_namespace[:user_attempted_problem_ids] + id.to_s
+    loop do
+      if span == 'all'
+        $redis.watch(key)
+        value = Submission.select('DISTINCT(problem_id)').
+            where("user_id = :user_id AND status = 'judged' AND NOT hidden", user_id: id).map(&:problem_id)
+        return value if $redis.multi do |multi|
+          multi.del(key)
+          multi.sadd(key, -1)
+          multi.sadd(key, value) unless value.empty?
+        end
+      else
+        time, expire = get_time_and_expire now, span
+        key = key + "/#{span}/#{time.to_i}"
+        $redis.watch(key)
+        value = Submission.select('DISTINCT(problem_id)').
+            where("user_id = :user_id AND status = 'judged' AND NOT hidden AND created_at >= :time", user_id: id, time: time).
+            map(&:problem_id)
+        return value if $redis.multi do |multi|
+          multi.del(key)
+          multi.sadd(key, -1)
+          multi.sadd(key, value) unless value.empty?
+          multi.expireat(key, expire.to_i)
+        end
+      end
+    end
+  end
+
+  def self.rebuild_rank_list(now, span)
+    key = APP_CONFIG.redis_namespace[:user_rank_list]
+    loop do
+      if span == 'all'
+        $redis.watch(key)
+        return if $redis.multi do |multi|
+          multi.del(key)
+          multi.zadd(key, -1, -1)
+          connection.execute(
+              %q{
+                 SELECT y.*
+                 FROM users AS x
+                 INNER JOIN (
+                     SELECT user_id AS id, COUNT(DISTINCT problem_id) AS accepted_problems
+                     FROM submissions
+                     WHERE score = 100 AND NOT hidden
+                     GROUP BY user_id
+                 ) AS y ON x.id = y.id
+                 WHERE NOT blocked
+              },
+          ).each { |row| multi.zadd(key, row['accepted_problems'], row['id']) }
+        end
+      else
+        time, expire = get_time_and_expire now, span
+        key = key + "#{span}/#{time.to_i}"
+        return if $redis.multi do |multi|
+          multi.del(key)
+          multi.zadd(key, -1, -1)
+          connection.execute(sanitize_sql_array([
+              %q{
+                 SELECT y.*
+                 FROM users AS x
+                 INNER JOIN (
+                     SELECT user_id AS id, COUNT(DISTINCT problem_id) AS accepted_problems
+                     FROM submissions
+                     WHERE score = 100 AND NOT hidden AND created_at >= :time
+                     GROUP BY user_id
+                 ) AS y ON x.id = y.id
+                 WHERE NOT blocked
+              },
+              time: time
+          ])).each { |row| multi.zadd(key, row['accepted_problems'], row['id']) }
+          multi.expireat(key, expire.to_i)
+        end
+      end
+    end
   end
 end

@@ -14,9 +14,6 @@ zh_CN:
       discuss_problem: '题目%{id}的讨论列表'
       top: '置顶'
 
-    list_toolbar:
-      new_topic: '发布新话题'
-
     content_edit_dialog:
       basic: '基本'
       title: '主题'
@@ -67,9 +64,6 @@ zh_CN:
       last_page: '上一页'
       next_page: '下一页'
       top: '置顶'
-
-    show_toolbar:
-      reply: '回复本话题'
       view_problem: '查看题目'
 
     program_dialog:

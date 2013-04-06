@@ -1,3 +1,7 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.edit_profile' %></div>
+</div>
+
 <%= form_for @user, url: users_update_path(@user.handle), method: :post, html: {class: 'form-horizontal'} do |f| %>
   <fieldset>
     <legend><strong><%= t '.edit_profile' %></strong></legend>

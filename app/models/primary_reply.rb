@@ -17,4 +17,11 @@ class PrimaryReply < ActiveRecord::Base
   validates :content, presence: true
   validates :content, length: { maximum: APP_CONFIG.primary_reply_length_limit }
   validates :language, inclusion: { in: APP_CONFIG.program_languages.keys.map(&:to_s) << nil }
+
+  def page_no
+    page_size = APP_CONFIG.page_size[:topic_replies_list]
+    count = PrimaryReply.where('topic_id = :topic_id AND (created_at < :time OR created_at = :time AND id <= :id)',
+                               topic_id: topic_id, time: created_at, id: id).count
+    count < page_size ? 1 : count / page_size + 1
+  end
 end

@@ -1,3 +1,7 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.title', handle: @user.handle %></div>
+</div>
+
 <div class="row-fluid">
   <div class="span3">
     <div id="user-block">
@@ -48,4 +52,11 @@
   </div>
 <% end %>
 
-<%= render 'messages/reply_dialog' %>
+<% unless @user.blocked %>
+  <div id="toolbar" class="hidden">
+    <ul class="nav pull-right">
+      <li><a href="#reply-dialog" data-toggle="modal" style="outline: none;"><%= t '.reply' %></a></li>
+    </ul>
+  </div>
+  <%= render 'messages/reply_dialog' %>
+<% end %>

@@ -37,6 +37,9 @@ $ -> # show
         if response.errors
           program_submit_form.setErrorState(response.errors)
         program_submit_dialog.find('button[type=submit]').enableButton()
+    error: (jqXHR, textStatusm, errorThrown) ->
+      alert(textStatusm) if textStatusm != null
+      program_submit_dialog.find('button[type=submit]').enableButton()
 
   program_submit_dialog.find('button[type=submit]').click ->
     program_submit_form.submit()
@@ -46,6 +49,25 @@ $ -> # list
   return unless container.length
 
   problems_list = container.find('#problems-list')
+
+  problems_stat = $.parseJSONDiv('problems_stat')
+  for item in problems_stat
+    row = problems_list.find('tr[data-id=' + item[0] + ']')
+    row.find('td.accepted-submissions a').html(item[1])
+    row.find('td.attempted-submissions a').html(item[2])
+    row.find('td.ratio').html($.ratioStr(item[1], item[2]))
+
+  if container.find('div.json[data-name="accepted_problem_ids"]').length
+    accepted_problem_ids = $.parseJSONDiv('accepted_problem_ids')
+    attempted_problem_ids = $.parseJSONDiv('attempted_problem_ids')
+    for item in accepted_problem_ids
+      row = problems_list.find('tr[data-id=' + item + ']')
+      row.find('td.icon .accepted').removeClass('hidden')
+    for item in attempted_problem_ids
+      row = problems_list.find('tr[data-id=' + item + ']')
+      if row.find('td.icon .accepted').hasClass('hidden')
+        row.find('td.icon .unaccepted').removeClass('hidden')
+
   problems_list.find('th.sortable').click (event) ->
     event.stopPropagation()
     thIndex = $(this).index()
@@ -76,6 +98,10 @@ $ -> # list
 
   filter_dialog = container.find('#filter-dialog')
   filter_form = container.find('#filter-form')
+  tag_ids = $.parseJSONDiv('tag_ids')
+  for id in tag_ids
+    filter_form.find('input[type=checkbox][name="tag_' + id + '"]').prop('checked', true)
+
   filter_dialog.find("button[data-toggle='tooltip']").tooltip()
   filter_dialog.find('button.submit').click ->
     if filter_form.find('input:checked').length > 5
@@ -113,6 +139,9 @@ $ -> # edit
         tmp.find('input[type=text], textarea').first().focusEnd()
         $('#submit-button').enableButton()
         need_confirm = true
+    error: (jqXHR, textStatusm, errorThrown) ->
+      alert(textStatusm) if textStatusm != null
+      $('#submit-button').enableButton()
 
 $ -> # upload_test_data
   container = $('.problems .upload_test_data')

@@ -7,6 +7,21 @@ module ApplicationHelper
     end
   end
 
+  def json_div_tag(var_name, data)
+    ActiveSupport.escape_html_entities_in_json = true
+    res = '<div class="json hidden" data-name="' + var_name + '">' + data.to_json + '</div>'
+    ActiveSupport.escape_html_entities_in_json = false
+    res.html_safe
+  end
+
+  def cache_if(condition, name)
+    if condition
+      cache(name) { yield }
+    else
+      yield
+    end
+  end
+
   def user_link(user_handle)
     link_to user_handle, users_show_path(user_handle), target: '_blank'
   end
@@ -40,11 +55,8 @@ module ApplicationHelper
   end
 
   def ratio_str(a, b)
-    if b == 0
-      '0%'
-    else
-      (a * 100 / b).to_s + '%'
-    end
+    b = 1 if b == 0
+    (a * 100 / b).to_s + '%'
   end
 
   def format_datetime(time)

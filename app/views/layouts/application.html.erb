@@ -5,9 +5,6 @@
   <title><%= APP_CONFIG.oj_name %></title>
   <%= stylesheet_link_tag "application" %>
   <%= javascript_include_tag "application" %>
-  <%# if @enable_latex %>
-    <!---->
-  <%# end %>
   <% if notice && !notice.empty? %>
     <script type="text/javascript">
       alert("<%= notice %>");
@@ -30,16 +27,15 @@
           <li data-name="rank"><%= link_to t('.rank_list'), rank_path('all') %></li>
           <li data-name="faq"><%= link_to t('.faq'), faq_path %></li>
         </ul>
-        <%# if !@some_wrong && lookup_context.exists?(controller.action_name + '_toolbar', controller.controller_name, true) %>
-          <%# render controller.controller_name + '/' + controller.action_name + '_toolbar' %>
-        <%# end %>
         <ul class="nav pull-right">
           <% if @current_user %>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
                 <i class="iconic-user"></i>
-                <% if (@notifications_count || 0) > 0 || (@messages_count || 0) > 0 %>
-                  <%= @current_user.handle + " (#{(@notifications_count || 0) + (@messages_count || 0)})" %>
+                <% notifications_count = Notification.unread_notifications @current_user.id %>
+                <% messages_count = Message.unread_messages @current_user.id %>
+                <% if notifications_count > 0 || messages_count > 0 %>
+                  <%= @current_user.handle + " (#{notifications_count + messages_count})" %>
                 <% else %>
                   <%= @current_user.handle %>
                 <% end %>
@@ -47,15 +43,15 @@
               </a>
               <ul class="dropdown-menu">
                 <li>
-                  <% if (@notifications_count || 0) > 0 %>
-                    <%= link_to raw(t('.notification') + " <strong>(#{@notifications_count})</strong>"), notifications_path %>
+                  <% if notifications_count > 0 %>
+                    <%= link_to raw(t('.notification') + " <strong>(#{notifications_count})</strong>"), notifications_path %>
                   <% else %>
                     <%= link_to t('.notification'), notifications_path %>
                   <% end %>
                 </li>
                 <li>
-                  <% if (@messages_count || 0) > 0 %>
-                    <%= link_to raw(t('.message') + " <strong>(#{@messages_count})</strong>"), messages_list_path %>
+                  <% if messages_count > 0 %>
+                    <%= link_to raw(t('.message') + " <strong>(#{messages_count})</strong>"), messages_list_path %>
                   <% else %>
                     <%= link_to t('.message'), messages_list_path %>
                   <% end %>

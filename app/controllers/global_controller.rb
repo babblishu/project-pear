@@ -7,15 +7,8 @@ class GlobalController < ApplicationController
   caches_action :markdown_help, layout: false
 
   def home
-    role = @current_user ? @current_user.role : 'normal_user'
-    @discuss = Topic.list_for_role role, 1, 13
-    today = Time.now.beginning_of_day
-    @top_users = User.top_users today, 5
-    @hot_problems = Problem.hot_problems today, role, 5
-    if @current_user
-      @today_accepted_problems = @current_user.accepted_problems today
-      @today_submissions = @current_user.attempted_submissions today
-    end
+    @role = @current_user ? @current_user.role : 'normal_user'
+    @now = Time.now
   end
 
   def faq

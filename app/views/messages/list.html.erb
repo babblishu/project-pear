@@ -1,6 +1,10 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.title' %></div>
+</div>
+
 <table class="table table-hover table-bordered">
   <tbody>
-  <% @messages.each do |message| %>
+  <% Message.list(@current_user.id, @page, @page_size).each do |message| %>
   <tr class="<%= 'warning' unless message.read %>">
     <td class="user">
       <div class="user-avatar"><div><%= user_avatar_link message.user, :thumb %></div></div>

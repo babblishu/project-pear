@@ -1,6 +1,4 @@
 class UserInformation < ActiveRecord::Base
-  acts_as_cached version: 1, expires_in: 1.week
-
   attr_accessible :real_name
   attr_accessible :school
   attr_accessible :email

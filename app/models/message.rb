@@ -1,8 +1,6 @@
 require 'ostruct'
 
 class Message < ActiveRecord::Base
-  acts_as_cached version: 1, expires_in: 1.week
-
   belongs_to :from, foreign_key: 'user_from', class_name: 'User'
   belongs_to :to, foreign_key: 'user_to', class_name: 'User'
 
@@ -79,6 +77,20 @@ class Message < ActiveRecord::Base
       @messages = Message.where('(user_from = :user_id_1 AND user_to = :user_id_2 OR user_from = :user_id_2 AND user_to = :user_id_1) AND NOT id IN (:excepted_ids)',
                                 user_id_1: user_id_1, user_id_2: user_id_2, excepted_ids: excepted_ids).
           order('created_at DESC').limit(page_size + 1).to_a
+    end
+  end
+
+  def self.unread_messages(user_id)
+    key = APP_CONFIG.redis_namespace[:user_unread_messages] + user_id.to_s
+    ($redis.get(key) || rebuild_unread_messages(user_id)).to_i
+  end
+
+  def self.rebuild_unread_messages(user_id)
+    key = APP_CONFIG.redis_namespace[:user_unread_messages] + user_id.to_s
+    loop do
+      $redis.watch(key)
+      value = Message.where('user_to = :user_id AND NOT read', user_id: user_id).count
+      return value if $redis.multi { |multi| $redis.set(key, value) }
     end
   end
 end

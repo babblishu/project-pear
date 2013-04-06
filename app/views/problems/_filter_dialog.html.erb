@@ -12,7 +12,7 @@
             <% tags.each_with_index do |tag, index| %>
               <% if index % 4 == x %>
                 <label class="checkbox">
-                  <%= check_box_tag tag.id.to_s, '1', @tag_hash["tag_#{tag.id}"], name: "tag_#{tag.id}", id: "tag_#{tag.id}" %>
+                  <%= check_box_tag tag.id.to_s, '1', false, name: "tag_#{tag.id}" %>
                   <span><%= tag.name %></span>
                 </label>
               <% end %>

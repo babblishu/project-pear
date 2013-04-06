@@ -1,6 +1,4 @@
 class Submission < ActiveRecord::Base
-  acts_as_cached version: 1, expires_in: 1.week
-
   belongs_to :user
   belongs_to :problem
 
@@ -32,8 +30,21 @@ class Submission < ActiveRecord::Base
 
   def self.filtered_list(filter, page, page_size)
     tmp = where_str_and_params filter
-    Submission.includes(:user).where(tmp[0], tmp[1]).order('id DESC').
-        offset((page - 1) * page_size).limit(page_size + 1).to_a
+    Submission.where(tmp[0], tmp[1]).order('id DESC').
+        offset((page - 1) * page_size).limit(page_size + 1)
+  end
+
+  def self.init_waiting_submissions
+    APP_CONFIG.judge_platforms.keys.each do |platform|
+      key = APP_CONFIG.redis_namespace[:waiting_submissions] + platform.to_s
+      next if $redis.exists(key)
+      $redis.watch(key)
+      $redis.multi do |multi|
+        multi.del(key)
+        ids = Submission.where("platform = :platform AND status = 'waiting'", platform: platform).order('id ASC').map(&:id)
+        ids.each { |id| multi.rpush(key, id) }
+      end
+    end
   end
 
   private

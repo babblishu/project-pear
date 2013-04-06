@@ -28,8 +28,6 @@ zh_CN:
         last_reply: '最后回复'
         replies: '回复数'
         top: '置顶'
-
-    home_toolbar:
       add_advanced_users: '添加高级用户'
 
     captcha_verify:

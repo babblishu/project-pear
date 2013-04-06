@@ -1,6 +1,6 @@
 SimpleConfig.for :application do
   set :oj_name, 'My OJ'
-  set :version_str, 'alpha1'
+  set :version_str, 'alpha2'
   set :judge_client_password, 'password'
   
   set :page_size, {
@@ -35,4 +35,28 @@ SimpleConfig.for :application do
   set :minimum_submit_interval, 10.seconds
   set :need_captcha_bound, 100
   set :reset_submit_counter_interval, 7.hours
+
+  set :redis_namespace, {
+      problem_accepted_submissions: 'a/',
+      problem_attempted_submissions: 'b/',
+      problem_accepted_user_ids: 'c/',
+      problem_attempted_user_ids: 'd/',
+
+      user_accepted_problems: 'e/',
+      user_attempted_problems: 'f/',
+      user_accepted_problem_ids: 'g/',
+      user_attempted_problem_ids: 'h/',
+      user_unread_messages: 'i/',
+      user_unread_notifications: 'j/',
+
+      user_rank_list: 'k/',
+      user_handles_hash: 'l/',
+      user_blocked_users: 'm/',
+      problem_titles_hash: 'n/',
+      problem_hot_problems: 'o/',
+      user_index: 'p/',
+      normal_user_index: 'q/',
+
+      waiting_submissions: 'r/'
+  }
 end

@@ -21,4 +21,12 @@ module ProblemsHelper
         superscript: !enable_latex
     )
   end
+
+  def list_cache_name(role, tag_ids)
+    if tag_ids.empty?
+      role
+    else
+      "#{role}:#{tag_ids.first}"
+    end
+  end
 end

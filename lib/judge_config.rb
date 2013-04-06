@@ -85,7 +85,7 @@ module JudgeConfig
           raise InvalidConfig unless value.is_a? Array
           value.each do |x|
             raise InvalidConfig unless x.is_a? Fixnum
-            raise InvalidConfig unless 0 <= x && x <= 100
+            raise InvalidConfig unless 0 < x && x <= 100
           end
           raise InvalidConfig unless value.reduce(:+) == 100
 
@@ -199,6 +199,7 @@ module JudgeConfig
       raise InvalidConfig unless tmp_config[:score].size == test_data.size
       config[:score] = tmp_config[:score]
     else
+      raise InvalidConfig if test_data.size > 100
       x = 100 / test_data.size
       y = 100 % test_data.size
       config[:score] = [x] * (test_data.size - y) + [x + 1] * y

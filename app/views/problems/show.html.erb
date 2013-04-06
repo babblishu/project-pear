@@ -152,11 +152,15 @@
 <% end %>
 
 <% if @current_user && @problem.test_data_timestamp %>
-  <%= render 'problems/submit_dialog' %>
+  <% cache(action_suffix: 'submit_dialog') do %>
+    <%= render 'problems/submit_dialog' %>
+  <% end %>
 <% end %>
 
 <% if admin? %>
-  <%= render 'problems/upload_test_data_dialog' %>
+  <% cache(action_suffix: 'upload_test_data_dialog') do %>
+    <%= render 'problems/upload_test_data_dialog' %>
+  <% end %>
 <% end %>
 
 <div id="toolbar" class="hidden">

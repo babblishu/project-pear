@@ -1,3 +1,7 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.title' %></div>
+</div>
+
 <form id="add-users" action="<%= users_search_path %>" method="get">
   <input name="handle" id="user-search" type="text" class="search-query" maxlength="15"
          placeholder="<%= t '.search_user' %>" data-search-url="<%= users_search_path %>">
