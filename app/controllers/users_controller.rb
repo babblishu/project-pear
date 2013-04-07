@@ -149,9 +149,11 @@ class UsersController < ApplicationController
         when 'block_user'
           raise AppExceptions::InvalidOperation if user.blocked
           User.block_user(user)
+          clear_home_cache
         when 'unblock_user'
           raise AppExceptions::InvalidOperation unless user.blocked
           User.unblock_user(user)
+          clear_home_cache
         else
       end
       response = { success: true, notice: t('users.admin.success') }
@@ -235,5 +237,11 @@ class UsersController < ApplicationController
       next if name && tmp != name
       expire_fragment action: 'show', handle: user.handle, action_suffix: tmp
     end
+  end
+
+  def clear_home_cache
+    now = Time.now
+    expire_fragment controller: 'global', action: 'home', action_suffix: "top_users/#{now.beginning_of_day.to_i}"
+    expire_fragment controller: 'global', action: 'home', action_suffix: "hot_problems/#{now.beginning_of_day.to_i}"
   end
 end
