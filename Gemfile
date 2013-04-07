@@ -33,6 +33,9 @@ gem 'easy_captcha'
 gem 'rchardet19'
 
 gem 'redis'
+unless /cygwin|mswin|mingw/ =~ RUBY_PLATFORM
+  gem 'hiredis'
+end
 gem 'redis-rails'
 
 gem 'second_level_cache'

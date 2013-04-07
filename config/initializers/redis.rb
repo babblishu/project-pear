@@ -1,4 +1,8 @@
-$redis = Redis.new db: 1
+if Rails.env.development?
+  $redis = Redis.new db: 1
+else
+  $redis = Redis.new db: 1, driver: :hiredis
+end
 
 User.init_handles_hash
 User.init_blocked_users
