@@ -269,6 +269,7 @@ class Problem < ActiveRecord::Base
     rebuild_attempted_submissions id
     rebuild_accepted_user_ids id
     rebuild_attempted_user_ids id
+    rebuild_hot_problems Time.now
   end
 
   def has_view_privilege(user)
