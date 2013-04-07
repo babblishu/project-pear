@@ -2,16 +2,12 @@ class GlobalController < ApplicationController
   before_filter :require_login, only: [ :captcha_verify ]
   before_filter :require_admin, only: [ :add_problem_help, :headers_test ]
 
-  #caches_action :faq, layout: false
   caches_action :add_problem_help, layout: false
   caches_action :markdown_help, layout: false
 
   def home
     @role = @current_user ? @current_user.role : 'normal_user'
     @now = Time.now
-  end
-
-  def faq
   end
 
   def captcha_verify
