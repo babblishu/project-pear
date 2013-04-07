@@ -25,6 +25,18 @@ class CustomLogger < Rails::Rack::Logger
   end
 end
 
+module ActionController
+  module Caching
+    module Fragments
+      def fragment_cache_key(key)
+        tmp = key.clone
+        tmp[:only_path] = true
+        ActiveSupport::Cache.expand_cache_key(key.is_a?(Hash) ? url_for(tmp).split("://").last : key, :views)
+      end
+    end
+  end
+end
+
 module ProjectPear
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
