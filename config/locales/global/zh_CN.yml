@@ -2,7 +2,7 @@ zh_CN:
   global:
     home:
       title: '欢迎来到%{name}'
-      subtitle: '本OJ还在测试阶段'
+      subtitle: '本OJ还在测试阶段，使用前请先阅读FAQ'
       user_block:
         rank: '总排名'
         accepted_problems: '通过题数'
@@ -28,8 +28,6 @@ zh_CN:
         last_reply: '最后回复'
         replies: '回复数'
         top: '置顶'
-
-    home_toolbar:
       add_advanced_users: '添加高级用户'
 
     captcha_verify:
@@ -43,6 +41,3 @@ zh_CN:
 
     add_problem_help:
       title: '如何添加题目'
-
-    faq:
-      title: 'FAQ'

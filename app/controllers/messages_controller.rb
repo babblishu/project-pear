@@ -13,6 +13,7 @@ class MessagesController < ApplicationController
         notifications.pop
       end
       Notification.update_all 'read = TRUE', ['id IN (?)', notifications.map(&:id) ]
+      Notification.rebuild_unread_notifications @current_user.id
       response[:data] = notifications.map do |notification|
         {
             id: notification.id,
@@ -30,22 +31,19 @@ class MessagesController < ApplicationController
         @notifications.pop
       end
       Notification.update_all 'read = TRUE', ['id IN (?)', @notifications.map(&:id) ]
-      @title = t 'messages.notifications.title'
+      Notification.rebuild_unread_notifications @current_user.id
     end
   end
 
   def list
     @page = (params[:page] || '1').to_i
-    page_size = APP_CONFIG.page_size[:messages_list]
-    @total_page = calc_total_page Message.list_count(@current_user.id), page_size
+    @page_size = APP_CONFIG.page_size[:messages_list]
+    @total_page = calc_total_page Message.list_count(@current_user.id), @page_size
     validate_page_number @page, @total_page
-    @messages = Message.list(@current_user.id, @page, page_size)
-    @title = t 'messages.list.title'
   end
 
   def show
-    @user = User.find_by_handle params[:handle]
-    raise AppExceptions::InvalidUserHandle unless @user
+    @user = User.fetch_by_uniq_key! params[:handle], :handle
     raise AppExceptions::InvalidOperation if @user.id == @current_user.id
     page_size = APP_CONFIG.page_size[:messages_show_list]
     if params[:ajax]
@@ -66,6 +64,7 @@ class MessagesController < ApplicationController
         }
       end
       Message.update_all 'read = TRUE', ['id IN (?) AND user_to = ?', messages.map(&:id), @current_user.id ]
+      Message.rebuild_unread_messages @current_user.id
       render json: response
     else
       @messages = Message.detail_list(@user.id, @current_user.id, [], page_size)
@@ -76,17 +75,18 @@ class MessagesController < ApplicationController
         @messages.pop
       end
       Message.update_all 'read = TRUE', ['id IN (?) AND user_to = ?', @messages.map(&:id), @current_user.id ]
-      @title = t 'messages.show.title', handle: @user.handle
+      Message.rebuild_unread_messages @current_user.id
     end
   end
 
   def create
-    user = User.find_by_handle params[:handle]
-    raise AppExceptions::InvalidUserHandle unless user
+    user = User.fetch_by_uniq_key! params[:handle], :handle
     raise AppExceptions::InvalidOperation if user.id == @current_user.id
+    raise AppExceptions::InvalidOperation if user.blocked
     message = Message.new content: params[:content], from: @current_user, to: user
     if message.save
       update_submit_times
+      Message.rebuild_unread_messages user.id
       render json: { success: true, notice: t('messages.create.success') }
     else
       render json: { success: false, error: message.errors[:content][0] }

@@ -6,6 +6,8 @@ require 'fileutils'
 include JudgeConfig
 
 class Problem < ActiveRecord::Base
+  acts_as_cached version: 1, expires_in: 1.week
+
   has_many :sample_test_datas, order: 'case_no ASC'
   has_and_belongs_to_many :tags, order: 'name ASC'
   has_one :content, class_name: 'ProblemContent', autosave: true
@@ -87,149 +89,309 @@ class Problem < ActiveRecord::Base
   end
 
   def update_tags(tag_list)
+    return nil if tag_list.sort == tags.all.map(&:name).sort
+    Tag.clear_cache
+    res = []
     Tag.transaction do
+      connection.execute('LOCK TABLE tags')
+      tags.each { |tag| res << tag.id }
       tags.delete_all
+      exist_tags = Hash[Tag.where('name IN (:tag_list)', tag_list: tag_list).map { |tag| [tag.name, tag] }]
       tag_list.each do |name|
-        tag = Tag.lock(true).find_by_name name
-        unless tag
-          tag = Tag.create name: name
+        if exist_tags[name]
+          tags << exist_tags[name]
+          res << exist_tags[name].id
+        else
+          tags << Tag.create(name: name)
         end
-        tags << tag
       end
       save
-      Tag.lock(true).all.each do |tag|
-        tag.delete if tag.problems.size == 0
-      end
+    end
+    res
+  end
+
+  def rejudge
+    submissions = nil
+    user_ids = nil
+    Submission.transaction do
+      connection.execute('LOCK TABLE submissions')
+      submissions = Submission.where("problem_id = :problem_id AND status <> 'waiting'", problem_id: id).order('id ASC')
+      ids = submissions.map(&:id)
+      user_ids = Submission.select('DISTINCT(user_id)').where("id IN (:ids)", ids: ids).map(&:user_id)
+      Submission.update_all("status = 'waiting', time_used = NULL, memory_used = NULL, score = NULL", ['id IN (:ids)', ids: ids])
+    end
+    User.clear_stat_cache user_ids
+    Problem.refresh_stat_cache id
+    Problem.remove_hot_problems
+    submissions.each do |submission|
+      key = APP_CONFIG.redis_namespace[:waiting_submissions] + submission.platform
+      $redis.rpush(key, submission.id)
     end
   end
 
   def accepted_users
-    Submission.where("problem_id = :problem_id AND score = 100 AND status = 'judged' AND NOT hidden", problem_id: id).
-        count(:user_id, distinct: true)
+    Problem.accepted_users([id]).first
   end
 
   def attempted_users
-    Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).
-        count(:user_id, distinct: true)
+    Problem.attempted_users([id]).first
   end
 
   def accepted_submissions
-    Submission.where("problem_id = :problem_id AND score = 100 AND status = 'judged' AND NOT hidden", problem_id: id).
-        count
+    Problem.accepted_submissions([id]).first
   end
 
   def attempted_submissions
-    Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).count
+    Problem.attempted_submissions([id]).first
   end
 
   def average_score
-    res = Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).
-        average(:score)
-    res = 0 unless res
+    Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).
+        average(:score) || 0.0
+  end
+
+  def self.accepted_users(ids)
+    return [] if ids.empty?
+    prefix = APP_CONFIG.redis_namespace[:problem_accepted_user_ids]
+    res = $redis.multi do |multi|
+      ids.each { |id| multi.scard(prefix + id.to_s) }
+    end
+    ids.each_with_index do |id, index|
+      res[index] = res[index] != 0 ? res[index] - 1 : rebuild_accepted_user_ids(id).size
+    end
     res
+  end
+
+  def self.attempted_users(ids)
+    return [] if ids.empty?
+    prefix = APP_CONFIG.redis_namespace[:problem_attempted_user_ids]
+    res = $redis.multi do |multi|
+      ids.each { |id| multi.scard(prefix + id.to_s) }
+    end
+    ids.each_with_index do |id, index|
+      res[index] = res[index] != 0 ? res[index] - 1 : rebuild_attempted_user_ids(id).size
+    end
+    res
+  end
+
+  def self.accepted_submissions(ids)
+    return [] if ids.empty?
+    prefix = APP_CONFIG.redis_namespace[:problem_accepted_submissions]
+    res = $redis.mget(ids.map { |id| prefix + id.to_s })
+    ids.each_with_index do |id, index|
+      res[index] = (res[index] || rebuild_accepted_submissions(id)).to_i
+    end
+    res
+  end
+
+  def self.attempted_submissions(ids)
+    return [] if ids.empty?
+    prefix = APP_CONFIG.redis_namespace[:problem_attempted_submissions]
+    res = $redis.mget(ids.map { |id| prefix + id.to_s })
+    ids.each_with_index do |id, index|
+      res[index] = (res[index] || rebuild_attempted_submissions(id)).to_i
+    end
+    res
+  end
+
+  def self.new_accepted_submission(problem_id, user_id, submit_time)
+    key = APP_CONFIG.redis_namespace[:problem_accepted_submissions] + problem_id.to_s
+    $redis.watch(key)
+    if $redis.exists(key)
+      unless $redis.multi { |multi| multi.incr(key) }
+        rebuild_accepted_submissions(problem_id)
+      end
+    else
+      $redis.unwatch
+      rebuild_accepted_submissions(problem_id)
+    end
+
+    key = APP_CONFIG.redis_namespace[:problem_accepted_user_ids] + problem_id.to_s
+    loop do
+      $redis.watch(key)
+      unless $redis.exists(key)
+        $redis.unwatch
+        rebuild_accepted_user_ids(problem_id)
+        break
+      end
+      break if $redis.multi { |multi| multi.sadd(key, user_id) }
+    end
+  end
+
+  def self.new_attempted_submission(problem_id, user_id, submit_time)
+    key = APP_CONFIG.redis_namespace[:problem_attempted_submissions] + problem_id.to_s
+    $redis.watch(key)
+    if $redis.exists(key)
+      unless $redis.multi { |multi| multi.incr(key) }
+        rebuild_attempted_submissions(problem_id)
+      end
+    else
+      $redis.unwatch
+      rebuild_attempted_submissions(problem_id)
+    end
+
+    key = APP_CONFIG.redis_namespace[:problem_attempted_user_ids] + problem_id.to_s
+    loop do
+      $redis.watch(key)
+      unless $redis.exists(key)
+        $redis.unwatch
+        rebuild_attempted_user_ids(problem_id)
+        break
+      end
+      break if $redis.multi { |multi| multi.sadd(key, user_id) }
+    end
+
+    key = APP_CONFIG.redis_namespace[:problem_hot_problems] + "/#{submit_time.beginning_of_day.to_i}"
+    $redis.watch(key)
+    if $redis.exists(key)
+      unless $redis.multi { |multi| $redis.zincrby(key, 1, problem_id.to_s) }
+        rebuild_hot_problems(submit_time)
+      end
+    else
+      $redis.unwatch
+      rebuild_hot_problems(submit_time)
+    end
+  end
+
+  def self.get_titles(ids)
+    return [] if ids.empty?
+    key = APP_CONFIG.redis_namespace[:problem_titles_hash]
+    $redis.hmget(key, ids)
+  end
+
+  def self.add_title(id, title)
+    key = APP_CONFIG.redis_namespace[:problem_titles_hash]
+    $redis.hset(key, id, title)
+  end
+
+  def self.refresh_stat_cache(id)
+    rebuild_accepted_submissions id
+    rebuild_attempted_submissions id
+    rebuild_accepted_user_ids id
+    rebuild_attempted_user_ids id
+  end
+
+  def has_view_privilege(user)
+    role = user ? user.role : 'normal_user'
+    return false if status == 'hidden' && role != 'admin'
+    return false if status == 'advanced' && role == 'normal_user'
+    true
   end
 
   def self.count_for_role(role, tags)
     if tags.empty?
-      Problem.where('status IN (:set)', set: status_set_for_role(role)).count
+      Rails.cache.fetch("model/problem/count_for_role/#{role}") do
+        Problem.where('status IN (:set)', set: status_set_for_role(role)).count
+      end
     else
-      connection.execute(sanitize_sql_array([
-          %q{
-             SELECT COUNT(*)
-             FROM problems AS x
-             INNER JOIN (
-                 SELECT problem_id
-                 FROM problems_tags
-                 WHERE tag_id IN (:tag_ids)
-                 GROUP BY problem_id
-                 HAVING COUNT(*) = :tags_size
-             ) AS y ON y.problem_id = x.id
-             WHERE x.status IN (:set)
-          },
-          set: status_set_for_role(role), tag_ids: tags, tags_size: tags.size
-      ])).first['count'].to_i
+      fetch_if(tags.size == 1, "model/problem/count_for_role/#{role}/#{tags.first}") do
+        connection.execute(sanitize_sql_array([
+            %q{
+               SELECT COUNT(*)
+               FROM problems AS x
+               INNER JOIN (
+                   SELECT problem_id
+                   FROM problems_tags
+                   WHERE tag_id IN (:tag_ids)
+                   GROUP BY problem_id
+                   HAVING COUNT(*) = :tags_size
+               ) AS y ON y.problem_id = x.id
+               WHERE x.status IN (:set)
+            },
+            set: status_set_for_role(role), tag_ids: tags, tags_size: tags.size
+        ])).first['count'].to_i
+      end
     end
   end
 
   def self.list_for_role(role, tags, page, page_size)
     if tags.empty?
-      list = connection.execute(sanitize_sql_array([
-          %q{
-             SELECT id, title, source, status
-             FROM problems
-             WHERE status IN (:set)
-             ORDER BY id
-             OFFSET :offset LIMIT :limit
-          },
-          set: status_set_for_role(role),
-          offset: (page - 1) * page_size, limit: page_size
-      ])).map do |row|
-        OpenStruct.new(
-            id: row['id'].to_i,
-            title: row['title'],
-            source: row['source'],
-            status: row['status']
-        )
+      list = Rails.cache.fetch("model/problem/list/#{role}/#{page}") do
+        connection.execute(sanitize_sql_array([
+            %q{
+               SELECT id, title, source, status
+               FROM problems
+               WHERE status IN (:set)
+               ORDER BY id
+               OFFSET :offset LIMIT :limit
+            },
+            set: status_set_for_role(role),
+            offset: (page - 1) * page_size, limit: page_size
+        ])).map do |row|
+          OpenStruct.new(
+              id: row['id'].to_i,
+              title: row['title'],
+              source: row['source'],
+              status: row['status']
+          )
+        end
       end
     else
-      list = connection.execute(sanitize_sql_array([
-          %q{
-             SELECT x.id, x.title, x.source, x.status
-             FROM problems AS x
-             INNER JOIN (
-                 SELECT problem_id
-                 FROM problems_tags
-                 WHERE tag_id IN (:tag_ids)
-                 GROUP BY problem_id
-                 HAVING COUNT(*) = :tags_size
-             ) AS y ON y.problem_id = x.id
-             WHERE x.status IN (:set)
-             ORDER BY x.id
-             OFFSET :offset LIMIT :limit
-          },
-          set: status_set_for_role(role), tag_ids: tags, tags_size: tags.size,
-          offset: (page - 1) * page_size, limit: page_size
-      ])).map do |row|
-        OpenStruct.new(
-            id: row['id'].to_i,
-            title: row['title'],
-            source: row['source'],
-            status: row['status']
-        )
+      list = fetch_if(tags.size == 1, "model/problem/list/#{role}/#{page}/#{tags.first}") do
+        connection.execute(sanitize_sql_array([
+            %q{
+               SELECT x.id, x.title, x.source, x.status
+               FROM problems AS x
+               INNER JOIN (
+                   SELECT problem_id
+                   FROM problems_tags
+                   WHERE tag_id IN (:tag_ids)
+                   GROUP BY problem_id
+                   HAVING COUNT(*) = :tags_size
+               ) AS y ON y.problem_id = x.id
+               WHERE x.status IN (:set)
+               ORDER BY x.id
+               OFFSET :offset LIMIT :limit
+            },
+            set: status_set_for_role(role), tag_ids: tags, tags_size: tags.size,
+            offset: (page - 1) * page_size, limit: page_size
+        ])).map do |row|
+          OpenStruct.new(
+              id: row['id'].to_i,
+              title: row['title'],
+              source: row['source'],
+              status: row['status']
+          )
+        end
       end
     end
-    ids = list.map { |x| x.id }
-    accepted_submissions = Hash[connection.execute(sanitize_sql_array([
-        %q{
-           SELECT problem_id AS id, COUNT(*) AS count
-           FROM submissions
-           WHERE problem_id IN (:ids) AND score = 100 AND status = 'judged' AND NOT hidden
-           GROUP BY problem_id
-        },
-        ids: ids
-    ])).map { |row| [row['id'].to_i, row['count'].to_i] }]
-    attempted_submissions = Hash[connection.execute(sanitize_sql_array([
-        %q{
-           SELECT problem_id AS id, COUNT(*) AS count
-           FROM submissions
-           WHERE problem_id IN (:ids) AND status = 'judged' AND NOT hidden
-           GROUP BY problem_id
-        },
-        ids: ids
-    ])).map { |row| [row['id'].to_i, row['count'].to_i] }]
-    list.each do |problem|
-      problem.accepted_submissions = accepted_submissions[problem.id] || 0
-      problem.attempted_submissions = attempted_submissions[problem.id] || 0
+    ids = list.map(&:id)
+    accepted_submissions_list = accepted_submissions ids
+    attempted_submissions_list = attempted_submissions ids
+    list.each_with_index do |problem, index|
+      problem.accepted_submissions = accepted_submissions_list[index]
+      problem.attempted_submissions = attempted_submissions_list[index]
     end
     list
   end
 
-  def self.status_list_count(problem)
-    Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: problem.id).
+  def self.clear_list_cache(tag_id = nil)
+    page_size = APP_CONFIG.page_size[:problems_list]
+    %w{normal_user advanced_user admin}.each do |role|
+      if tag_id
+        Rails.cache.delete "model/problem/count_for_role/#{role}/#{tag_id}"
+        total_page = (count_for_role(role, [tag_id]) - 1) / page_size + 1
+        total_page = 1 if total_page == 0
+        1.upto(total_page) do |page|
+          Rails.cache.delete "model/problem/list/#{role}/#{page}/#{tag_id}"
+        end
+      else
+        Rails.cache.delete "model/problem/count_for_role/#{role}"
+        total_page = (count_for_role(role, []) - 1) / page_size + 1
+        total_page = 1 if total_page == 0
+        1.upto(total_page) do |page|
+          Rails.cache.delete "model/problem/list/#{role}/#{page}"
+        end
+      end
+    end
+  end
+
+  def self.status_list_count(problem_id)
+    Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: problem_id).
         count(:user_id, distinct: true)
   end
 
-  def self.status_list(problem, page, page_size)
+  def self.status_list(problem_id, page, page_size)
     connection.execute(sanitize_sql_array([
         %q{
            SELECT y.id, y.share, z.handle, x.count, y.score, y.time_used, y.memory_used,
@@ -244,16 +406,16 @@ class Problem < ActiveRecord::Base
                SELECT id, share, user_id, score, time_used, memory_used, language, platform, code_length, code_size,
                       created_at, RANK() OVER (
                                       PARTITION BY user_id
-                                      ORDER BY score DESC, time_used ASC, memory_used ASC, code_size ASC
+                                      ORDER BY score DESC, time_used ASC, memory_used ASC, code_size ASC, id ASC
                                   ) AS pos
                FROM submissions
                WHERE problem_id = :problem_id AND status = 'judged' AND NOT hidden
            ) AS y ON y.pos = 1 AND y.user_id = x.user_id
            INNER JOIN users AS z ON z.id = x.user_id
-           ORDER BY y.score DESC, y.time_used ASC, y.memory_used ASC, y.code_size ASC
+           ORDER BY y.score DESC, y.time_used ASC, y.memory_used ASC, y.code_size ASC, y.id ASC
            OFFSET :offset LIMIT :limit
         },
-        problem_id: problem.id, offset: (page - 1) * page_size, limit: page_size
+        problem_id: problem_id, offset: (page - 1) * page_size, limit: page_size
     ])).map do |row|
       OpenStruct.new(
           submission_id: row['id'].to_i,
@@ -272,29 +434,30 @@ class Problem < ActiveRecord::Base
     end
   end
 
-  def self.hot_problems(time, role, limit)
-    connection.execute(sanitize_sql_array([
-        %q{
-           SELECT x.id, x.title, y.submissions
-           FROM problems AS x
-           INNER JOIN (
-               SELECT problem_id, COUNT(*) AS submissions
-               FROM submissions
-               WHERE created_at >= :time AND status = 'judged' AND NOT hidden
-               GROUP BY problem_id
-           ) AS y ON x.id = y.problem_id
-           WHERE x.status IN (:set)
-           ORDER BY y.submissions DESC
-           LIMIT :limit
-        },
-        set: status_set_for_role(role), time: time, limit: limit
-    ])).map do |row|
-      OpenStruct.new(
-          id: row['id'].to_i,
-          title: row['title'],
-          submissions: row['submissions'].to_i,
-      )
+  def self.init_titles_hash
+    key = APP_CONFIG.redis_namespace[:problem_titles_hash]
+    return if $redis.exists(key)
+    $redis.watch(key)
+    $redis.multi do |multi|
+      multi.del(key)
+      Problem.all.each { |problem| multi.hset(key, problem.id, problem.title) }
     end
+  end
+
+  def self.hot_problems(now, limit)
+    key = APP_CONFIG.redis_namespace[:problem_hot_problems] + "#{now.beginning_of_day.to_i}"
+    rebuild_hot_problems(now) unless $redis.exists(key)
+    list = $redis.zrevrange(key, 0, limit - 1, with_scores: true).map do |entry|
+      OpenStruct.new(id: entry[0].to_i, submissions: entry[1].to_i)
+    end
+    list.pop if list.last.id == -1
+    get_titles(list.map(&:id)).each_with_index { |title, index| list[index].title = title }
+    list
+  end
+
+  def self.remove_hot_problems
+    key = APP_CONFIG.redis_namespace[:problem_hot_problems] + "#{Time.now.beginning_of_day.to_i}"
+    $redis.del(key)
   end
 
   private
@@ -303,5 +466,85 @@ class Problem < ActiveRecord::Base
     set << 'advanced' if role == 'advanced_user' || role == 'admin'
     set << 'hidden' if role == 'admin'
     set
+  end
+
+  def self.fetch_if(condition, name)
+    if condition
+      Rails.cache.fetch(name) { yield }
+    else
+      yield
+    end
+  end
+
+  def self.rebuild_accepted_submissions(id)
+    key = APP_CONFIG.redis_namespace[:problem_accepted_submissions] + id.to_s
+    loop do
+      $redis.watch(key)
+      value = Submission.where('problem_id = :problem_id AND score = 100 AND NOT hidden', problem_id: id).count
+      return value if $redis.multi { |multi| multi.set(key, value) }
+    end
+  end
+
+  def self.rebuild_attempted_submissions(id)
+    key = APP_CONFIG.redis_namespace[:problem_attempted_submissions] + id.to_s
+    loop do
+      $redis.watch(key)
+      value = Submission.where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).count
+      return value if $redis.multi { |multi| multi.set(key, value) }
+    end
+  end
+
+  def self.rebuild_accepted_user_ids(id)
+    key = APP_CONFIG.redis_namespace[:problem_accepted_user_ids] + id.to_s
+    loop do
+      $redis.watch(key)
+      value = Submission.select('DISTINCT(user_id)').
+          where('problem_id = :problem_id AND score = 100 AND NOT hidden', problem_id: id).map(&:user_id)
+      return value if $redis.multi do |multi|
+        multi.del(key)
+        multi.sadd(key, -1)
+        multi.sadd(key, value) unless value.empty?
+      end
+    end
+  end
+
+  def self.rebuild_attempted_user_ids(id)
+    key = APP_CONFIG.redis_namespace[:problem_attempted_user_ids] + id.to_s
+    loop do
+      $redis.watch(key)
+      value = Submission.select('DISTINCT(user_id)').
+          where("problem_id = :problem_id AND status = 'judged' AND NOT hidden", problem_id: id).map(&:user_id)
+      return value if $redis.multi do |multi|
+        multi.del(key)
+        multi.sadd(key, -1)
+        multi.sadd(key, value) unless value.empty?
+      end
+    end
+  end
+
+  def self.rebuild_hot_problems(now)
+    key = APP_CONFIG.redis_namespace[:problem_hot_problems]
+    time = now.beginning_of_day
+    expire = now.end_of_day
+    tmp = Time.now + 600
+    expire = tmp if expire < tmp
+    key = key + "#{time.to_i}"
+    loop do
+      $redis.watch(key)
+      return if $redis.multi do |multi|
+        multi.del(key)
+        multi.zadd(key, -1, -1)
+        connection.execute(sanitize_sql_array([
+          %q{
+             SELECT problem_id AS id, COUNT(*) AS submissions
+             FROM submissions
+             WHERE created_at >= :time AND status = 'judged' AND NOT hidden
+             GROUP BY problem_id
+          },
+          time: time
+        ])).each { |x| multi.zadd(key, x['submissions'], x['id']) }
+        multi.expireat(key, expire.to_i)
+      end
+    end
   end
 end

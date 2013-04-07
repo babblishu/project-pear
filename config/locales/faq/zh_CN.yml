@@ -1,0 +1,28 @@
+zh_CN:
+  faq:
+    show:
+      title: 'FAQ'
+      edit: '编辑'
+      delete: '删除'
+      delete_confirm: '确定删除该FAQ？'
+      up: '上移'
+      down: '下移'
+      add_faq: '新建条目'
+
+    new:
+      title: '新建FAQ'
+      input_title: '输入标题'
+      input_content: '输入内容（支持Markdown）'
+      submit: '提交'
+
+    edit:
+      title: '编辑FAQ'
+      input_title: '输入标题'
+      input_content: '输入内容（支持Markdown）'
+      submit: '提交'
+
+    create:
+      empty_title: '标题不能为空！'
+
+    update:
+      empty_title: '标题不能为空！'

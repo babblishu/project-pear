@@ -5,36 +5,39 @@
       <p><%= t '.subtitle' %></p>
     </div>
 
-    <% unless @discuss.empty? %>
-      <div id="recent-discuss" class="block">
-        <table class="table table-hover" style="margin-bottom: 0;">
-          <thead>
-          <tr>
-            <th style="width: 13%;"><%= t '.recent_discuss.related_problem' %></th>
-            <th class="title"><%= t '.recent_discuss.title' %></th>
-            <th style="width: 28%;"><%= t '.recent_discuss.last_reply' %></th>
-            <th style="width: 13%;"><%= t '.recent_discuss.replies' %></th>
-          </tr>
-          </thead>
-          <tbody>
-          <% @discuss.each do |topic| %>
+    <% cache(action_suffix: "discuss/#{@role}") do %>
+      <% discuss = Topic.list_for_role @role, 1, 13 %>
+      <% unless discuss.empty? %>
+        <div id="recent-discuss" class="block">
+          <table class="table table-hover" style="margin-bottom: 0;">
+            <thead>
             <tr>
-              <td><%= (problem_link topic.problem_id) if topic.problem_id %></td>
-              <td class="title">
-                <%= link_to topic.title, discuss_show_path(topic.id) %>
-                <% if topic.top %>
-                  <span class="badge badge-info" style="margin-left: 5px;"><%= t '.top' %></span>
-                <% end %>
-              </td>
-              <td><%= format_datetime topic.last_reply %></td>
-              <td><%= topic.replies_count %></td>
+              <th style="width: 13%;"><%= t '.recent_discuss.related_problem' %></th>
+              <th class="title"><%= t '.recent_discuss.title' %></th>
+              <th style="width: 28%;"><%= t '.recent_discuss.last_reply' %></th>
+              <th style="width: 13%;"><%= t '.recent_discuss.replies' %></th>
             </tr>
-          <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+            <% discuss.each do |topic| %>
+              <tr>
+                <td><%= (problem_link topic.problem_id) if topic.problem_id %></td>
+                <td class="title">
+                  <%= link_to topic.title, discuss_show_path(topic.id) %>
+                  <% if topic.top %>
+                    <span class="badge badge-info" style="margin-left: 5px;"><%= t '.recent_discuss.top' %></span>
+                  <% end %>
+                </td>
+                <td><%= format_datetime topic.last_reply %></td>
+                <td><%= topic.replies_count %></td>
+              </tr>
+            <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
       </div>
     <% end %>
-  </div>
 
   <div class="span4">
     <% if @current_user %>
@@ -47,7 +50,7 @@
           <div class="right-block span7">
             <div class="detail-row">
               <span class="left-column"><%= t '.user_block.rank' %></span>
-              <span class="right-column">
+              <span class="rank right-column">
                 <% rank = @current_user.rank %>
                 <%= rank ? rank : '-' %>
               </span>
@@ -62,79 +65,96 @@
             </div>
             <div class="detail-row">
               <span class="left-column"><%= t '.user_block.today_accepted_problems' %></span>
-              <span class="right-column"><%= @today_accepted_problems %></span>
+              <span class="right-column"><%= @current_user.accepted_problems @now, 'day' %></span>
             </div>
             <div class="detail-row">
               <span class="left-column"><%= t '.user_block.today_submissions' %></span>
-              <span class="right-column"><%= @today_submissions %></span>
+              <span class="right-column"><%= @current_user.attempted_submissions @now, 'day' %></span>
             </div>
           </div>
         </div>
       </div>
     <% end %>
 
-    <div id="search-block" class="block">
-      <div class="row-fluid">
-        <div class="span5">
-          <form style="margin: 0;" class="form-inline" action="<%= problems_search_path %>" method="get">
-            <input name="problem_id" type="text" class="span12 search-query" maxlength="4" placeholder="<%= t '.search_block.go_problem' %>">
-          </form>
-        </div>
-        <div class="span7">
-          <form style="margin: 0;" class="form-inline" action="<%= users_search_path %>" method="get">
-            <input id="user-search" name="handle" type="text" class="span12 search-query" maxlength="15"
-                   placeholder="<%= t '.search_block.search_user' %>" data-search-url="<%= users_search_path %>">
-          </form>
+    <% cache(action_suffix: 'search') do %>
+      <div id="search-block" class="block">
+        <div class="row-fluid">
+          <div class="span5">
+            <form style="margin: 0;" class="form-inline" action="<%= problems_search_path %>" method="get">
+              <input name="problem_id" type="text" class="span12 search-query" maxlength="4" placeholder="<%= t '.search_block.go_problem' %>">
+            </form>
+          </div>
+          <div class="span7">
+            <form style="margin: 0;" class="form-inline" action="<%= users_search_path %>" method="get">
+              <input id="user-search" name="handle" type="text" class="span12 search-query" maxlength="15"
+                     placeholder="<%= t '.search_block.search_user' %>" data-search-url="<%= users_search_path %>">
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-
-    <% unless @top_users.empty? %>
-      <table id="top-users" class="table table-bordered table-condensed block">
-        <thead>
-        <tr>
-          <th class="title" colspan="3"><%= t '.top_users.title' %></th>
-        </tr>
-        <tr>
-          <th style="width: 40px;"><%= t '.top_users.rank' %></th>
-          <th><%= t '.top_users.handle' %></th>
-          <th style="width: 70px;"><%= t '.top_users.accepted_problems' %></th>
-        </tr>
-        </thead>
-        <tbody>
-        <% @top_users.each_with_index do |user, index| %>
-          <tr>
-            <td><%= index + 1 %></td>
-            <td><%= user_link user.handle %></td>
-            <td><%= user_accepted_submissions_link user.accepted_problems, user.handle %></td>
-          </tr>
-        <% end %>
-        </tbody>
-      </table>
     <% end %>
 
-    <% unless @hot_problems.empty? %>
-      <table id="hot-problems" class="table table-bordered table-condensed block">
-        <thead>
-        <tr>
-          <th class="title" colspan="3"><%= t '.hot_problems.title' %></th>
-        </tr>
-        <tr>
-          <th><%= t '.hot_problems.problem_title' %></th>
-          <th style="width: 70px;"><%= t '.hot_problems.submissions' %></th>
-        </tr>
-        </thead>
-        <tbody>
-        <% @hot_problems.each do |problem| %>
+    <% cache({action_suffix: "top_users/#{@now.beginning_of_day.to_i}"}, expires_in: 1.day) do %>
+      <% top_users = User.rank_list @now, 'day', 1, 5 %>
+      <% unless top_users.empty? %>
+        <table id="top-users" class="table table-bordered table-condensed block">
+          <thead>
           <tr>
-            <td>
-              <%= link_to problem.title, problems_show_path(problem.id) %>
-            </td>
-            <td><%= problem_attempted_submissions_link problem.submissions, problem.id %></td>
+            <th class="title" colspan="3"><%= t '.top_users.title' %></th>
           </tr>
-        <% end %>
-        </tbody>
-      </table>
+          <tr>
+            <th style="width: 40px;"><%= t '.top_users.rank' %></th>
+            <th><%= t '.top_users.handle' %></th>
+            <th style="width: 70px;"><%= t '.top_users.accepted_problems' %></th>
+          </tr>
+          </thead>
+          <tbody>
+          <% top_users.each_with_index do |user, index| %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= user_link user.handle %></td>
+              <td><%= user_accepted_submissions_link user.accepted_problems, user.handle %></td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    <% end %>
+
+    <% cache({action_suffix: "hot_problems/#{@now.beginning_of_day.to_i}"}, expires_in: 1.day) do %>
+      <% hot_problems = Problem.hot_problems @now, 5 %>
+      <% unless hot_problems.empty? %>
+        <table id="hot-problems" class="table table-bordered table-condensed block">
+          <thead>
+          <tr>
+            <th class="title" colspan="3"><%= t '.hot_problems.title' %></th>
+          </tr>
+          <tr>
+            <th><%= t '.hot_problems.problem_title' %></th>
+            <th style="width: 70px;"><%= t '.hot_problems.submissions' %></th>
+          </tr>
+          </thead>
+          <tbody>
+          <% hot_problems.each do |problem| %>
+            <tr>
+              <td>
+                <%= link_to problem.title, problems_show_path(problem.id) %>
+              </td>
+              <td><%= problem_attempted_submissions_link problem.submissions, problem.id %></td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+      <% end %>
     <% end %>
   </div>
 </div>
+
+<% if admin? %>
+  <div id="toolbar">
+    <ul class="nav pull-right">
+      <li><%= link_to t('.add_advanced_users'), users_add_advanced_users_path %></li>
+    </ul>
+  </div>
+<% end %>
+

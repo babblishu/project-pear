@@ -13,6 +13,13 @@ $ -> # show
   container = $('.discuss .show')
   return unless container.length
 
+  current_user = $.parseJSONDiv('current_user')
+  container.find('.block').each ->
+    block = $(this)
+    owner = block.data('owner')
+    if owner == current_user.handle || current_user.role == 'admin'
+      block.find('.edit-button').removeClass('hidden')
+
   container.find('button.button-link').click ->
     if confirm($(this).data('confirm'))
       $(this).addClass('disabled')

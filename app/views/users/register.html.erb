@@ -1,95 +1,103 @@
-<%= form_for @user, url: users_create_path, method: :post, html: {class: 'form-horizontal'} do |f| %>
-  <fieldset>
-    <legend><strong><%= t '.register' %></strong></legend>
-    <div class="control-group">
-      <%= f.label :handle, t('.handle'), class: 'control-label' %>
-      <div class="controls">
-        <%= f.text_field :handle, maxlength: 15 %>
-        <span class="help-inline" data-errors="handle"></span>
-      </div>
-    </div>
-    <div class="control-group">
-      <%= f.label :password, t('.password'), class: 'control-label' %>
-      <div class="controls">
-        <%= f.password_field :password %>
-        <span class="help-inline" data-errors="password_digest"></span>
-      </div>
-    </div>
-    <div class="control-group">
-      <%= f.label :password_confirmation, t('.password_confirmation'), class: 'control-label' %>
-      <div class="controls">
-        <%= f.password_field :password_confirmation %>
-        <span class="help-inline" data-errors="password"></span>
-      </div>
-    </div>
-    <%= fields_for @user_information do |f| %>
+<% cache do %>
+
+  <div id="page-config" class="hidden">
+    <div class="title"><%= t '.register' %></div>
+  </div>
+
+  <%= form_for User.new, url: users_create_path, method: :post, html: {class: 'form-horizontal'} do |f| %>
+    <fieldset>
+      <legend><strong><%= t '.register' %></strong></legend>
       <div class="control-group">
-        <%= f.label :real_name, t('.real_name'), class: 'control-label' %>
+        <%= f.label :handle, t('.handle'), class: 'control-label' %>
         <div class="controls">
-          <%= f.text_field :real_name, maxlength: 20 %>
-          <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.real_name_info' %>">
-            <i class="icon-question-sign"></i>
-          </a>
-          <span class="help-inline" data-errors="information.real_name"></span>
+          <%= f.text_field :handle, maxlength: 15 %>
+          <span class="help-inline" data-errors="handle"></span>
         </div>
       </div>
       <div class="control-group">
-        <%= f.label :school, t('.school'), class: 'control-label' %>
+        <%= f.label :password, t('.password'), class: 'control-label' %>
         <div class="controls">
-          <%= f.text_field :school, maxlength: 50 %>
-          <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.school_info' %>">
-            <i class="icon-question-sign"></i>
-          </a>
-          <span class="help-inline" data-errors="information.school"></span>
+          <%= f.password_field :password %>
+          <span class="help-inline" data-errors="password_digest"></span>
         </div>
       </div>
       <div class="control-group">
-        <%= f.label :email, t('.email'), class: 'control-label' %>
+        <%= f.label :password_confirmation, t('.password_confirmation'), class: 'control-label' %>
         <div class="controls">
-          <%= f.email_field :email, maxlength: 50 %>
-          <span class="help-inline" data-errors="information.email"></span>
+          <%= f.password_field :password_confirmation %>
+          <span class="help-inline" data-errors="password"></span>
         </div>
       </div>
-      <div class="control-group">
-        <%= f.label :signature, t('.signature'), class: 'control-label' %>
-        <div class="controls">
-          <%= f.text_area :signature, rows: 4, maxlength: 100 %>
-          <span class="help-inline" data-errors="information.signature"></span>
-        </div>
-      </div>
-    <% end %>
-    <div class="control-group">
-      <%= f.label :avatar, t('.choose_avatar'), class: 'control-label' %>
-      <div class="controls">
-        <div class="fileupload fileupload-new" data-provides="fileupload">
-          <div class="fileupload-preview thumbnail" style="width: 200px; height: 200px;"></div>
-          <div>
-            <span class="btn btn-file">
-              <span class="fileupload-new"><%= t '.select' %></span>
-              <span class="fileupload-exists"><%= t '.change' %></span>
-              <%= f.file_field :avatar, accept: 'image/jpg,image/png,image/jpeg' %>
-            </span>
-            <a href="#" class="btn fileupload-exists" data-dismiss="fileupload"><%= t '.remove' %></a>
-            <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.avatar_info' %>">
+      <%= fields_for UserInformation.new do |f| %>
+        <div class="control-group">
+          <%= f.label :real_name, t('.real_name'), class: 'control-label' %>
+          <div class="controls">
+            <%= f.text_field :real_name, maxlength: 20 %>
+            <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.real_name_info' %>">
               <i class="icon-question-sign"></i>
             </a>
-            <span class="help-inline" data-errors="avatar avatar_content_type avatar_file_size"></span>
+            <span class="help-inline" data-errors="information.real_name"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <%= f.label :school, t('.school'), class: 'control-label' %>
+          <div class="controls">
+            <%= f.text_field :school, maxlength: 50 %>
+            <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.school_info' %>">
+              <i class="icon-question-sign"></i>
+            </a>
+            <span class="help-inline" data-errors="information.school"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <%= f.label :email, t('.email'), class: 'control-label' %>
+          <div class="controls">
+            <%= f.email_field :email, maxlength: 50 %>
+            <span class="help-inline" data-errors="information.email"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <%= f.label :signature, t('.signature'), class: 'control-label' %>
+          <div class="controls">
+            <%= f.text_area :signature, rows: 4, maxlength: 100 %>
+            <span class="help-inline" data-errors="information.signature"></span>
+          </div>
+        </div>
+      <% end %>
+      <div class="control-group">
+        <%= f.label :avatar, t('.choose_avatar'), class: 'control-label' %>
+        <div class="controls">
+          <div class="fileupload fileupload-new" data-provides="fileupload">
+            <div class="fileupload-preview thumbnail" style="width: 200px; height: 200px;"></div>
+            <div>
+              <span class="btn btn-file">
+                <span class="fileupload-new"><%= t '.select' %></span>
+                <span class="fileupload-exists"><%= t '.change' %></span>
+                <%= f.file_field :avatar, accept: 'image/jpg,image/png,image/jpeg' %>
+              </span>
+              <a href="#" class="btn fileupload-exists" data-dismiss="fileupload"><%= t '.remove' %></a>
+              <a href="#" data-toggle="tooltip" data-placement="right" title="<%= t '.avatar_info' %>">
+                <i class="icon-question-sign"></i>
+              </a>
+              <span class="help-inline" data-errors="avatar avatar_content_type avatar_file_size"></span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="control-group">
-      <label for="captcha-input" class="control-label"><%= t '.captcha' %></label>
-      <div class="controls">
-        <input id="captcha-input" type="text" name="captcha" class="input-small" maxlength="10">
-        <%= captcha_tag id: 'captcha', style: 'cursor: pointer;' %>
-        <span class="help-inline" data-errors="captcha"></span>
+      <div class="control-group">
+        <label for="captcha-input" class="control-label"><%= t '.captcha' %></label>
+        <div class="controls">
+          <input id="captcha-input" type="text" name="captcha" class="input-small" maxlength="10">
+          <%= captcha_tag id: 'captcha', style: 'cursor: pointer;' %>
+          <span class="help-inline" data-errors="captcha"></span>
+        </div>
       </div>
-    </div>
-    <div class="control-group">
-      <div class="controls">
-        <button type="submit" class="btn btn-primary" data-disabled="<%= t '.submitting' %>"><%= t '.submit' %></button>
+      <div class="control-group">
+        <div class="controls">
+          <button type="submit" class="btn btn-primary" data-disabled="<%= t '.submitting' %>"><%= t '.submit' %></button>
+        </div>
       </div>
-    </div>
-  </fieldset>
+    </fieldset>
+  <% end %>
+
 <% end %>

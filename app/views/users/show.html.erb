@@ -1,102 +1,152 @@
-<div id="user-block">
-  <div class="row-fluid">
-    <div id="user-div" class="span7">
-      <h3 style="margin-left: 5px;"><%= @user.handle %></h3>
-      <table class="table" style="margin-bottom: 0">
-        <thead></thead>
-        <tbody>
-        <% if admin? %>
-          <tr>
-            <td class="left-column"><%= t '.remote_ip' %></td>
-            <td class="right-column"><%= @user.remote_ip %></td>
-          </tr>
-        <% end %>
-        <% rank = @user.rank %>
-        <% if rank %>
-          <tr>
+<% cache(action_suffix: show_cache_name) do %>
+
+  <div id="page-config" class="hidden">
+    <div class="title"><%= @user.handle %></div>
+  </div>
+
+  <div id="user-block">
+    <div class="row-fluid">
+      <div id="user-div" class="span7">
+        <h3 style="margin-left: 5px;"><%= @user.handle %></h3>
+        <table class="table" style="margin-bottom: 0">
+          <thead></thead>
+          <tbody>
+          <% if admin? %>
+            <tr>
+              <td class="left-column"><%= t '.remote_ip' %></td>
+              <td class="right-column"><%= @user.remote_ip %></td>
+            </tr>
+          <% end %>
+          <tr class="rank">
             <td class="left-column"><%= t '.rank' %></td>
-            <td class="right-column"><%= rank %></td>
+            <td class="right-column"></td>
           </tr>
-        <% end %>
-        <tr>
-          <td class="left-column"><%= t '.signature' %></td>
-          <td class="right-column"><%= @user.information.signature %></td>
-        </tr>
-        <% if @user.information.show_real_name || owner?(@user) || admin? %>
           <tr>
-            <td class="left-column"><%= t '.real_name' %></td>
-            <td class="right-column"><%= @user.information.real_name %></td>
+            <td class="left-column"><%= t '.signature' %></td>
+            <td class="right-column"><%= @user.information.signature %></td>
           </tr>
-        <% end %>
-        <% if @user.information.show_school || owner?(@user) || admin? %>
-          <tr>
-            <td class="left-column"><%= t '.school' %></td>
-            <td class="right-column"><%= @user.information.school %></td>
+          <% if @user.information.show_real_name || owner?(@user) || admin? %>
+            <tr>
+              <td class="left-column"><%= t '.real_name' %></td>
+              <td class="right-column"><%= @user.information.real_name %></td>
+            </tr>
+          <% end %>
+          <% if @user.information.show_school || owner?(@user) || admin? %>
+            <tr>
+              <td class="left-column"><%= t '.school' %></td>
+              <td class="right-column"><%= @user.information.school %></td>
+            </tr>
+          <% end %>
+          <% if @user.information.show_email || owner?(@user) || admin? %>
+            <tr>
+              <td class="left-column"><%= t '.email' %></td>
+              <td class="right-column">
+                <a href="mailto:<%= @user.information.email %>"><%= @user.information.email %></a>
+              </td>
+            </tr>
+          <% end %>
+          <tr class="accepted_problems">
+            <td class="left-column"><%= t '.accepted_problems' %></td>
+            <td class="right-column"></td>
           </tr>
-        <% end %>
-        <% if @user.information.show_email || owner?(@user) || admin? %>
-          <tr>
-            <td class="left-column"><%= t '.email' %></td>
-            <td class="right-column">
-              <a href="mailto:<%= @user.information.email %>"><%= @user.information.email %></a>
-            </td>
+          <tr class="attempted_problems">
+            <td class="left-column"><%= t '.attempted_problems' %></td>
+            <td class="right-column"></td>
           </tr>
-        <% end %>
-        <tr>
-          <td class="left-column"><%= t '.accepted_problems_count' %></td>
-          <td class="right-column"><%= @user.accepted_problems %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.attempted_problems_count' %></td>
-          <td class="right-column"><%= @user.attempted_problems %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.accepted_submissions' %></td>
-          <td class="right-column"><%= user_accepted_submissions_link @user.accepted_submissions, @user.handle %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.attempted_submissions' %></td>
-          <td class="right-column"><%= user_attempted_submissions_link @user.attempted_submissions, @user.handle %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.accept_ratio' %></td>
-          <td class="right-column"><%= ratio_str @user.accepted_submissions, @user.attempted_submissions %></td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-    <div id="avatar-div" class="span5">
-      <div><%= image_tag @user.avatar.url, class: 'img-polaroid' %></div>
+          <tr class="accepted_submissions">
+            <td class="left-column"><%= t '.accepted_submissions' %></td>
+            <td class="right-column"></td>
+          </tr>
+          <tr class="attempted_submissions">
+            <td class="left-column"><%= t '.attempted_submissions' %></td>
+            <td class="right-column"></td>
+          </tr>
+          <tr class="accept_ratio">
+            <td class="left-column"><%= t '.accept_ratio' %></td>
+            <td class="right-column"></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="avatar-div" class="span5">
+        <div><%= image_tag @user.avatar.url, class: 'img-polaroid' %></div>
+      </div>
     </div>
   </div>
-</div>
 
-<% if @current_user && !owner?(@user) %>
-  <%= render 'users/message_dialog' %>
+  <div id="toolbar" class="hidden">
+    <% if @current_user && @user.id != @current_user.id %>
+      <ul class="nav pull-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+            <%= t '.operations' %>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <% if @user.blocked %>
+              <li>
+                <a id="unblock-user-button" href="#unblock-user-dialog" data-toggle="modal">
+                  <%= t '.unblock_user' %>
+                </a>
+              </li>
+            <% else %>
+              <li><a href="#message-dialog" data-toggle="modal"><%= t '.send_message' %></a></li>
+              <li><%= link_to t('.compare_with_me'), users_compare_path(@user.handle) %></li>
+              <% if @current_user.role == 'admin' && @user.role != 'admin' %>
+                <li class="divider"></li>
+                <li><%= link_to t('.edit_profile'), users_edit_path(@user.handle) %></li>
+                <li>
+                  <a id="upto-admin-button" href="#upto-admin-dialog" data-toggle="modal">
+                    <%= t '.upto_admin' %>
+                  </a>
+                </li>
+                <li>
+                  <a id="block-user-button" href="#block-user-dialog" data-toggle="modal">
+                    <%= t '.block_user' %>
+                  </a>
+                </li>
+              <% end %>
+            <% end %>
+          </ul>
+        </li>
+      </ul>
+    <% end %>
+  </div>
+
+  <% if @current_user && !owner?(@user) && !@user.blocked %>
+    <%= render 'users/message_dialog' %>
+  <% end %>
+
+  <% if admin? %>
+    <% unless @user.blocked %>
+      <%= render partial: 'users/confirm_operation_dialog', locals: {
+              name: 'upto-admin',
+              title: t('.upto_admin_title', handle: @user.handle),
+              submit_path: users_admin_path(@user.handle, 'upto_admin')
+      } %>
+    <% end %>
+    <% if @user.blocked %>
+      <%= render partial: 'users/confirm_operation_dialog', locals: {
+              name: 'unblock-user',
+              title: t('.unblock_user_title', handle: @user.handle),
+              submit_path: users_admin_path(@user.handle, 'unblock_user')
+      } %>
+    <% else %>
+      <%= render partial: 'users/confirm_operation_dialog', locals: {
+              name: 'block-user',
+              title: t('.block_user_title', handle: @user.handle),
+              submit_path: users_admin_path(@user.handle, 'block_user')
+      } %>
+    <% end %>
+  <% end %>
+
 <% end %>
 
-<% if admin? %>
-  <% unless @user.blocked %>
-    <%= render partial: 'users/confirm_operation_dialog', locals: {
-            name: 'upto-admin',
-            title: t('.upto_admin_title', handle: @user.handle),
-            submit_path: users_admin_path(@user.handle, 'upto_admin'),
-            errors_hash: flash[:upto_admin_errors]
-    } %>
-  <% end %>
-  <% if @user.blocked %>
-    <%= render partial: 'users/confirm_operation_dialog', locals: {
-            name: 'unblock-user',
-            title: t('.unblock_user_title', handle: @user.handle),
-            submit_path: users_admin_path(@user.handle, 'unblock_user'),
-            errors_hash: flash[:unblock_user_errors]
-    } %>
-  <% else %>
-    <%= render partial: 'users/confirm_operation_dialog', locals: {
-            name: 'block-user',
-            title: t('.block_user_title', handle: @user.handle),
-            submit_path: users_admin_path(@user.handle, 'block_user'),
-            errors_hash: flash[:block_user_errors]
-    } %>
-  <% end %>
-<% end %>
+<%= json_div_tag 'stat', {
+        rank: @user.rank.to_s,
+        accepted_problems: @user.accepted_problems.to_s,
+        attempted_problems: @user.attempted_problems.to_s,
+        accepted_submissions: user_accepted_submissions_link(@user.accepted_submissions, @user.handle),
+        attempted_submissions: user_attempted_submissions_link(@user.attempted_submissions, @user.handle),
+        accept_ratio: ratio_str(@user.accepted_submissions, @user.attempted_submissions)
+} %>

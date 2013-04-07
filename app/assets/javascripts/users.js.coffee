@@ -23,6 +23,9 @@ $ -> # register
         register_form.find('#captcha').prop('src', captcha_url + '&t=' + new Date().getTime())
         register_form.setErrorState(response.errors)
         register_form.find('button[type=submit]').enableButton()
+    error: (jqXHR, textStatusm, errorThrown) ->
+      alert(textStatusm) if textStatusm != null
+      register_form.find('button[type=submit]').enableButton()
 
 $ -> #edit
   container = $('.users .edit')
@@ -41,6 +44,15 @@ $ -> # edit_password
 $ -> #show
   container = $('.users .show')
   return unless container.length
+
+  table = container.find('#user-div table')
+  stat = $.parseJSONDiv('stat')
+  for key, value of stat
+    row = table.find('tr.' + key)
+    if value && value != ''
+      row.find('.right-column').html(value)
+    else
+      row.addClass('hidden')
 
   container.find('#upto-advanced-user-dialog').containerFormHelper({})
   container.find('#upto-admin-dialog').containerFormHelper({})
@@ -123,6 +135,8 @@ $ -> #add_advanced_users
         alert(response.notice)
         if response.success
           location.href = response.redirect_url
-      complete: ->
+        else
+          submit_button.removeClass('disabled')
+      error: (jqXHR, textStatusm, errorThrown) ->
+        alert(textStatusm) if textStatusm != null
         submit_button.removeClass('disabled')
-

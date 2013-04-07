@@ -1,3 +1,7 @@
+<div id="page-config" class="hidden">
+  <div class="problem-active">true</div>
+</div>
+
 <div style="text-align: center;">
   <h3 style="color: #468847;"><i class="iconic-check"></i><%= t '.success' %></h3>
 </div>
@@ -54,3 +58,16 @@
 </div>
 
 <%= render 'problems/upload_test_data_dialog' %>
+
+<div id="toolbar" class="hidden">
+  <ul class="nav pull-right">
+    <li>
+      <%= link_to t('.back_to_problem'), problems_show_path(@problem.id) %>
+    </li>
+    <li>
+      <a id="upload-test-data-button" href="#upload-test-data-dialog" data-toggle="modal" style="outline: none;">
+        <%= t '.reupload' %>
+      </a>
+    </li>
+  </ul>
+</div>

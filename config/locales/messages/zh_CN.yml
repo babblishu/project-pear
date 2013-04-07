@@ -16,8 +16,6 @@ zh_CN:
       not_read: '未读'
       view_more: '查看更多'
       loading: '正在加载'
-
-    show_toolbar:
       reply: '回复'
 
     reply_dialog:

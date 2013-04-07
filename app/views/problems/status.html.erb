@@ -1,3 +1,8 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.status_id', id: @problem.id %></div>
+  <div class="problem-active">true</div>
+</div>
+
 <h2 class="title"><%= t '.status', title: @problem.title %></h2>
 
 <table id="submissions-list" class="table table-condensed table-striped">
@@ -49,3 +54,45 @@
     <li><%= link_to t('.next_page'), problems_status_path(@problem.id, @page + 1) %></li>
   <% end %>
 </ul>
+
+<div id="toolbar" class="hidden">
+  <ul class="nav pull-right">
+    <li><%= link_to t('.view_problem'), problems_show_path(problem_id: @problem.id), style: 'outline: none;' %></li>
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+        <%= t '.statistics' %>
+        <b class="caret"></b>
+      </a>
+      <div id="statistics-dropdown" class="dropdown-menu">
+        <table class="table">
+          <tbody>
+          <tr>
+            <td class="left-column"><%= t '.accepted_users' %></td>
+            <td class="right-column"><%= @problem.accepted_users %></td>
+          </tr>
+          <tr>
+            <td class="left-column"><%= t '.attempted_users' %></td>
+            <td class="right-column"><%= @problem.attempted_users %></td>
+          </tr>
+          <tr>
+            <td class="left-column"><%= t '.accepted_submissions' %></td>
+            <td class="right-column"><%= @problem.accepted_submissions %></td>
+          </tr>
+          <tr>
+            <td class="left-column"><%= t '.attempted_submissions' %></td>
+            <td class="right-column"><%= @problem.attempted_submissions %></td>
+          </tr>
+          <tr>
+            <td class="left-column"><%= t '.accepted_ratio' %></td>
+            <td class="right-column"><%= ratio_str @problem.accepted_submissions, @problem.attempted_submissions %></td>
+          </tr>
+          <tr>
+            <td class="left-column"><%= t '.average_score' %></td>
+            <td class="right-column"><%= sprintf('%.1f', @problem.average_score) %></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </li>
+  </ul>
+</div>

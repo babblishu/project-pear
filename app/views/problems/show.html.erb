@@ -1,140 +1,202 @@
-<h2 class="title"><%= @problem.title %></h2>
+<% cache(action_suffix: 'main') do %>
+  <div id="page-config" class="hidden">
+    <div class="title"><%= @problem.title %></div>
+    <div class="problem-active">true</div>
+  </div>
 
-<div id="problem-limits">
-  <span><%= t('.time_limit') + @problem.content.time_limit %></span>
-  <span style="margin-left: 20px;"><%= t('.memory_limit') + @problem.content.memory_limit %></span>
-</div>
+  <% @markdown = new_markdown(@problem.content.enable_latex) if @problem.content.enable_markdown %>
 
-<div>
-  <% unless @tags.empty? %>
-    <div id="problem-tags" class="pull-right">
-      <%= t('.tags') + @tags %>
-    </div>
-  <% end %>
+  <h2 class="title"><%= @problem.title %></h2>
 
-  <% unless @problem.content.background.empty? %>
-    <div>
-      <h3 class="title"><%= t '.background' %></h3>
-      <div class="problem-block statement-block">
-        <% if @problem.content.enable_markdown %>
-          <%= raw @markdown.render @problem.content.background %>
-        <% else %>
-          <%= raw @problem.content.background %>
-        <% end %>
+  <div id="problem-limits">
+    <span><%= t('.time_limit') + @problem.content.time_limit %></span>
+    <span style="margin-left: 20px;"><%= t('.memory_limit') + @problem.content.memory_limit %></span>
+  </div>
+
+  <div>
+    <% unless @problem.tags.empty? %>
+      <div id="problem-tags" class="pull-right">
+        <%= t('.tags') + @problem.tags.map(&:name).join(APP_CONFIG.tags_input_separate_char) %>
       </div>
-    </div>
-  <% end %>
+    <% end %>
 
-  <% unless @problem.content.description.empty? %>
-    <div>
-      <h3 class="title"><%= t '.description' %></h3>
-      <div class="problem-block statement-block">
-        <% if @problem.content.enable_markdown %>
-          <%= raw @markdown.render @problem.content.description %>
-        <% else %>
-          <%= raw @problem.content.description %>
-        <% end %>
+    <% unless @problem.content.background.empty? %>
+      <div>
+        <h3 class="title"><%= t '.background' %></h3>
+
+        <div class="problem-block statement-block">
+          <% if @problem.content.enable_markdown %>
+            <%= raw @markdown.render @problem.content.background %>
+          <% else %>
+            <%= raw @problem.content.background %>
+          <% end %>
+        </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
 
-  <% unless @problem.content.input.empty? %>
-    <div>
-      <h3 class="title"><%= t '.input' %></h3>
-      <div class="problem-block statement-block">
-        <% if @problem.content.enable_markdown %>
-          <%= raw @markdown.render @problem.content.input %>
-        <% else %>
-          <%= raw @problem.content.input %>
-        <% end %>
+    <% unless @problem.content.description.empty? %>
+      <div>
+        <h3 class="title"><%= t '.description' %></h3>
+
+        <div class="problem-block statement-block">
+          <% if @problem.content.enable_markdown %>
+            <%= raw @markdown.render @problem.content.description %>
+          <% else %>
+            <%= raw @problem.content.description %>
+          <% end %>
+        </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
 
-  <% unless @problem.content.output.empty? %>
-    <div>
-      <h3 class="title"><%= t '.output' %></h3>
-      <div class="problem-block statement-block">
-        <% if @problem.content.enable_markdown %>
-          <%= raw @markdown.render @problem.content.output %>
-        <% else %>
-          <%= raw @problem.content.output %>
-        <% end %>
+    <% unless @problem.content.input.empty? %>
+      <div>
+        <h3 class="title"><%= t '.input' %></h3>
+
+        <div class="problem-block statement-block">
+          <% if @problem.content.enable_markdown %>
+            <%= raw @markdown.render @problem.content.input %>
+          <% else %>
+            <%= raw @problem.content.input %>
+          <% end %>
+        </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
 
-  <% @problem.sample_test_datas.each_with_index do |sample_test_data, index| %>
-    <div>
-      <% if @problem.sample_test_datas.size > 1 %>
-        <h3 class="title"><%= t('.sample_input') + " ##{index + 1}" %></h3>
-      <% else %>
-        <h3 class="title"><%= t('.sample_input') %></h3>
-      <% end %>
-      <div class="problem-block input-output-block">
+    <% unless @problem.content.output.empty? %>
+      <div>
+        <h3 class="title"><%= t '.output' %></h3>
+
+        <div class="problem-block statement-block">
+          <% if @problem.content.enable_markdown %>
+            <%= raw @markdown.render @problem.content.output %>
+          <% else %>
+            <%= raw @problem.content.output %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% @problem.sample_test_datas.each_with_index do |sample_test_data, index| %>
+      <div>
+        <% if @problem.sample_test_datas.size > 1 %>
+          <h3 class="title"><%= t('.sample_input') + " ##{index + 1}" %></h3>
+        <% else %>
+          <h3 class="title"><%= t('.sample_input') %></h3>
+        <% end %>
+        <div class="problem-block input-output-block">
 <pre>
 <%= raw sample_test_data.input.chomp %>
 </pre>
+        </div>
       </div>
-    </div>
-    <div>
-      <% if @problem.sample_test_datas.size > 1 %>
-        <h3 class="title"><%= t('.sample_output') + " ##{index + 1}" %></h3>
-      <% else %>
-        <h3 class="title"><%= t('.sample_output') %></h3>
-      <% end %>
-      <div class="problem-block input-output-block">
+      <div>
+        <% if @problem.sample_test_datas.size > 1 %>
+          <h3 class="title"><%= t('.sample_output') + " ##{index + 1}" %></h3>
+        <% else %>
+          <h3 class="title"><%= t('.sample_output') %></h3>
+        <% end %>
+        <div class="problem-block input-output-block">
 <pre>
 <%= raw sample_test_data.output.chomp %>
 </pre>
+        </div>
       </div>
-    </div>
+    <% end %>
+
+    <% unless @problem.content.sample_illustration.empty? %>
+      <div>
+        <h3 class="title"><%= t '.sample_illustration' %></h3>
+
+        <div class="problem-block statement-block">
+          <% if @problem.content.enable_markdown %>
+            <%= raw @markdown.render @problem.content.sample_illustration %>
+          <% else %>
+            <%= raw @problem.content.sample_illustration %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% unless @problem.content.additional_information.empty? %>
+      <div>
+        <h3 class="title"><%= t '.additional_information' %></h3>
+
+        <div class="problem-block statement-block">
+          <% if @problem.content.enable_markdown %>
+            <%= raw @markdown.render @problem.content.additional_information %>
+          <% else %>
+            <%= raw @problem.content.additional_information %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% unless @problem.source.empty? %>
+      <div>
+        <h3 class="title"><%= t '.source' %></h3>
+
+        <div class="problem-block statement-block">
+          <p><%= @problem.source %></p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% unless @problem.content.solution.empty? && @problem.content.program.empty? %>
+    <%= render 'problems/solution_dialog' %>
   <% end %>
 
-  <% unless @problem.content.sample_illustration.empty? %>
-    <div>
-      <h3 class="title"><%= t '.sample_illustration' %></h3>
-      <div class="problem-block statement-block">
-        <% if @problem.content.enable_markdown %>
-          <%= raw @markdown.render @problem.content.sample_illustration %>
-        <% else %>
-          <%= raw @problem.content.sample_illustration %>
-        <% end %>
-      </div>
-    </div>
+  <% if @problem.content.enable_latex %>
+    <script type="text/javascript" src="/jsMath/easy/load.js"></script>
   <% end %>
-
-  <% unless @problem.content.additional_information.empty? %>
-    <div>
-      <h3 class="title"><%= t '.additional_information' %></h3>
-      <div class="problem-block statement-block">
-        <% if @problem.content.enable_markdown %>
-          <%= raw @markdown.render @problem.content.additional_information %>
-        <% else %>
-          <%= raw @problem.content.additional_information %>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
-
-  <% unless @problem.source.empty? %>
-    <div>
-      <h3 class="title"><%= t '.source' %></h3>
-      <div class="problem-block statement-block">
-        <p><%= @problem.source %></p>
-      </div>
-    </div>
-  <% end %>
-</div>
-
-<% if @current_user && @problem.test_data_timestamp %>
-  <%= render 'problems/submit_dialog' %>
 <% end %>
 
-<% unless @problem.content.solution.empty? && @problem.content.program.empty? %>
-  <%= render 'problems/solution_dialog' %>
+<% if @current_user && @problem.test_data_timestamp %>
+  <% cache(action_suffix: 'submit_dialog') do %>
+    <%= render 'problems/submit_dialog' %>
+  <% end %>
 <% end %>
 
 <% if admin? %>
-  <%= render 'problems/upload_test_data_dialog' %>
+  <% cache(action_suffix: 'upload_test_data_dialog') do %>
+    <%= render 'problems/upload_test_data_dialog' %>
+  <% end %>
 <% end %>
+
+<div id="toolbar" class="hidden">
+  <ul class="nav pull-right">
+    <% if @current_user && @problem.test_data_timestamp %>
+      <li><a id="program-submit-button" href="#program-submit-dialog" data-toggle="modal" style="outline: none;">
+        <%= t '.toolbar.submit' %>
+      </a></li>
+    <% end %>
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+        <%= t '.toolbar.other_operations' %>
+        <b class="caret"></b>
+      </a>
+      <ul class="dropdown-menu">
+        <% if @current_user %>
+          <li><%= link_to t('.toolbar.my_submissions'), submissions_list_path(handle: @current_user.handle, problem_id: @problem.id, choose_all: '1'), target: '_blank' %></li>
+        <% end %>
+        <% cache(action_suffix: 'toolbar') do %>
+          <li><%= link_to t('.toolbar.discuss'), discuss_list_path(problem_id: @problem.id), target: '_blank' %></li>
+          <li><%= link_to t('.toolbar.status'), problems_status_path(@problem.id, '1'), target: '_blank' %></li>
+          <% unless @problem.content.solution.empty? && @problem.content.program.empty? %>
+            <li><a href="#solution-dialog" data-toggle="modal" data-confirm="<%= t '.toolbar.solution_confirm' %>" style="outline: none;">
+              <%= t '.toolbar.solution' %></a></li>
+          <% end %>
+        <% end %>
+        <% if admin? %>
+          <li class="divider"></li>
+          <li><%= link_to t('.toolbar.edit_content'), problems_edit_path(@problem.id) %></li>
+          <li><a id="upload-test-data-button" href="#upload-test-data-dialog" data-toggle="modal"><%= t '.toolbar.upload_test_data' %></a></li>
+          <% if @problem.test_data_timestamp %>
+            <li><%= link_to t('.toolbar.download_test_data'), problems_download_test_data_path(@problem.id) %></li>
+            <li><%= link_to t('.toolbar.rejudge'), problems_rejudge_path(@problem.id), confirm: t('.toolbar.rejudge_confirm') %></li>
+          <% end %>
+        <% end %>
+      </ul>
+    </li>
+  </ul>
+</div>

@@ -2,21 +2,16 @@ class GlobalController < ApplicationController
   before_filter :require_login, only: [ :captcha_verify ]
   before_filter :require_admin, only: [ :add_problem_help, :headers_test ]
 
+  #caches_action :faq, layout: false
+  caches_action :add_problem_help, layout: false
+  caches_action :markdown_help, layout: false
+
   def home
-    role = @current_user ? @current_user.role : 'normal_user'
-    @discuss = Topic.list_for_role role, 1, 13
-    today = Time.now.beginning_of_day
-    @top_users = User.top_users today, 5
-    @hot_problems = Problem.hot_problems today, role, 5
-    if @current_user
-      @today_accepted_problems = @current_user.accepted_problems today
-      @today_submissions = @current_user.attempted_submissions today
-    end
+    @role = @current_user ? @current_user.role : 'normal_user'
+    @now = Time.now
   end
 
   def faq
-    @faq_active = true
-    @title = t 'global.faq.title'
   end
 
   def captcha_verify
@@ -34,11 +29,9 @@ class GlobalController < ApplicationController
   end
 
   def add_problem_help
-    @title = t 'global.add_problem_help.title'
   end
 
   def markdown_help
-    @title = t 'global.markdown_help.title'
   end
 
   def headers_test

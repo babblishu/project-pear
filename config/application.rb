@@ -9,6 +9,22 @@ if defined?(Bundler)
   # Bundler.require(:default, :assets, Rails.env)
 end
 
+class CustomLogger < Rails::Rack::Logger
+  def call(env)
+    if env['HTTP_X_SILENCE_LOGGER']
+      bak = Rails.logger.level
+      Rails.logger.level = Logger::ERROR
+      begin
+        @app.call(env)
+      ensure
+        Rails.logger.level = bak
+      end
+    else
+      super(env)
+    end
+  end
+end
+
 module ProjectPear
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
@@ -60,5 +76,11 @@ module ProjectPear
     config.assets.version = '1.0'
 
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+
+    config.autoload_paths += %W( #{Rails.root}/path/to/sweepers )
+
+    config.cache_store = :redis_store, 'redis://localhost:6379/0', { expires_in: 1.week }
+
+    config.middleware.swap Rails::Rack::Logger, CustomLogger
   end
 end

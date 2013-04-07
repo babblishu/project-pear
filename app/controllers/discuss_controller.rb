@@ -1,89 +1,25 @@
-require 'cgi'
-
-class DiscussMarkdownHTMLRender < Redcarpet::Render::HTML
-  def block_code(code, language)
-    code = CGI::escapeHTML code
-    if APP_CONFIG.program_languages.keys.map(&:to_s).include? language
-      "<pre class=\"prettyprint lang-#{language}\">\n#{code.gsub(/\t/, '    ')}</pre>"
-    else
-      "<pre>\n#{code.gsub(/\t/, '    ')}</pre>"
-    end
-  end
-
-  def preprocess(text)
-    text = text.gsub(/\r\n/, "\n").gsub(/\r/, "\n")
-    flag = false
-    res = ''
-    text.each_line do |line|
-      if flag
-        flag = false if line =~ /\A\s{0,3}~~~\Z/
-      else
-        flag = true if line =~ /\A\s{0,3}~~~\s*\w*\s*\Z/
-      end
-      if flag
-        res += line
-      else
-        if !line.empty? && line[0] == '=' && res.last == "\n"
-          res.chop!
-          res += line
-        else
-          res += line.gsub(/^\s*#/, "\\#").gsub(/^\s*-/, "\\-").gsub(/^\s*>/, "\\>")
-        end
-      end
-    end
-    res
-  end
-end
-
 class DiscussController < ApplicationController
   before_filter :require_login, only: [ :topic, :primary_reply, :secondary_reply ]
   before_filter :require_admin, only: [ :admin ]
   before_filter :inspect_submit_interval, only: [ :topic, :primary_reply, :secondary_reply ]
+  cache_sweeper :notification_sweeper
 
   def show
-    @topic = Topic.includes(:user, :problem).find_by_id params[:topic_id]
-    raise AppExceptions::InvalidTopicId unless @topic
+    @topic = Topic.find_by_id! params[:topic_id]
     check_view_privilege @current_user, @topic
 
     @page = (params[:page] || '1').to_i
     @page_size = APP_CONFIG.page_size[:topic_replies_list]
-    @total_page = calc_total_page PrimaryReply.where('topic_id = :id', id: @topic.id).count + 1, @page_size
-    validate_page_number @page, @total_page
-
-    if @page == 1
-      offset = 0
-      limit = @page_size - 1
-    else
-      offset = @page_size * (@page - 1) - 1
-      limit = @page_size
+    @total_page = Rails.cache.fetch("model/topic/total_page/#{@topic.id}") do
+      calc_total_page PrimaryReply.where('topic_id = :id', id: @topic.id).count + 1, @page_size
     end
-    @replies = PrimaryReply.includes(:user, {:secondary_replies => :user}).
-        where('topic_id = :id', id: @topic.id).order('created_at ASC, id ASC').offset(offset).limit(limit)
-
-    @primary_reply = PrimaryReply.new
-
-    @markdown = Redcarpet::Markdown.new(
-        DiscussMarkdownHTMLRender.new(escape_html: true, no_styles: true, safe_links_only: true),
-        no_intra_emphasis: true,
-        fenced_code_blocks: true,
-        autolink: true,
-        lax_spacing: true
-    )
-    @discuss_active = true
-    @title = @topic.title
+    validate_page_number @page, @total_page
   end
 
   def list
     if params[:problem_id]
-      @problem = Problem.find_by_id params[:problem_id]
-      raise AppExceptions::InvalidProblemId unless @problem
+      @problem = Problem.find_by_id! params[:problem_id]
       check_view_privilege @current_user, @problem
-    end
-
-    if @current_user
-      @topic = Topic.new
-      @topic.status = 'normal' if @current_user.role == 'admin'
-      @topic.problem = @problem if @problem
     end
 
     @page = (params[:page] || '1').to_i
@@ -101,19 +37,20 @@ class DiscussController < ApplicationController
     else
       @topics = Topic.list_for_role role, @page, page_size
     end
-    @discuss_active = true
-    @title = @problem ? t('discuss.list.discuss_problem', id: @problem.id) : t('discuss.list.discuss')
   end
 
   def topic
-    topic = nil
     if params[:operation] == 'create'
       topic = Topic.new user: @current_user
     else
-      topic = Topic.includes(:user, :problem).find_by_id params[:topic_id]
-      raise AppExceptions::InvalidTopicId unless topic
+      topic = Topic.find_by_id! params[:topic_id]
       check_view_privilege @current_user, topic
       check_update_privilege @current_user, topic
+      original_problem_id = topic.problem_id
+      need_clear_list_cache = false
+      need_clear_list_cache ||= topic.title != params[:topic][:title]
+      need_clear_list_cache ||= topic.status != params[:topic][:status]
+      need_clear_list_cache ||= topic.top != (params[:topic][:top] == '1')
     end
 
     topic.assign_attributes params[:topic], without_protection: @current_user.role == 'admin'
@@ -147,6 +84,20 @@ class DiscussController < ApplicationController
       if params[:operation] == 'update' && @current_user.id != topic.user.id
         create_notification 'edit_topic', topic, topic.user, topic
       end
+      if params[:operation] == 'update'
+        if original_problem_id != topic.problem_id
+          clear_list_cache
+          clear_list_cache(topic.problem_id) if topic.problem_id
+          clear_list_cache(original_problem_id) if original_problem_id
+        elsif need_clear_list_cache
+          clear_list_cache
+          clear_list_cache(topic.problem_id) if topic.problem_id
+        end
+        clear_show_cache topic.id, 1
+      else
+        clear_list_cache
+        clear_list_cache(topic.problem_id) if topic.problem_id
+      end
       update_submit_times
       render json: { success: true, redirect_url: discuss_show_path(topic.id) }
     else
@@ -156,14 +107,12 @@ class DiscussController < ApplicationController
 
   def primary_reply
     if params[:operation] == 'create'
-      topic = Topic.includes(:problem, :user).find_by_id params[:topic_id]
-      raise AppExceptions::InvalidTopicId unless topic
+      topic = Topic.find_by_id! params[:topic_id]
       raise AppExceptions::NoPrivilegeError if topic.no_reply
       check_view_privilege @current_user, topic
       primary_reply = PrimaryReply.new user: @current_user, topic: topic
     else
-      primary_reply = PrimaryReply.includes({:topic => :problem}, :user).find_by_id params[:primary_reply_id]
-      raise AppExceptions::InvalidPrimaryReplyId unless primary_reply
+      primary_reply = PrimaryReply.find_by_id! params[:primary_reply_id]
       raise AppExceptions::NoPrivilegeError if primary_reply.hidden
       check_view_privilege @current_user, primary_reply.topic
       check_update_privilege @current_user, primary_reply
@@ -185,6 +134,17 @@ class DiscussController < ApplicationController
       if params[:operation] == 'update' && @current_user.id != primary_reply.user.id
         create_notification 'edit_reply', primary_reply.topic, primary_reply.user, primary_reply
       end
+      if params[:operation] == 'create'
+        clear_list_cache
+        problem_id = topic.problem_id
+        clear_list_cache(problem_id) if problem_id
+        page_no = primary_reply.page_no
+        clear_show_cache(topic.id, page_no)
+        clear_show_cache(topic.id, page_no - 1) if page_no > 1
+        Rails.cache.delete "model/topic/total_page/#{topic.id}"
+      else
+        clear_show_cache primary_reply.topic_id, primary_reply.page_no
+      end
       update_submit_times
       render json: { success: true }
     else
@@ -194,17 +154,13 @@ class DiscussController < ApplicationController
 
   def secondary_reply
     if params[:operation] == 'create'
-      primary_reply = PrimaryReply.includes(:topic => :problem).find_by_id params[:primary_reply_id]
-      raise AppExceptions::InvalidPrimaryReplyId unless primary_reply
+      primary_reply = PrimaryReply.find_by_id! params[:primary_reply_id]
       raise AppExceptions::NoPrivilegeError if primary_reply.topic.no_reply
       check_view_privilege @current_user, primary_reply.topic
-      reply_to = User.find_by_handle params[:reply_to]
-      raise AppExceptions::InvalidUserHandle unless reply_to
+      reply_to = User.fetch_by_uniq_key! params[:reply_to], :handle
       secondary_reply = SecondaryReply.new user: @current_user, primary_reply: primary_reply
     else
-      secondary_reply = SecondaryReply.includes({:primary_reply => {:topic => :problem}}, :user).
-          find_by_id params[:secondary_reply_id]
-      raise AppExceptions::InvalidSecondaryReplyId unless secondary_reply
+      secondary_reply = SecondaryReply.find_by_id! params[:secondary_reply_id]
       raise AppExceptions::NoPrivilegeError if secondary_reply.hidden
       check_view_privilege @current_user, secondary_reply.primary_reply.topic
       check_update_privilege @current_user, secondary_reply
@@ -218,6 +174,12 @@ class DiscussController < ApplicationController
       if params[:operation] == 'update' && @current_user.id != secondary_reply.user.id
         create_notification 'edit_reply', secondary_reply.primary_reply.topic, secondary_reply.user, secondary_reply
       end
+      if params[:operation] == 'create'
+        clear_list_cache
+        problem_id = primary_reply.topic.problem_id
+        clear_list_cache(problem_id) if problem_id
+      end
+      clear_show_cache secondary_reply.primary_reply.topic_id, secondary_reply.primary_reply.page_no
       update_submit_times
       render json: { success: true }
     else
@@ -227,39 +189,24 @@ class DiscussController < ApplicationController
 
   def locate
     if params[:type] == 'primary_reply'
-      primary_reply = PrimaryReply.includes(:topic).find_by_id params[:id]
-      raise AppExceptions::InvalidPrimaryReplyId unless primary_reply
-      topic = primary_reply.topic
+      primary_reply = PrimaryReply.find_by_id! params[:id]
       suffix = "#primary_reply_#{primary_reply.id}"
     else
-      secondary_reply = SecondaryReply.includes(:primary_reply => :topic).find_by_id params[:id]
-      raise AppExceptions::InvalidSecondaryReplyId unless secondary_reply
+      secondary_reply = SecondaryReply.find_by_id! params[:id]
       primary_reply = secondary_reply.primary_reply
-      topic = primary_reply.topic
       suffix = "#secondary_reply_#{secondary_reply.id}"
     end
-
-    page_size = APP_CONFIG.page_size[:topic_replies_list]
-    count = PrimaryReply.where('topic_id = :topic_id AND (created_at < :time OR created_at = :time AND id <= :id)',
-                               topic_id: topic.id, time: primary_reply.created_at, id: primary_reply.id).count
-    if count < page_size
-      redirect_to discuss_show_path(primary_reply.topic.id) + suffix
-    else
-      page = count / page_size + 1
-      redirect_to discuss_show_path(primary_reply.topic.id, page) + suffix
-    end
+    redirect_to discuss_show_path(primary_reply.topic_id, primary_reply.page_no) + suffix
   end
 
   def download_code
     if params[:type] == 'topic'
-      topic = Topic.find_by_id params[:id]
-      raise AppExceptions::InvalidTopicId unless topic
+      topic = Topic.find_by_id! params[:id]
       raise AppExceptions::InvalidOperation unless topic.program && !topic.program.empty?
       check_view_privilege @current_user, topic
       send_data topic.program, filename: 'Main.' + topic.language
     else
-      primary_reply = PrimaryReply.find_by_id params[:id]
-      raise AppExceptions::InvalidPrimaryReplyId unless primary_reply
+      primary_reply = PrimaryReply.find_by_id! params[:id]
       raise AppExceptions::InvalidOperation unless primary_reply.program && !primary_reply.program.empty?
       raise AppExceptions::NoPrivilegeError if primary_reply.hidden
       check_view_privilege @current_user, primary_reply.topic
@@ -269,25 +216,25 @@ class DiscussController < ApplicationController
 
   def admin
     if params[:primary_reply_id]
-      modal = PrimaryReply.includes(:topic).find_by_id params[:primary_reply_id]
+      modal = PrimaryReply.find_by_id! params[:primary_reply_id]
       topic = modal.topic
-      raise AppExceptions::InvalidPrimaryReplyId unless modal
+      clear_show_cache topic.id, modal.page_no
     end
 
     if params[:secondary_reply_id]
-      modal = SecondaryReply.includes(:primary_reply => :topic).find_by_id params[:secondary_reply_id]
+      modal = SecondaryReply.find_by_id! params[:secondary_reply_id]
       topic = modal.primary_reply.topic
-      raise AppExceptions::InvalidSecondaryReplyId unless modal
+      clear_show_cache topic.id, modal.primary_reply.page_no
     end
 
     if params[:operation] == 'show'
       modal.update_attribute :hidden, false
-      create_notification 'show_reply', topic, modal.user, modal
+      create_notification('show_reply', topic, modal.user, modal) unless @current_user.id == modal.user.id
     end
 
     if params[:operation] == 'hide'
       modal.update_attribute :hidden, true
-      create_notification 'hide_reply', topic, modal.user, modal
+      create_notification('hide_reply', topic, modal.user, modal) unless @current_user.id == modal.user.id
     end
 
     redirect_to :back, notice: t('discuss.content_edit.success')
@@ -332,5 +279,37 @@ class DiscussController < ApplicationController
         user: user,
         content: t('discuss.notification.' + selector, hash)
     )
+  end
+
+  def clear_list_cache(problem_id = nil)
+    unless problem_id
+      %w{normal_user advanced_user admin}.each do |role|
+        expire_fragment controller: 'global', action: 'home', action_suffix: "discuss/#{role}"
+      end
+    end
+
+    Topic.clear_list_cache problem_id
+    page_size = APP_CONFIG.page_size[:discuss_list]
+    %w{guest normal_user advanced_user admin}.each do |role|
+      if problem_id
+        total_page = (Topic.count_with_problem_for_role(role, problem_id) - 1) / page_size + 1
+        total_page = 1 if total_page == 0
+        1.upto(total_page) do |page|
+          expire_fragment action: 'list', page: page, action_suffix: "#{role}:#{problem_id}"
+        end
+      else
+        total_page = (Topic.count_for_role(role) - 1) / page_size + 1
+        total_page = 1 if total_page == 0
+        1.upto(total_page) do |page|
+          expire_fragment action: 'list', page: page, action_suffix: role
+        end
+      end
+    end
+  end
+
+  def clear_show_cache(topic_id, page_no)
+    %w{normal guest admin}.each do |role|
+      expire_fragment action: 'show', topic_id: topic_id, page: page_no, action_suffix: role
+    end
   end
 end

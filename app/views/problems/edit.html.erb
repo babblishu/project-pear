@@ -1,3 +1,8 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= @title = t '.edit_problem', id: @problem.id %></div>
+  <div class="problem-active">true</div>
+</div>
+
 <%= form_for @problem, url: problems_update_path(@problem.id), method: :post,
              html: {id: 'problem-edit-form', class: 'form-horizontal', enctype: 'multipart/form-data' } do |f| %>
 <div class="tabbable">
@@ -154,3 +159,9 @@
 <% end %>
 
 <div id="confirm-message" style="display: none;"><%= t '.leave_confirm_message' %></div>
+
+<div id="toolbar" class="hidden">
+  <ul class="nav pull-right">
+    <li><a id="submit-button" href="#" style="outline: none;"><%= t '.submit' %></a></li>
+  </ul>
+</div>

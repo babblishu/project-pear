@@ -14,8 +14,15 @@ ProjectPear::Application.routes.draw do
   get 'register' => 'users#register'
   post 'users/create' => 'users#create'
 
-  get 'faq' => 'global#faq'
   get 'markdown' => 'global#markdown_help'
+
+  get 'faq' => 'faq#show'
+  get 'faq/new' => 'faq#new'
+  get 'faq/edit/:faq_id' => 'faq#edit', faq_id: /\d+/, as: 'faq_edit'
+  post 'faq/create' => 'faq#create'
+  post 'faq/update/:faq_id' => 'faq#update', faq_id: /\d+/, as: 'faq_update'
+  get 'faq/delete/:faq_id' => 'faq#delete', faq_id: /\d+/, as: 'faq_delete'
+  get 'faq/swap/:faq_id_1/:faq_id_2' => 'faq#swap', faq_id_1: /\d+/, faq_id_2: /\d+/, as: 'faq_swap'
 
   get 'discuss/list(/:page)' => 'discuss#list', page: /\d+/, as: 'discuss_list'
   get 'discuss/:topic_id/show(/:page)' => 'discuss#show', topic_id: /\d+/, page: /\d+/, as: 'discuss_show'
@@ -36,7 +43,7 @@ ProjectPear::Application.routes.draw do
   post 'messages/create/:handle' => 'messages#create', handle: /[a-z0-9\._]{3,15}/i, as: 'messages_create'
 
   get 'problems/:problem_id/show' => 'problems#show', problem_id: /\d{4}/, as: 'problems_show'
-  get 'problems/:problem_id/status(/:page)' => 'problems#status', problem_id: /\d{4}/,
+  get 'problems/:problem_id/status/:page' => 'problems#status', problem_id: /\d{4}/,
       page: /\d+/, as: 'problems_status'
   get 'problems/list(/:page)' => 'problems#list', page: /\d+/, as: 'problems_list'
   get 'problems/:problem_id/edit' => 'problems#edit', problem_id: /\d{4}/, as: 'problems_edit'
@@ -62,14 +69,14 @@ ProjectPear::Application.routes.draw do
       platform: Regexp.new(APP_CONFIG.judge_platforms.keys.map(&:to_s).join('|'))
   post 'submissions/:submission_id/receive_result' => 'submissions#receive_result', submission_id: /\d+/
 
-  get 'users/:user_handle/edit' => 'users#edit', user_handle: /[a-z0-9\._]{3,15}/i, as: 'users_edit'
-  post 'users/:user_handle/update' => 'users#update', user_handle: /[a-z0-9\._]{3,15}/i, as: 'users_update'
-  get 'users/:user_handle/admin/:operation' => 'users#admin', user_handle: /[a-z0-9\._]{3,15}/i,
+  get 'users/:handle/edit' => 'users#edit', handle: /[a-z0-9\._]{3,15}/i, as: 'users_edit'
+  post 'users/:handle/update' => 'users#update', handle: /[a-z0-9\._]{3,15}/i, as: 'users_update'
+  get 'users/:handle/admin/:operation' => 'users#admin', handle: /[a-z0-9\._]{3,15}/i,
       operation: /upto_admin|block_user|unblock_user/, as: 'users_admin'
   get 'edit_password' => 'users#edit_password', as: 'users_edit_password'
   post 'update_password' => 'users#update_password', as: 'users_update_password'
-  get 'users/:user_handle' => 'users#show', user_handle: /[a-z0-9\._]{3,15}/i, as: 'users_show'
-  get 'users/:user_handle/compare' => 'users#compare', user_handle: /[a-z0-9\._]{3,15}/i, as: 'users_compare'
+  get 'users/:handle' => 'users#show', handle: /[a-z0-9\._]{3,15}/i, as: 'users_show'
+  get 'users/:handle/compare' => 'users#compare', handle: /[a-z0-9\._]{3,15}/i, as: 'users_compare'
   get 'search_user' => 'users#search', as: 'users_search'
   get 'rank/:span(/:page)' => 'users#list', span: /all|year|month|week|day/, page: /\d+/, as: 'rank'
   get 'users/add_advanced_users' => 'users#add_advanced_users'

@@ -1,3 +1,8 @@
+<div id="page-config" class="hidden">
+  <div class="rank-active">true</div>
+  <div class="title"><%= t '.title' %></div>
+</div>
+
 <ul class="nav nav-pills">
   <li class="<%= @span == 'all' ? ' active' : '' %>"><%= link_to t('.entire_rank'), rank_path('all') %></li>
   <li class="<%= @span == 'day' ? ' active' : '' %>"><%= link_to t('.day_rank'), rank_path('day') %></li>
@@ -5,7 +10,6 @@
   <li class="<%= @span == 'month' ? ' active' : '' %>"><%= link_to t('.month_rank'), rank_path('month') %></li>
   <li class="<%= @span == 'year' ? ' active' : '' %>"><%= link_to t('.year_rank'), rank_path('year') %></li>
 </ul>
-
 
 <table id="users-list" class="table table-condensed table-striped">
   <thead>
@@ -36,7 +40,7 @@
   <% if @page > 1 %>
     <li><%= link_to t('.last_page'), rank_path(@span, @page - 1) %></li>
   <% end %>
-  <% unless @is_last_page %>
+  <% if @page < @total_page %>
     <li><%= link_to t('.next_page'), rank_path(@span, @page + 1) %></li>
   <% end %>
 </ul>

@@ -66,7 +66,7 @@ $.fn.formSubmitHelper = (container, button) ->
         if response.redirect_url
           location.href = response.redirect_url
         else
-          location.reload()
+          location.reload(true)
       else
         if response.notice and response.notice.length
           alert(response.notice)
@@ -74,6 +74,9 @@ $.fn.formSubmitHelper = (container, button) ->
         if response.errors
           form.setErrorState(response.errors)
         button.enableButton()
+    error: (jqXHR, textStatusm, errorThrown) ->
+      alert(textStatusm) if textStatusm != null
+      button.enableButton()
 
 $.fn.inlineFormSubmitHelper = (container, button) ->
   form = this
@@ -91,7 +94,7 @@ $.fn.inlineFormSubmitHelper = (container, button) ->
         if response.redirect_url
           location.href = response.redirect_url
         else
-          location.reload()
+          location.reload(true)
       else
         if response.notice and response.notice.length
           alert(response.notice)
@@ -102,6 +105,9 @@ $.fn.inlineFormSubmitHelper = (container, button) ->
           else
             alert(response.error)
         button.enableButton()
+    error: (jqXHR, textStatusm, errorThrown) ->
+      alert(textStatusm) if textStatusm != null
+      button.enableButton()
 
 $.fn.containerFormHelper = (options) ->
   form = options['form']
@@ -115,10 +121,14 @@ $.fn.containerFormHelper = (options) ->
   button.click ->
     form.submit()
 
-$ ->
-  $('#login-dropdown form').inlineFormSubmitHelper()
+$.parseJSONDiv = (name) ->
+  $.parseJSON($('div.json[data-name="' + name + '"]').first().html())
 
-$ ->
+$.ratioStr = (a, b) ->
+  b = 1 if b == 0
+  Math.round(a * 100 / b) + '%'
+
+$ -> # home
   container = $('.global .home')
   return unless container.length
 
@@ -143,3 +153,24 @@ $ -> # captcha_verify
   captcha_url = container.find('#captcha').prop('src')
   container.find('#captcha').click ->
     $(this).prop('src', captcha_url + '&t=' + new Date().getTime())
+
+$ ->
+  $('#login-dropdown form').inlineFormSubmitHelper()
+
+  toolbar = $('#toolbar')
+  if toolbar.length
+    toolbar.insertAfter('#main-nav')
+    toolbar.removeClass('hidden')
+
+  page_config = $('#page-config')
+  if page_config.length
+    page_title = page_config.find('.title')
+    if page_title.length
+      oj_name = $('head title').html()
+      $('head title').html(page_title.html() + ' - ' + oj_name)
+
+    navbar = $('#main-nav')
+    navbar.children('li').each ->
+      tmp = page_config.find('.' + $(this).data('name') + '-active')
+      if tmp.length && tmp.html() == 'true'
+        $(this).addClass('active')

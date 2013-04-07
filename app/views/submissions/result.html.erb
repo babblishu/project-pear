@@ -1,137 +1,176 @@
-<div class="tabbable">
-  <ul class="nav nav-tabs">
-    <li><a href="#overall" data-toggle="tab"><%= t '.overall' %></a></li>
-    <% if @submission.status == 'judged' %>
-      <% if @result[:compile_message] %>
-        <li><a href="#compile-message" data-toggle="tab"><%= t '.compile_message' %></a></li>
-      <% else %>
-        <li><a href="#result" data-toggle="tab"><%= t '.result' %></a></li>
+<% cache(action_suffix: result_cache_name) do %>
+
+  <div id="page-config" class="hidden">
+    <div class="submission-active">true</div>
+    <div class="title"><%= t '.submission_result', id: @submission.id %></div>
+  </div>
+
+  <% @result = JSON.parse(@submission.detail.result, symbolize_names: true) if @submission.status == 'judged' %>
+
+  <div class="tabbable">
+    <ul class="nav nav-tabs">
+      <li><a href="#overall" data-toggle="tab"><%= t '.overall' %></a></li>
+      <% if @submission.status == 'judged' %>
+        <% if @result[:compile_message] %>
+          <li><a href="#compile-message" data-toggle="tab"><%= t '.compile_message' %></a></li>
+        <% else %>
+          <li><a href="#result" data-toggle="tab"><%= t '.result' %></a></li>
+        <% end %>
       <% end %>
-    <% end %>
-    <li><a href="#source-code" data-toggle="tab"><%= t '.source_code' %></a></li>
-  </ul>
-  <div class="tab-content">
-    <div class="tab-pane" id="overall">
-      <table id="overall-table" class="table table-bordered">
-        <tbody>
-        <% if admin? %>
+      <li><a href="#source-code" data-toggle="tab"><%= t '.source_code' %></a></li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane" id="overall">
+        <table id="overall-table" class="table table-bordered">
+          <tbody>
+          <% if admin? %>
+            <tr>
+              <td class="left-column"><%= t '.remote_ip' %></td>
+              <td class="right-column"><%= @submission.remote_ip %></td>
+            </tr>
+            <tr>
+              <td class="left-column"><%= t '.hide_status' %></td>
+              <td class="right-column"><%= @submission.hidden ? t('.hidden') : t('.not_hidden') %></td>
+            </tr>
+          <% end %>
+          <% if admin? || owner?(@submission) %>
+            <tr>
+              <td class="left-column"><%= t '.share_status' %></td>
+              <td class="right-column"><%= @submission.share ? t('.shared') : t('.not_shared') %></td>
+            </tr>
+          <% end %>
           <tr>
-            <td class="left-column"><%= t '.remote_ip' %></td>
-            <td class="right-column"><%= @submission.remote_ip %></td>
+            <td class="left-column"><%= t '.handle' %></td>
+            <td class="right-column"><%= user_link @submission.user.handle %></td>
           </tr>
           <tr>
-            <td class="left-column"><%= t '.hide_status' %></td>
-            <td class="right-column"><%= @submission.hidden ? t('.hidden') : t('.not_hidden') %></td>
+            <td class="left-column"><%= t '.problem' %></td>
+            <td class="right-column"><%= problem_link @submission.problem_id %></td>
           </tr>
-        <% end %>
-        <% if admin? || owner?(@submission) %>
+          <% if @submission.score %>
+            <tr>
+              <td class="left-column"><%= t '.score' %></td>
+              <td class="right-column"><%= @submission.score %></td>
+            </tr>
+          <% end %>
+          <% if @submission.time_used %>
+            <tr>
+              <td class="left-column"><%= t '.time_used' %></td>
+              <td class="right-column"><%= format_time_used @submission.time_used %></td>
+            </tr>
+          <% end %>
+          <% if @submission.memory_used %>
+            <tr>
+              <td class="left-column"><%= t '.memory_used' %></td>
+              <td class="right-column"><%= format_memory_used @submission.memory_used %></td>
+            </tr>
+          <% end %>
           <tr>
-            <td class="left-column"><%= t '.share_status' %></td>
-            <td class="right-column"><%= @submission.share ? t('.shared') : t('.not_shared') %></td>
+            <td class="left-column"><%= t '.language' %></td>
+            <td class="right-column"><%= format_language @submission.language %></td>
           </tr>
-        <% end %>
-        <tr>
-          <td class="left-column"><%= t '.handle' %></td>
-          <td class="right-column"><%= user_link @submission.user.handle %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.problem' %></td>
-          <td class="right-column"><%= problem_link @submission.problem_id %></td>
-        </tr>
-        <% if @submission.score %>
           <tr>
-            <td class="left-column"><%= t '.score' %></td>
-            <td class="right-column"><%= @submission.score %></td>
+            <td class="left-column"><%= t '.platform' %></td>
+            <td class="right-column"><%= format_platform @submission.platform %></td>
           </tr>
-        <% end %>
-        <% if @submission.time_used %>
           <tr>
-            <td class="left-column"><%= t '.time_used' %></td>
-            <td class="right-column"><%= format_time_used @submission.time_used %></td>
+            <td class="left-column"><%= t '.code_length' %></td>
+            <td class="right-column"><%= @submission.code_length %></td>
           </tr>
-        <% end %>
-        <% if @submission.memory_used %>
           <tr>
-            <td class="left-column"><%= t '.memory_used' %></td>
-            <td class="right-column"><%= format_memory_used @submission.memory_used %></td>
+            <td class="left-column"><%= t '.code_size' %></td>
+            <td class="right-column"><%= format_code_size @submission.code_size %></td>
           </tr>
-        <% end %>
-        <tr>
-          <td class="left-column"><%= t '.language' %></td>
-          <td class="right-column"><%= format_language @submission.language %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.platform' %></td>
-          <td class="right-column"><%= format_platform @submission.platform %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.code_length' %></td>
-          <td class="right-column"><%= @submission.code_length %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.code_size' %></td>
-          <td class="right-column"><%= format_code_size @submission.code_size %></td>
-        </tr>
-        <tr>
-          <td class="left-column"><%= t '.submit_time' %></td>
-          <td class="right-column"><%= format_datetime @submission.created_at %></td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-    <% if @submission.status == 'judged' %>
-      <% if @result[:compile_message] %>
-        <div class="tab-pane" id="compile-message">
+          <tr>
+            <td class="left-column"><%= t '.submit_time' %></td>
+            <td class="right-column"><%= format_datetime @submission.created_at %></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <% if @submission.status == 'judged' %>
+        <% if @result[:compile_message] %>
+          <div class="tab-pane" id="compile-message">
 <pre>
 <%= @result[:compile_message] %>
 </pre>
-        </div>
-      <% else %>
-        <div class="tab-pane" id="result">
-          <table id="result-table" class="table table-condensed table-bordered">
-            <thead>
-            <tr>
-              <th><%= t '.test_case' %></th>
-              <th><%= t '.result' %></th>
-              <th><%= t '.time_used' %></th>
-              <th><%= t '.memory_used' %></th>
-              <th><%= t '.score' %></th>
-            </tr>
-            </thead>
-            <tbody>
-            <% @result[:result].each_with_index do |test_case, index1| %>
-              <% test_case.each_with_index do |single_case, index2| %>
-                <tr>
-                  <% if index2 == 0 %>
-                    <td rowspan="<%= test_case.size %>">#<%= index1 + 1 %></td>
-                  <% end %>
-                  <% if single_case[:message] && !single_case[:message].empty? %>
-                    <td><%= t '.' + single_case[:status] %> <a href="javascript:void(0)" onclick="alert('<%= single_case[:message].gsub(/(?:\n\r?|\r\n?)/, "\\n") %>');">(..)</a></td>
-                  <% else %>
-                    <td><%= t '.' + single_case[:status] %></td>
-                  <% end %>
-                  <td><%= format_time_used single_case[:time_used] %></td>
-                  <td><%= format_memory_used single_case[:memory_used] %></td>
-                  <% if index2 == 0 %>
-                    <td rowspan="<%= test_case.size %>"><%= @result[:score][index1] %></td>
-                  <% end %>
-                </tr>
+          </div>
+        <% else %>
+          <div class="tab-pane" id="result">
+            <table id="result-table" class="table table-condensed table-bordered">
+              <thead>
+              <tr>
+                <th><%= t '.test_case' %></th>
+                <th><%= t '.result' %></th>
+                <th><%= t '.time_used' %></th>
+                <th><%= t '.memory_used' %></th>
+                <th><%= t '.score' %></th>
+              </tr>
+              </thead>
+              <tbody>
+              <% @result[:result].each_with_index do |test_case, index1| %>
+                <% test_case.each_with_index do |single_case, index2| %>
+                  <tr>
+                    <% if index2 == 0 %>
+                      <td rowspan="<%= test_case.size %>">#<%= index1 + 1 %></td>
+                    <% end %>
+                    <% if single_case[:message] && !single_case[:message].empty? %>
+                      <td><%= t '.' + single_case[:status] %>
+                        <a href="javascript:void(0)" onclick="alert('<%= single_case[:message].gsub(/(?:\n\r?|\r\n?)/, "\\n") %>');">(..)</a>
+                      </td>
+                    <% else %>
+                      <td><%= t '.' + single_case[:status] %></td>
+                    <% end %>
+                    <td><%= format_time_used single_case[:time_used] %></td>
+                    <td><%= format_memory_used single_case[:memory_used] %></td>
+                    <% if index2 == 0 %>
+                      <td rowspan="<%= test_case.size %>"><%= @result[:score][index1] %></td>
+                    <% end %>
+                  </tr>
+                <% end %>
               <% end %>
-            <% end %>
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        <% end %>
       <% end %>
-    <% end %>
-    <div class="tab-pane" id="source-code">
-      <div>
-        <a href="<%= submissions_download_path @submission.id %>" class="btn pull-right">
-          <i class="iconic-download"></i>
-        </a>
+      <div class="tab-pane" id="source-code">
+        <div>
+          <a href="<%= submissions_download_path @submission.id %>" class="btn pull-right">
+            <i class="iconic-download"></i>
+          </a>
 <pre class="prettyprint lang-<%= @submission.language %> linenums">
-<%= @submission.program.gsub(/\t/, '    ') %>
+<%= @submission.detail.program.gsub(/\t/, '    ') %>
 </pre>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <div id="toolbar" class="hidden">
+    <ul class="nav pull-right">
+      <% if !@submission.hidden && !@submission.share && @submission.status == 'judged' && !@result[:compile_message] && owner?(@submission) %>
+        <li><%= link_to t('.toolbar.share'), submissions_share_path(@submission.id), confirm: t('.toolbar.share_confirm') %></li>
+      <% end %>
+      <% if @current_user && @current_user.role == 'admin' %>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+            <%= t '.toolbar.other_operations' %>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <% if @submission.hidden %>
+              <li><%= link_to t('.toolbar.show_submission'), submissions_show_path(@submission.id), confirm: t('.toolbar.confirm') %></li>
+            <% else %>
+              <li><%= link_to t('.toolbar.hide_submission'), submissions_hide_path(@submission.id), confirm: t('.toolbar.confirm') %></li>
+            <% end %>
+            <% if @submission.status != 'waiting' %>
+              <li><%= link_to t('.toolbar.rejudge_submission'), submissions_rejudge_path(@submission.id), confirm: t('.toolbar.confirm') %></li>
+            <% end %>
+          </ul>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+<% end %>

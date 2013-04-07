@@ -2,9 +2,10 @@ class UsersController < ApplicationController
   before_filter :require_login, only: [ :logout, :edit, :edit_password, :update, :update_password, :compare ]
   before_filter :require_admin, only: [ :admin, :add_advanced_users, :admin_advanced_users ]
   before_filter :inspect_submit_interval, only: [ :update, :update_password ]
+  cache_sweeper :notification_sweeper
 
   def login
-    user = User.find_by_handle params[:handle]
+    user = User.fetch_by_uniq_key params[:handle], :handle
     if user
       if user.authenticate(params[:password])
         if user.blocked
@@ -26,16 +27,11 @@ class UsersController < ApplicationController
   def logout
     session[:user_handle] = nil
     cookies.delete :user_handle
-    redirect_to :back
+    redirect_to root_url
   end
 
   def register
-    if @current_user
-      redirect_to root_url
-    end
-    @user = User.new
-    @user_information = UserInformation.new
-    @title = t 'users.register.register'
+    redirect_to root_url if @current_user
   end
 
   def create
@@ -47,6 +43,7 @@ class UsersController < ApplicationController
       if user.save
         response = { success: true, notice: t('users.create.success'), redirect_url: root_url }
         session[:user_handle] = user.handle
+        User.add_user user
       else
         response = { success: false, errors: user.errors.to_hash }
       end
@@ -57,32 +54,29 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = User.includes(:information).find_by_handle params[:user_handle]
-    raise AppExceptions::InvalidUserHandle unless @user
-    @title = @user.handle
+    @user = User.fetch_by_uniq_key! params[:handle], :handle
+    if @user.blocked
+      raise AppExceptions::NoPrivilegeError unless @current_user && @current_user.role == 'admin'
+    end
   end
 
   def compare
-    @user = User.includes(:information).find_by_handle params[:user_handle]
-    raise AppExceptions::InvalidUserHandle unless @user
+    @user = User.fetch_by_uniq_key! params[:handle], :handle
+    raise AppExceptions::NoPrivilegeError if @user.blocked
     @you_accepted = @current_user.accepted_problem_ids
     @he_accepted = @user.accepted_problem_ids
     @both = @you_accepted.select { |x| @he_accepted.include? x }
     @you_accepted.select! { |x| !@both.include? x }
     @he_accepted.select! { |x| !@both.include? x }
-    @title = t('users.compare.compare_with', handle: @user.handle)
   end
 
   def edit
-    @user = User.includes(:information).find_by_handle params[:user_handle]
-    raise AppExceptions::InvalidUserHandle unless @user
+    @user = User.fetch_by_uniq_key! params[:handle], :handle
     raise AppExceptions::NoPrivilegeError if @current_user.id != @user.id && @current_user.role != 'admin'
-    @title = t 'users.edit.edit_profile'
   end
 
   def update
-    user = User.includes(:information).find_by_handle params[:user_handle]
-    raise AppExceptions::InvalidUserHandle unless user
+    user = User.fetch_by_uniq_key! params[:handle], :handle
     raise AppExceptions::NoPrivilegeError if @current_user.id != user.id && @current_user.role != 'admin'
     if params[:user]
       params[:user].delete :avatar unless params[:user][:avatar].respond_to? :read
@@ -103,6 +97,7 @@ class UsersController < ApplicationController
         )
       end
       response = { success: true, notice: t('users.update.success'), redirect_url: users_show_url(user.handle) }
+      clear_show_cache user
     else
       response = { success: false, errors: user.errors.to_hash }
     end
@@ -110,7 +105,6 @@ class UsersController < ApplicationController
   end
 
   def edit_password
-    @title = t 'users.edit_password.edit_password'
   end
 
   def update_password
@@ -138,44 +132,30 @@ class UsersController < ApplicationController
     @page_size = APP_CONFIG.page_size[:users_rank_list]
     @span = params[:span]
 
-    time_now = Time.now
-    case @span
-      when 'year'
-        time = time_now.beginning_of_year
-      when 'month'
-        time = time_now.beginning_of_month
-      when 'week'
-        time = time_now.beginning_of_week
-      when 'day'
-        time = time_now.beginning_of_day
-      else
-        time = Time.local(2000)
-    end
-
-    @rank_list = User.rank_list time, @page, @page_size
-    if @rank_list.size <= @page_size
-      @is_last_page = true
-    else
-      @rank_list.pop
-    end
-    @rank_active = true
-    @title = t 'users.list.rank'
+    now = Time.now
+    @total_page = calc_total_page User.rank_list_count(now, @span), @page_size
+    validate_page_number @page, @total_page
+    @rank_list = User.rank_list now, @span, @page, @page_size
   end
 
   def admin
-    user = User.find_by_handle params[:user_handle]
-    raise AppExceptions::InvalidUserHandle unless user
+    user = User.fetch_by_uniq_key! params[:handle], :handle
     if @current_user.authenticate params[:password]
       case params[:operation]
         when 'upto_admin'
+          raise AppExceptions::InvalidOperation if user.blocked
+          User.remove_handle_index(:normal_user_index, user.handle) if user.role == 'normal_user'
           user.update_attribute :role, 'admin'
         when 'block_user'
-          user.update_attribute :blocked, true
+          raise AppExceptions::InvalidOperation if user.blocked
+          User.block_user(user)
         when 'unblock_user'
-          user.update_attribute :blocked, false
+          raise AppExceptions::InvalidOperation unless user.blocked
+          User.unblock_user(user)
         else
       end
       response = { success: true, notice: t('users.admin.success') }
+      clear_show_cache user, 'admin'
     else
       response = { success: false, errors: { password: t('users.admin.wrong_password') } }
     end
@@ -185,7 +165,7 @@ class UsersController < ApplicationController
   def search
     if params[:ajax]
       if params[:add_advanced_users]
-        user = User.includes(:information).find_by_handle(params[:handle])
+        user = User.fetch_by_uniq_key params[:handle], :handle
         return render json: { success: false, notice: t('users.search.not_exist', handle: params[:handle]) } unless user
         return render json: { success: false, notice: t('users.search.not_normal_user', handle: user.handle)} unless user.role == 'normal_user'
         return render json: { success: false, notice: t('users.search.blocked_user', handle: user.handle)} if user.blocked
@@ -197,19 +177,18 @@ class UsersController < ApplicationController
             cancel_confirm: t('users.search.cancel_confirm', handle: user.handle)
         }
       else
-        pattern = '%' + params[:handle].to_s + '%'
         if params[:add_advanced_users_auto_complete]
-          users = User.select(:handle).where("role = 'normal_user' AND handle ILIKE :pattern AND NOT blocked", pattern: pattern).
-              limit(9).map(&:handle)
+          key = APP_CONFIG.redis_namespace[:normal_user_index] + params[:handle].downcase
+          users = $redis.srandmember(key, 9)
         else
-          users = User.select(:handle).where('handle ILIKE :pattern AND NOT blocked', pattern: pattern).
-              limit(9).map(&:handle)
+          key = APP_CONFIG.redis_namespace[:user_index] + params[:handle].downcase
+          users = $redis.srandmember(key, 9)
         end
         users = [] unless users.size < 9
         render json: users
       end
     else
-      user = User.find_by_handle params[:handle]
+      user = User.fetch_by_uniq_key params[:handle], :handle
       if user
         redirect_to users_show_url(user.handle)
       else
@@ -219,7 +198,6 @@ class UsersController < ApplicationController
   end
 
   def add_advanced_users
-    @title = t 'users.add_advanced_users.title'
   end
 
   def admin_advanced_users
@@ -235,7 +213,7 @@ class UsersController < ApplicationController
         return render json: { success: false, notice: t('users.admin_advanced_users.have_invalid_handle') }
       end
       handles.each do |handle|
-        user = User.find_by_handle handle
+        user = User.fetch_by_uniq_key handle, :handle
         user.update_attribute :role, 'advanced_user'
         Notification.create(
             user: user,
@@ -245,8 +223,17 @@ class UsersController < ApplicationController
                 handle: @current_user.handle
             )
         )
+        User.remove_handle_index :normal_user_index, user.handle
       end
       render json: { success: true, redirect_url: root_url, notice: t('users.admin_advanced_users.success') }
+    end
+  end
+
+  private
+  def clear_show_cache(user, name = nil)
+    %w{normal self admin}.each do |tmp|
+      next if name && tmp != name
+      expire_fragment action: 'show', handle: user.handle, action_suffix: tmp
     end
   end
 end

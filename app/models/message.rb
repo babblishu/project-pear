@@ -79,4 +79,18 @@ class Message < ActiveRecord::Base
           order('created_at DESC').limit(page_size + 1).to_a
     end
   end
+
+  def self.unread_messages(user_id)
+    key = APP_CONFIG.redis_namespace[:user_unread_messages] + user_id.to_s
+    ($redis.get(key) || rebuild_unread_messages(user_id)).to_i
+  end
+
+  def self.rebuild_unread_messages(user_id)
+    key = APP_CONFIG.redis_namespace[:user_unread_messages] + user_id.to_s
+    loop do
+      $redis.watch(key)
+      value = Message.where('user_to = :user_id AND NOT read', user_id: user_id).count
+      return value if $redis.multi { |multi| $redis.set(key, value) }
+    end
+  end
 end

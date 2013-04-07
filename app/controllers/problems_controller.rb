@@ -1,91 +1,48 @@
-require 'cgi'
-
-class ProblemMarkdownHTMLRender < Redcarpet::Render::HTML
-  def block_code(code, language)
-    code = CGI::escapeHTML code
-    if APP_CONFIG.program_languages.keys.map(&:to_s).include? language
-      "<pre class=\"prettyprint lang-#{language}\">\n#{code.gsub(/\t/, '    ')}</pre>"
-    else
-      "<pre>\n#{code.gsub(/\t/, '    ')}</pre>"
-    end
-  end
-end
-
 class ProblemsController < ApplicationController
   before_filter :require_admin, only: [ :create, :update, :edit, :upload_test_data, :rejudge ]
+  before_filter :check_view_privilege, only: [ :status ]
+  caches_action :status, layout: false
 
   def show
-    @problem = Problem.includes(:tags, :content).find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless @problem
-
-    begin
-      check_view_privilege @current_user, @problem
-    rescue AppExceptions::NoPrivilegeError
-      return render 'problems/no_privilege'
-    end
-    @tags = @problem.tags.map(&:name).join(APP_CONFIG.tags_input_separate_char)
-    @enable_latex = @problem.content.enable_latex
-    @markdown = Redcarpet::Markdown.new(
-        ProblemMarkdownHTMLRender,
-        no_intra_emphasis: true,
-        fenced_code_blocks: true,
-        lax_spacing: true,
-        superscript: !@enable_latex
-    )
-    @title = @problem.title
-    @problem_active = true
+    @problem = Problem.find_by_id! params[:problem_id]
+    render 'problems/no_privilege' unless @problem.has_view_privilege(@current_user)
   end
 
   def status
-    @problem = Problem.find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless @problem
-
-    check_view_privilege @current_user, @problem
-
-    @page = (params[:page] || '1').to_i
+    @problem = Problem.find_by_id! params[:problem_id]
+    @page = params[:page].to_i
     @page_size = APP_CONFIG.page_size[:problem_status_list]
-    @total_page = calc_total_page Problem.status_list_count(@problem), @page_size
+    @total_page = calc_total_page Problem.status_list_count(@problem.id), @page_size
     validate_page_number @page, @total_page
-
-    @status_list = Problem.status_list @problem, @page, @page_size
-    @problem_active = true
-    @title = t('problems.status.status_id', id: @problem.id)
+    @status_list = Problem.status_list @problem.id, @page, @page_size
   end
 
   def list
-    tag_ids = []
+    @tag_ids = []
     @tag_hash = {}
-    Tag.all.each do |tag|
-      if params["tag_#{tag.id}"]
-        tag_ids << tag.id
-        @tag_hash["tag_#{tag.id}"] = '1'
+    Tag.valid_ids.each do |id|
+      if params["tag_#{id}"]
+        @tag_ids << id
+        @tag_hash["tag_#{id}"] = '1'
       end
     end
+    raise AppExceptions::InvalidOperation if @tag_ids.size > 5
 
     page_size = APP_CONFIG.page_size[:problems_list]
-    role = @current_user ? @current_user.role : 'normal_user'
-    @total_page = calc_total_page Problem.count_for_role(role, tag_ids), page_size
+    @role = @current_user ? @current_user.role : 'normal_user'
+    @total_page = calc_total_page Problem.count_for_role(@role, @tag_ids), page_size
     if params[:page]
       @page = params[:page].to_i
       validate_page_number @page, @total_page
-    elsif tag_ids.empty? && cookies[:page_no]
+    elsif @tag_ids.empty? && cookies[:page_no]
       @page = cookies[:page_no].to_i
       @page = 1 unless 1 <= @page && @page <= @total_page
     else
       @page = 1
     end
 
-    if @current_user && @current_user.role == 'admin'
-      @problem = Problem.new flash[:problem] || {}
-      @problem_content = ProblemContent.new flash[:@problem_content] || {}
-    end
-
-    @problems = Problem.list_for_role role, tag_ids, @page, page_size
-    @accepted_ids = @current_user.accepted_problem_ids if @current_user
-    @attempted_ids = @current_user.attempted_problem_ids if @current_user
-    @problem_active = true
-    @title = t 'problems.list.problems_list'
-    if tag_ids.empty?
+    @problems = Problem.list_for_role @role, @tag_ids, @page, page_size
+    if @tag_ids.empty?
       cookies[:page_no] = { value: @page.to_s, expires: 1.year.from_now, path: '/problems/list' }
     end
   end
@@ -94,6 +51,8 @@ class ProblemsController < ApplicationController
     problem = Problem.new params[:problem]
     problem.content = ProblemContent.new params[:problem_content]
     if problem.save
+      clear_list_cache
+      Problem.add_title problem.id, problem.title
       render json: { success: true, redirect_url: problems_show_url(problem.id) }
     else
       render json: { success: false, errors: problem.errors.to_hash }
@@ -101,23 +60,16 @@ class ProblemsController < ApplicationController
   end
 
   def edit
-    @problem = Problem.includes(:tags, :content).find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless @problem
-
+    @problem = Problem.find_by_id! params[:problem_id]
     @tags = @problem.tags.map(&:name).join(APP_CONFIG.tags_input_separate_char)
-    @tags = flash[:tags] || @tags
-
-    @problem.attributes = flash[:problem] if flash[:problem]
-    @problem.content.attributes = flash[:problem_content] if flash[:problem_content]
-
-    @title = t 'problems.edit.edit_problem', id: @problem.id
-    @problem_active = true
   end
 
   def update
-    problem = Problem.includes(:content).find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless problem
-
+    problem = Problem.includes.find_by_id! params[:problem_id]
+    need_clear_list_cache = false
+    need_clear_list_cache ||= problem.title != params[:problem][:title]
+    need_clear_list_cache ||= problem.source != params[:problem][:source]
+    need_clear_list_cache ||= problem.status != params[:problem][:status]
     problem.attributes = params[:problem]
     problem.content.attributes = params[:problem_content]
 
@@ -144,8 +96,18 @@ class ProblemsController < ApplicationController
     end
 
     if problem.save
-      problem.update_tags tags
+      affected_tags = problem.update_tags(tags)
+      if affected_tags
+        affected_tags.each { |id| clear_list_cache id }
+        expire_fragment(controller: 'problems', action: 'list', action_suffix: 'filter_dialog')
+      end
       problem.unzip_attachment_file(dir) if dir
+      if need_clear_list_cache
+        clear_list_cache
+        clear_status_cache problem.id
+        Problem.add_title problem.id, problem.title
+      end
+      clear_show_cache problem.id
       render json: { success: true, redirect_url: problems_show_url(problem.id) }
     else
       dir.rmtree if dir
@@ -154,34 +116,33 @@ class ProblemsController < ApplicationController
   end
 
   def upload_test_data
-    @problem = Problem.find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless @problem
+    @problem = Problem.find_by_id! params[:problem_id]
     unless params[:data_file].respond_to? :read
       return redirect_to problems_show_path(@problem.id), notice: t('problems.upload_test_data.empty')
     end
     @config = @problem.unzip_test_data_file params[:data_file]
     if @config[:errors]
-      return redirect_to problems_show_path(@problem.id), notice: @config[:errors]
+      redirect_to problems_show_path(@problem.id), notice: @config[:errors]
+    else
+      clear_show_cache @problem.id
     end
-    @problem_active = true
   end
 
   def download_test_data
     unless @current_user && @current_user.role == 'admin' || params[:password] == APP_CONFIG.judge_client_password
       raise AppExceptions::NoPrivilegeError
     end
-    problem = Problem.find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless problem
-    raise AppExceptions::NoTestDataError unless problem.test_data_timestamp
+    problem = Problem.find_by_id! params[:problem_id]
+    raise AppExceptions::InvalidOperation unless problem.test_data_timestamp
     send_file Rails.root.join('test_data', problem.id.to_s, 'data.zip'), filename: "#{problem.id}_data.zip"
   end
 
   def rejudge
-    problem = Problem.find_by_id params[:problem_id]
-    raise AppExceptions::InvalidProblemId unless problem
-    raise AppExceptions::NoTestDataError unless problem.test_data_timestamp
-    Submission.lock(true).update_all("status = 'waiting', time_used = null, memory_used = null, score = null, result = null",
-                                     ['problem_id = :problem_id', problem_id: problem.id])
+    problem = Problem.find_by_id! params[:problem_id]
+    raise AppExceptions::InvalidOperation unless problem.test_data_timestamp
+    problem.rejudge
+    clear_status_cache problem.id
+    clear_home_cache
     redirect_to :back, notice: t('problems.rejudge.success')
   end
 
@@ -195,13 +156,47 @@ class ProblemsController < ApplicationController
   end
 
   private
-  def check_view_privilege(user, problem)
-    role = user ? user.role : 'normal_user'
-    if problem.status == 'hidden' && role != 'admin'
-      raise AppExceptions::NoPrivilegeError
+  def check_view_privilege
+    problem = Problem.find_by_id! params[:problem_id]
+    raise AppExceptions::NoPrivilegeError unless problem.has_view_privilege(@current_user)
+  end
+
+  def clear_home_cache
+    now = Time.now
+    expire_fragment controller: 'global', action: 'home', action_suffix: "top_users/#{now.beginning_of_day.to_i}"
+    expire_fragment controller: 'global', action: 'home', action_suffix: "hot_problems/#{now.beginning_of_day.to_i}"
+  end
+
+  def clear_show_cache(problem_id)
+    expire_fragment action: 'show', problem_id: problem_id, action_suffix: 'main'
+    expire_fragment action: 'show', problem_id: problem_id, action_suffix: 'toolbar'
+  end
+
+  def clear_status_cache(problem_id)
+    total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
+    total_page = 1 if total_page == 0
+    1.upto(total_page) do |page|
+      expire_action action: 'status', problem_id: problem_id, page: page
     end
-    if problem.status == 'advanced' && role == 'normal_user'
-      raise AppExceptions::NoPrivilegeError
+  end
+
+  def clear_list_cache(tag_id = nil)
+    Problem.clear_list_cache tag_id
+    page_size = APP_CONFIG.page_size[:problems_list]
+    %w{normal_user advanced_user admin}.each do |role|
+      if tag_id
+        total_page = (Problem.count_for_role(role, [tag_id]) - 1) / page_size + 1
+        total_page = 1 if total_page == 0
+        1.upto(total_page) do |page|
+          expire_fragment action: 'list', page: page, action_suffix: "#{role}:#{tag_id}"
+        end
+      else
+        total_page = (Problem.count_for_role(role, []) - 1) / page_size + 1
+        total_page = 1 if total_page == 0
+        1.upto(total_page) do |page|
+          expire_fragment action: 'list', page: page, action_suffix: role
+        end
+      end
     end
   end
 end
