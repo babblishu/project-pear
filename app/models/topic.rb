@@ -160,6 +160,11 @@ class Topic < ActiveRecord::Base
     end
   end
 
+  def add_appear_users(page, handle)
+    key = APP_CONFIG.redis_namespace[:topic_appear_users] + id.to_s + "/#{page}"
+    $redis.sadd(key, handle)
+  end
+
   def self.init_appear_users
     key = APP_CONFIG.redis_namespace[:topic_appear_users] + 'exists'
     return if $redis.exists(key)

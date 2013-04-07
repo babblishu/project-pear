@@ -97,6 +97,7 @@ class DiscussController < ApplicationController
       else
         clear_list_cache
         clear_list_cache(topic.problem_id) if topic.problem_id
+        topic.add_appear_users 1, topic.user.handle
       end
       update_submit_times
       render json: { success: true, redirect_url: discuss_show_path(topic.id) }
@@ -142,6 +143,7 @@ class DiscussController < ApplicationController
         clear_show_cache(topic.id, page_no)
         clear_show_cache(topic.id, page_no - 1) if page_no > 1
         Rails.cache.delete "model/topic/total_page/#{topic.id}"
+        topic.add_appear_users page_no, primary_reply.user.handle
       else
         clear_show_cache primary_reply.topic_id, primary_reply.page_no
       end
@@ -174,12 +176,15 @@ class DiscussController < ApplicationController
       if params[:operation] == 'update' && @current_user.id != secondary_reply.user.id
         create_notification 'edit_reply', secondary_reply.primary_reply.topic, secondary_reply.user, secondary_reply
       end
+      primary_reply = secondary_reply.primary_reply
+      page_no = primary_reply.page_no
       if params[:operation] == 'create'
         clear_list_cache
         problem_id = primary_reply.topic.problem_id
         clear_list_cache(problem_id) if problem_id
+        primary_reply.topic.add_appear_users page_no, secondary_reply.user.handle
       end
-      clear_show_cache secondary_reply.primary_reply.topic_id, secondary_reply.primary_reply.page_no
+      clear_show_cache primary_reply.topic_id, page_no
       update_submit_times
       render json: { success: true }
     else

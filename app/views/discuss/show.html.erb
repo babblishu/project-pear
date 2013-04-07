@@ -244,9 +244,9 @@
           <%= t '.reply' %>
         </a></li>
       <% end %>
-      <% if @topic.problem %>
+      <% if @topic.problem_id %>
         <li>
-          <a style="outline: none;" target="_blank" href="<%= problems_show_path @topic.problem.id %>">
+          <a style="outline: none;" target="_blank" href="<%= problems_show_path @topic.problem_id %>">
             <%= t '.view_problem' %>
           </a>
         </li>
