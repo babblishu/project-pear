@@ -1,0 +1,10 @@
+<table class="table table-bordered">
+  <tbody>
+  <% request.headers.each do |key, value| %>
+    <tr>
+      <td><%= key %></td>
+      <td><%= value %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

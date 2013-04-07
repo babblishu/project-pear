@@ -1,6 +1,6 @@
 class GlobalController < ApplicationController
   before_filter :require_login, only: [ :captcha_verify ]
-  before_filter :require_admin, only: [ :add_problem_help ]
+  before_filter :require_admin, only: [ :add_problem_help, :headers_test ]
 
   def home
     role = @current_user ? @current_user.role : 'normal_user'
@@ -41,6 +41,6 @@ class GlobalController < ApplicationController
     @title = t 'global.markdown_help.title'
   end
 
-  def ip_test
+  def headers_test
   end
 end
