@@ -2,7 +2,7 @@ class GlobalController < ApplicationController
   before_filter :require_login, only: [ :captcha_verify ]
   before_filter :require_admin, only: [ :add_problem_help ]
 
-  caches_action :faq, layout: false
+  #caches_action :faq, layout: false
   caches_action :add_problem_help, layout: false
   caches_action :markdown_help, layout: false
 

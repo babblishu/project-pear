@@ -2,7 +2,7 @@ zh_CN:
   global:
     home:
       title: '欢迎来到%{name}'
-      subtitle: '本OJ还在测试阶段'
+      subtitle: '本OJ还在测试阶段，使用前请先阅读FAQ'
       user_block:
         rank: '总排名'
         accepted_problems: '通过题数'
@@ -41,6 +41,3 @@ zh_CN:
 
     add_problem_help:
       title: '如何添加题目'
-
-    faq:
-      title: 'FAQ'

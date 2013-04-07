@@ -14,8 +14,15 @@ ProjectPear::Application.routes.draw do
   get 'register' => 'users#register'
   post 'users/create' => 'users#create'
 
-  get 'faq' => 'global#faq'
   get 'markdown' => 'global#markdown_help'
+
+  get 'faq' => 'faq#show'
+  get 'faq/new' => 'faq#new'
+  get 'faq/edit/:faq_id' => 'faq#edit', faq_id: /\d+/, as: 'faq_edit'
+  post 'faq/create' => 'faq#create'
+  post 'faq/update/:faq_id' => 'faq#update', faq_id: /\d+/, as: 'faq_update'
+  get 'faq/delete/:faq_id' => 'faq#delete', faq_id: /\d+/, as: 'faq_delete'
+  get 'faq/swap/:faq_id_1/:faq_id_2' => 'faq#swap', faq_id_1: /\d+/, faq_id_2: /\d+/, as: 'faq_swap'
 
   get 'discuss/list(/:page)' => 'discuss#list', page: /\d+/, as: 'discuss_list'
   get 'discuss/:topic_id/show(/:page)' => 'discuss#show', topic_id: /\d+/, page: /\d+/, as: 'discuss_show'

@@ -25,7 +25,7 @@
                 <td class="title">
                   <%= link_to topic.title, discuss_show_path(topic.id) %>
                   <% if topic.top %>
-                    <span class="badge badge-info" style="margin-left: 5px;"><%= t '.top' %></span>
+                    <span class="badge badge-info" style="margin-left: 5px;"><%= t '.recent_discuss.top' %></span>
                   <% end %>
                 </td>
                 <td><%= format_datetime topic.last_reply %></td>

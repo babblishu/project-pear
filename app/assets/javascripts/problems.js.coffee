@@ -127,7 +127,7 @@ $ -> # edit
   form.ajaxForm
     dataType: 'json'
     beforeSend: ->
-      $('#submit-button').disableButton()
+      $('#submit-button').addClass('hidden')
     success: (response) ->
       if response.success
         location.href = response.redirect_url
@@ -137,11 +137,11 @@ $ -> # edit
         tab_id = tmp.parents('.tab-pane').prop('id')
         form.find('.nav-tabs a[href="#' + tab_id + '"]').tab('show')
         tmp.find('input[type=text], textarea').first().focusEnd()
-        $('#submit-button').enableButton()
+        $('#submit-button').removeClass('hidden')
         need_confirm = true
     error: (jqXHR, textStatusm, errorThrown) ->
       alert(textStatusm) if textStatusm != null
-      $('#submit-button').enableButton()
+      $('#submit-button').removeClass('hidden')
 
 $ -> # upload_test_data
   container = $('.problems .upload_test_data')

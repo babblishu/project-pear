@@ -1,0 +1,15 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.title' %></div>
+  <div class="faq-active">true</div>
+</div>
+
+<%= form_for @faq, url: faq_update_path(@faq.id), method: :post do |f| %>
+  <%= f.text_field :title, class: 'input-block-level', placeholder: t('.input_title') %>
+  <%= f.text_area :content, class: 'editor', placeholder: t('.input_content') %>
+<% end %>
+
+<div id="toolbar" class="hidden">
+  <ul class="nav pull-right">
+    <li><a id="submit-button" href="#" style="outline: none;"><%= t '.submit' %></a></li>
+  </ul>
+</div>

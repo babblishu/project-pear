@@ -1,0 +1,43 @@
+<% cache(action_suffix: show_cache_name) do %>
+
+  <div id="page-config" class="hidden">
+    <div class="title"><%= t '.title' %></div>
+    <div class="faq-active">true</div>
+  </div>
+
+  <div style="width: 75%; margin: 0 auto;">
+    <% markdown = new_markdown %>
+    <% faqs = Faq.order('rank').all %>
+    <% faqs.each_with_index do |faq, index| %>
+      <div class="item">
+        <div style="margin: 15px 0;">
+          <span class="title"><%= faq.title %></span>
+          <% if admin? %>
+            <div class="operation">
+              <% if index > 0 %>
+                <%= link_to t('.up'), faq_swap_path(faq.id, faqs[index - 1].id), class: 'act' %>
+              <% end %>
+              <% if index + 1 < faqs.size %>
+                <%= link_to t('.down'), faq_swap_path(faq.id, faqs[index + 1].id), class: 'act' %>
+              <% end %>
+              <%= link_to t('.edit'), faq_edit_path(faq.id), class: 'act' %>
+              <%= link_to t('.delete'), faq_delete_path(faq.id), class: 'act', confirm: t('.delete_confirm') %>
+            </div>
+          <% end %>
+        </div>
+        <div class="content">
+          <%= raw markdown.render faq.content %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if admin? %>
+    <div id="toolbar" class="hidden">
+      <ul class="nav pull-right">
+        <li><%= link_to t('.add_faq'), faq_new_path %></li>
+      </ul>
+    </div>
+  <% end %>
+
+<% end %>
