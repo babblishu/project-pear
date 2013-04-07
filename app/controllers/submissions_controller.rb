@@ -235,11 +235,11 @@ class SubmissionsController < ApplicationController
   end
 
   def clear_problem_status_cache(problem_id)
-    total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
-    total_page = 1 if total_page == 0
-    1.upto(total_page) do |page|
-      expire_action controller: 'problems', action: 'status', problem_id: problem_id, page: page
-    end
+    #total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
+    #total_page = 1 if total_page == 0
+    #1.upto(total_page) do |page|
+    #  expire_action controller: 'problems', action: 'status', problem_id: problem_id, page: page
+    #end
   end
 
   def update_stat_cache(submission)

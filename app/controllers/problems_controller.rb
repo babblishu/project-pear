@@ -1,7 +1,6 @@
 class ProblemsController < ApplicationController
   before_filter :require_admin, only: [ :create, :update, :edit, :upload_test_data, :rejudge ]
   before_filter :check_view_privilege, only: [ :status ]
-  caches_action :status, layout: false
 
   def show
     @problem = Problem.find_by_id! params[:problem_id]
@@ -14,7 +13,6 @@ class ProblemsController < ApplicationController
     @page_size = APP_CONFIG.page_size[:problem_status_list]
     @total_page = calc_total_page Problem.status_list_count(@problem.id), @page_size
     validate_page_number @page, @total_page
-    @status_list = Problem.status_list @problem.id, @page, @page_size
   end
 
   def list
@@ -173,11 +171,11 @@ class ProblemsController < ApplicationController
   end
 
   def clear_status_cache(problem_id)
-    total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
-    total_page = 1 if total_page == 0
-    1.upto(total_page) do |page|
-      expire_action action: 'status', problem_id: problem_id, page: page
-    end
+    #total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
+    #total_page = 1 if total_page == 0
+    #1.upto(total_page) do |page|
+    #  expire_action action: 'status', problem_id: problem_id, page: page
+    #end
   end
 
   def clear_list_cache(tag_id = nil)
