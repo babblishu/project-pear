@@ -41,4 +41,4 @@ zh_CN:
       view_profile: '查看个人信息'
       change_profile: '修改个人信息'
       change_password: '修改密码'
-
+      blocker_user_caption: '被锁定的用户'

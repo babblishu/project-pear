@@ -13,6 +13,24 @@ $ -> # show
   container = $('.discuss .show')
   return unless container.length
 
+  blocked_users = $.parseJSONDiv('blocked_users')
+  medium_avatar_urls = $.parseJSONDiv('medium_avatar_urls')
+  container.find('.primary-block').each ->
+    avatar = $(this).find('.user-avatar')
+    handle = $(this).data('owner')
+    if $.inArray(handle, blocked_users) == -1
+      avatar.find('a').html('<img src="' + medium_avatar_urls[handle] + '">')
+    else
+      avatar.html('<img src="/img/blocked_user_medium.png">')
+  thumb_avatar_urls = $.parseJSONDiv('thumb_avatar_urls')
+  container.find('.secondary-block').each ->
+    avatar = $(this).find('.user-avatar')
+    handle = $(this).data('owner')
+    if $.inArray(handle, blocked_users) == -1
+      avatar.find('a').html('<img src="' + thumb_avatar_urls[handle] + '">')
+    else
+      avatar.html('<img src="/img/blocked_user_thumb.png">')
+
   current_user = $.parseJSONDiv('current_user')
   container.find('.block').each ->
     block = $(this)

@@ -23,11 +23,18 @@ module ApplicationHelper
   end
 
   def user_link(user_handle)
-    link_to user_handle, users_show_path(user_handle), target: '_blank'
+    link_to user_handle, users_show_path(user_handle), target: '_blank', class: 'user-link', data: { handle: user_handle }
   end
 
   def user_avatar_link(user, style)
-    link_to image_tag(user.avatar.url(style)), users_show_path(user.handle), target: '_blank'
+    if style == :null
+      return link_to '', users_show_path(user.handle), target: '_blank'
+    end
+    if user.blocked
+      image_tag("/img/blocked_user_#{style}.png")
+    else
+      link_to image_tag(user.avatar.url(style)), users_show_path(user.handle), target: '_blank'
+    end
   end
 
   def problem_link(problem_id)

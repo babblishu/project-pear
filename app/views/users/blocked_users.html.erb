@@ -1,0 +1,23 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.title' %></div>
+</div>
+
+<table id="users-table" class="table">
+  <thead>
+  <tr>
+    <th><%= t '.handle' %></th>
+    <th><%= t '.real_name' %></th>
+    <th><%= t '.school' %></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% User.where('blocked').each do |user| %>
+    <tr>
+      <td><%= link_to user.handle, users_show_path(user.handle), target: '_blank' %></td>
+      <td><%= user.information.real_name %></td>
+      <td><%= user.information.school %></td>
+    </tr>
+  <% end %>
+
+  </tbody>
+</table>

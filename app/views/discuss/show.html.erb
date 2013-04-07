@@ -22,7 +22,7 @@
 
       <div id="main-block" class="primary-block block topic" data-owner="<%= @topic.user.handle %>">
         <div class="pull-left left-block">
-          <div class="user-avatar"><%= user_avatar_link @topic.user, :medium %></div>
+          <div class="user-avatar"><%= user_avatar_link @topic.user, :null %></div>
           <div class="user-handle"><%= user_link @topic.user.handle %></div>
         </div>
         <div class="right-block clearfix">
@@ -83,7 +83,7 @@
 
       <div class="primary-block block reply" data-owner="<%= reply.user.handle %>">
         <div class="pull-left left-block">
-          <div class="user-avatar"><%= user_avatar_link reply.user, :medium %></div>
+          <div class="user-avatar"><%= user_avatar_link reply.user, :null %></div>
           <div class="user-handle"><%= user_link reply.user.handle %></div>
         </div>
         <div class="right-block clearfix">
@@ -167,7 +167,7 @@
 
           <div class="secondary-block block" data-owner="<%= secondary_reply.user.handle %>">
             <div class="pull-left left-block">
-              <div class="user-avatar"><%= user_avatar_link secondary_reply.user, :thumb %></div>
+              <div class="user-avatar"><%= user_avatar_link secondary_reply.user, :null %></div>
               <div class="user-handle"><%= user_link secondary_reply.user.handle %></div>
             </div>
             <div class="right-block clearfix">
@@ -271,3 +271,7 @@
 <% else %>
   <%= json_div_tag 'current_user', { handle: '', role: 'normal_user' } %>
 <% end %>
+
+<% appear_users = @topic.appear_users(@page) %>
+<%= json_div_tag 'thumb_avatar_urls', User.get_avatar_url(appear_users, 'thumb') %>
+<%= json_div_tag 'medium_avatar_urls', User.get_avatar_url(appear_users, 'medium') %>

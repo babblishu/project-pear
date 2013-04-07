@@ -178,3 +178,14 @@
     }
   }
 }
+
+.global .judge_machines {
+  table {
+    width: 500px;
+    margin: 0 auto 10px auto;
+    th, td {
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+}

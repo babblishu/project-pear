@@ -76,6 +76,13 @@ class User < ActiveRecord::Base
     User.attempted_problem_ids(id, now, span)
   end
 
+  def refresh_avatar_url
+    %w{thumb medium}.each do |style|
+      key = APP_CONFIG.redis_namespace[:user_avatar_url] + style
+      $redis.hset(key, handle, avatar.url(style.to_sym))
+    end
+  end
+
   def self.get_rank(id)
     key = APP_CONFIG.redis_namespace[:user_rank_list]
     rebuild_rank_list(nil, 'all') unless $redis.exists(key)
@@ -292,10 +299,6 @@ class User < ActiveRecord::Base
     end
     loop do
       $redis.watch(key)
-      if $redis.sismember(APP_CONFIG.redis_namespace[:user_blocked_users], id)
-        $redis.unwatch
-        break
-      end
       unless $redis.exists(key)
         $redis.unwatch
         rebuild_rank_list(now, span)
@@ -312,36 +315,32 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.get_avatar_url(handles, style)
+    return {} if handles.empty?
+    key = APP_CONFIG.redis_namespace[:user_avatar_url] + style
+    res = {}
+    $redis.hmget(key, handles).each_with_index do |url, index|
+      res[handles[index]] = url
+    end
+    res
+  end
+
   def self.add_user(user)
     key = APP_CONFIG.redis_namespace[:user_handles_hash]
     $redis.hset(key, user.id, user.handle)
+    user.refresh_avatar_url
     add_handle_index(:user_index, user.handle)
     add_handle_index(:normal_user_index, user.handle)
   end
 
   def self.block_user(user)
     user.update_attribute :blocked, true
-    now = Time.now
-    key = APP_CONFIG.redis_namespace[:user_blocked_users]
-    $redis.sadd(key, user.id)
-    %w{all year month week day}.each do |span|
-      key = APP_CONFIG.redis_namespace[:user_rank_list]
-      unless span == 'all'
-        time, dummy = get_time_and_expire now, span
-        key = key + "#{span}/#{time.to_i}"
-      end
-      rebuild_rank_list(now, span) unless $redis.exists(key)
-      $redis.zrem(key, user.id)
-    end
     remove_handle_index(:user_index, user.handle)
     remove_handle_index(:normal_user_index, user.handle) if user.role == 'normal_user'
   end
 
   def self.unblock_user(user)
     user.update_attribute :blocked, false
-    key = APP_CONFIG.redis_namespace[:user_blocked_users]
-    $redis.srem(key, user.id)
-    refresh_stat_cache(user.id)
     add_handle_index(:user_index, user.handle)
     add_handle_index(:normal_user_index, user.handle) if user.role == 'normal_user'
   end
@@ -388,6 +387,13 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.init_user_avatar_url
+    key = APP_CONFIG.redis_namespace[:user_avatar_url] + '/exists'
+    return if $redis.exists(key)
+    $redis.set(key, 1)
+    User.all.each { |user| user.refresh_avatar_url }
+  end
+
   def self.init_handles_hash
     key = APP_CONFIG.redis_namespace[:user_handles_hash]
     return if $redis.exists(key)
@@ -395,16 +401,6 @@ class User < ActiveRecord::Base
     $redis.multi do |multi|
       multi.del(key)
       User.all.each { |user| multi.hset(key, user.id, user.handle) }
-    end
-  end
-
-  def self.init_blocked_users
-    key = APP_CONFIG.redis_namespace[:user_blocked_users]
-    return if $redis.exists(key)
-    $redis.watch(key)
-    $redis.multi do |multi|
-      multi.del(key)
-      User.where('blocked').each { |user| multi.sadd(key, user.id) }
     end
   end
 
@@ -545,15 +541,10 @@ class User < ActiveRecord::Base
           multi.zadd(key, -1, -1)
           connection.execute(
               %q{
-                 SELECT y.*
-                 FROM users AS x
-                 INNER JOIN (
-                     SELECT user_id AS id, COUNT(DISTINCT problem_id) AS accepted_problems
-                     FROM submissions
-                     WHERE score = 100 AND NOT hidden
-                     GROUP BY user_id
-                 ) AS y ON x.id = y.id
-                 WHERE NOT blocked
+                 SELECT user_id AS id, COUNT(DISTINCT problem_id) AS accepted_problems
+                 FROM submissions
+                 WHERE score = 100 AND NOT hidden
+                 GROUP BY user_id
               },
           ).each { |row| multi.zadd(key, row['accepted_problems'], row['id']) }
         end
@@ -565,15 +556,10 @@ class User < ActiveRecord::Base
           multi.zadd(key, -1, -1)
           connection.execute(sanitize_sql_array([
               %q{
-                 SELECT y.*
-                 FROM users AS x
-                 INNER JOIN (
-                     SELECT user_id AS id, COUNT(DISTINCT problem_id) AS accepted_problems
-                     FROM submissions
-                     WHERE score = 100 AND NOT hidden AND created_at >= :time
-                     GROUP BY user_id
-                 ) AS y ON x.id = y.id
-                 WHERE NOT blocked
+                 SELECT user_id AS id, COUNT(DISTINCT problem_id) AS accepted_problems
+                 FROM submissions
+                 WHERE score = 100 AND NOT hidden AND created_at >= :time
+                 GROUP BY user_id
               },
               time: time
           ])).each { |row| multi.zadd(key, row['accepted_problems'], row['id']) }

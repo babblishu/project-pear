@@ -143,6 +143,8 @@ class SubmissionsController < ApplicationController
   end
 
   def get_waiting
+    key = APP_CONFIG.redis_namespace[:judge_machines] + params[:platform]
+    $redis.hset(key, request.remote_ip, Time.now.to_i)
     key = APP_CONFIG.redis_namespace[:waiting_submissions] + params[:platform]
     id = $redis.lpop(key)
     result = {}

@@ -28,7 +28,10 @@ zh_CN:
         last_reply: '最后回复'
         replies: '回复数'
         top: '置顶'
+      other_operations: '其他操作'
       add_advanced_users: '添加高级用户'
+      view_blocked_users: '查看锁定用户'
+      judge_machine_status: '查看评测机状态'
 
     captcha_verify:
       title: '输入验证码以继续操作'
@@ -41,3 +44,9 @@ zh_CN:
 
     add_problem_help:
       title: '如何添加题目'
+
+    judge_machines:
+      title: '评测机状态'
+      platform: '平台'
+      ip: 'IP地址'
+      last_connection: '最后连接时间'

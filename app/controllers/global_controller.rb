@@ -1,6 +1,6 @@
 class GlobalController < ApplicationController
   before_filter :require_login, only: [ :captcha_verify ]
-  before_filter :require_admin, only: [ :add_problem_help, :headers_test ]
+  before_filter :require_admin, only: [ :add_problem_help, :headers_test, :judge_machines ]
 
   def home
     @role = @current_user ? @current_user.role : 'normal_user'
@@ -28,5 +28,8 @@ class GlobalController < ApplicationController
   end
 
   def headers_test
+  end
+
+  def judge_machines
   end
 end

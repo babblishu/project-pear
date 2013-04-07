@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_filter :require_login, only: [ :logout, :edit, :edit_password, :update, :update_password, :compare ]
-  before_filter :require_admin, only: [ :admin, :add_advanced_users, :admin_advanced_users ]
+  before_filter :require_admin, only: [ :admin, :add_advanced_users, :admin_advanced_users, :blocked_users ]
   before_filter :inspect_submit_interval, only: [ :update, :update_password ]
   cache_sweeper :notification_sweeper
 
@@ -98,6 +98,7 @@ class UsersController < ApplicationController
       end
       response = { success: true, notice: t('users.update.success'), redirect_url: users_show_url(user.handle) }
       clear_show_cache user
+      user.refresh_avatar_url
     else
       response = { success: false, errors: user.errors.to_hash }
     end
@@ -150,10 +151,12 @@ class UsersController < ApplicationController
           raise AppExceptions::InvalidOperation if user.blocked
           User.block_user(user)
           clear_home_cache
+          expire_fragment 'blocked_user'
         when 'unblock_user'
           raise AppExceptions::InvalidOperation unless user.blocked
           User.unblock_user(user)
           clear_home_cache
+          expire_fragment 'blocked_user'
         else
       end
       response = { success: true, notice: t('users.admin.success') }
@@ -229,6 +232,9 @@ class UsersController < ApplicationController
       end
       render json: { success: true, redirect_url: root_url, notice: t('users.admin_advanced_users.success') }
     end
+  end
+
+  def blocked_users
   end
 
   private

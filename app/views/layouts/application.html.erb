@@ -110,5 +110,10 @@
 
 </div>
 
+<% cache('blocked_user') do %>
+  <%= json_div_tag 'blocked_users', User.select(:handle).where('blocked').map(&:handle) %>
+  <div id="blocked-user-caption" class="hidden"><%= t '.blocker_user_caption' %></div>
+<% end %>
+
 </body>
 </html>

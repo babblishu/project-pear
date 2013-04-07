@@ -1,8 +1,6 @@
 ProjectPear::Application.routes.draw do
   captcha_route
 
-  get 'headers_test' => 'global#headers_test'
-
   root :to => 'global#home'
 
   get 'captcha_verify' => 'global#captcha_verify'
@@ -15,6 +13,8 @@ ProjectPear::Application.routes.draw do
   post 'users/create' => 'users#create'
 
   get 'markdown' => 'global#markdown_help'
+  get 'headers_test' => 'global#headers_test'
+  get 'judge_machines' => 'global#judge_machines'
 
   get 'faq' => 'faq#show'
   get 'faq/new' => 'faq#new'
@@ -79,7 +79,8 @@ ProjectPear::Application.routes.draw do
   get 'users/:handle/compare' => 'users#compare', handle: /[a-z0-9\._]{3,15}/i, as: 'users_compare'
   get 'search_user' => 'users#search', as: 'users_search'
   get 'rank/:span(/:page)' => 'users#list', span: /all|year|month|week|day/, page: /\d+/, as: 'rank'
-  get 'users/add_advanced_users' => 'users#add_advanced_users'
-  post 'users/admin_advanced_users/:operation' => 'users#admin_advanced_users',
+  get 'add_advanced_users' => 'users#add_advanced_users', as: 'users_add_advanced_users'
+  get 'blocked_users' => 'users#blocked_users', as: 'users_blocked_users'
+  post 'admin_advanced_users/:operation' => 'users#admin_advanced_users',
       operation: /add|remove/, as: 'users_admin_advanced_users'
 end

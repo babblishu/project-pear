@@ -41,22 +41,23 @@ SimpleConfig.for :application do
       problem_attempted_submissions: 'b/',
       problem_accepted_user_ids: 'c/',
       problem_attempted_user_ids: 'd/',
+      problem_titles_hash: 'e/',
+      problem_hot_problems: 'f/',
 
-      user_accepted_submissions: 'e/',
-      user_attempted_submissions: 'f/',
-      user_accepted_problem_ids: 'g/',
-      user_attempted_problem_ids: 'h/',
-      user_unread_messages: 'i/',
-      user_unread_notifications: 'j/',
+      user_accepted_submissions: 'g/',
+      user_attempted_submissions: 'h/',
+      user_accepted_problem_ids: 'i/',
+      user_attempted_problem_ids: 'j/',
+      user_unread_messages: 'k/',
+      user_unread_notifications: 'l/',
 
-      user_rank_list: 'k/',
-      user_handles_hash: 'l/',
-      user_blocked_users: 'm/',
-      problem_titles_hash: 'n/',
-      problem_hot_problems: 'o/',
+      user_avatar_url: 'm/',
+      user_rank_list: 'n/',
+      user_handles_hash: 'o/',
       user_index: 'p/',
       normal_user_index: 'q/',
-
-      waiting_submissions: 'r/'
+      topic_appear_users: 'r/',
+      waiting_submissions: 's/',
+      judge_machines: 't/'
   }
 end

@@ -69,7 +69,13 @@
         </table>
       </div>
       <div id="avatar-div" class="span5">
-        <div><%= image_tag @user.avatar.url, class: 'img-polaroid' %></div>
+        <div>
+          <% if @user.blocked %>
+            <%= image_tag '/img/blocked_user_original.png', class: 'img-polaroid' %>
+          <% else %>
+            <%= image_tag @user.avatar.url, class: 'img-polaroid' %>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>

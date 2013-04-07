@@ -23,6 +23,11 @@ class Topic < ActiveRecord::Base
   validates :content, length: { maximum: APP_CONFIG.topic_length_limit }
   validates :language, inclusion: { in: APP_CONFIG.program_languages.keys.map(&:to_s) << nil }
 
+  def appear_users(page)
+    key = APP_CONFIG.redis_namespace[:topic_appear_users] + "#{id}/#{page}"
+    $redis.smembers(key)
+  end
+
   def self.count_for_role(role)
     Rails.cache.fetch("model/topic/count_for_role/#{role}") do
       connection.execute(sanitize_sql_array([
@@ -151,6 +156,23 @@ class Topic < ActiveRecord::Base
         1.upto(total_page) do |page|
           Rails.cache.delete "model/topic/list/#{role}/#{page}"
         end
+      end
+    end
+  end
+
+  def self.init_appear_users
+    key = APP_CONFIG.redis_namespace[:topic_appear_users] + 'exists'
+    return if $redis.exists(key)
+    $redis.set(key, 1)
+    Topic.all.each do |topic|
+      key = APP_CONFIG.redis_namespace[:topic_appear_users] + topic.id.to_s + '/1'
+      $redis.sadd(key, topic.user.handle)
+    end
+    PrimaryReply.all.each do |primary_reply|
+      key = APP_CONFIG.redis_namespace[:topic_appear_users] + "#{primary_reply.topic_id}/#{primary_reply.page_no}"
+      $redis.sadd(key, primary_reply.user.handle)
+      primary_reply.secondary_replies.each do |secondary_reply|
+        $redis.sadd(key, secondary_reply.user.handle)
       end
     end
   end

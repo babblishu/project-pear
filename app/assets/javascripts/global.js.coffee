@@ -174,3 +174,13 @@ $ ->
       tmp = page_config.find('.' + $(this).data('name') + '-active')
       if tmp.length && tmp.html() == 'true'
         $(this).addClass('active')
+
+  blocked_users = $.parseJSONDiv('blocked_users')
+  caption = $('#blocked-user-caption').html()
+  for handle in blocked_users
+    $('a.user-link[data-handle="' + handle + '"]').each ->
+      $(this).prop('href', '#')
+      $(this).css('color', 'grey')
+      $(this).css('pointer-events', 'none')
+      $(this).css('cursor', 'default')
+      $(this).html(caption)

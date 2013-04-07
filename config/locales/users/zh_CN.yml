@@ -146,6 +146,12 @@ zh_CN:
       have_invalid_handle: '包含不存在的用户名'
       success: '操作成功'
 
+    blocked_users:
+      title: '被锁定的用户'
+      handle: '用户名'
+      real_name: '真实姓名'
+      school: '学校'
+
     notification:
       edit_profile: '你的个人信息已被管理员<a href="%{admin_link}" target="_blank">%{handle}</a>编辑，点击<a href="%{user_link}" target="_blank">此处</a>查看。'
       upto_advanced_user: '你已经被管理员<a href="%{admin_link}" target="_blank">%{handle}</a>提升为高级用户。'

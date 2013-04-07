@@ -1,0 +1,27 @@
+<div id="page-config" class="hidden">
+  <div class="title"><%= t '.title' %></div>
+</div>
+
+<table id="users-table" class="table table-bordered">
+  <thead>
+  <tr>
+    <th><%= t '.platform' %></th>
+    <th><%= t '.ip' %></th>
+    <th><%= t '.last_connection' %></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% APP_CONFIG.judge_platforms.keys.each do |platform| %>
+    <% machines = $redis.hgetall(APP_CONFIG.redis_namespace[:judge_machines] + platform.to_s) %>
+    <% machines.each_with_index do |(key, value), index| %>
+      <tr>
+        <% if index == 0 %>
+          <td rowspan="<%= machines.size %>"><%= APP_CONFIG.judge_platforms[platform] %></td>
+        <% end %>
+        <td><%= key %></td>
+        <td><%= format_datetime Time.at(value.to_i) %></td>
+      </tr>
+    <% end %>
+  <% end %>
+  </tbody>
+</table>
