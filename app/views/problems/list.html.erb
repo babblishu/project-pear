@@ -35,17 +35,15 @@
     <% @problems.each do |problem| %>
       <tr data-id="<%= problem.id %>">
         <td class="icon">
-          <% if @current_user %>
-            <% if admin? %>
-              <% if problem.status == 'hidden' %>
-                <span style="color: grey;"><i class="iconic-lock-stroke"></i></span>
-              <% elsif problem.status == 'advanced' %>
-                <span style="color: grey;"><i class="iconic-star"></i></span>
-              <% end %>
-            <% else %>
-              <span class="hidden accepted" style="color: limegreen;"><i class="iconic-check"></i></span>
-              <span class="hidden unaccepted" style="color: lightcoral;"><i class="iconic-x"></i></span>
+          <% if admin? %>
+            <% if problem.status == 'hidden' %>
+              <span style="color: grey;"><i class="iconic-lock-stroke"></i></span>
+            <% elsif problem.status == 'advanced' %>
+              <span style="color: grey;"><i class="iconic-star"></i></span>
             <% end %>
+          <% else %>
+            <span class="hidden accepted" style="color: limegreen;"><i class="iconic-check"></i></span>
+            <span class="hidden unaccepted" style="color: lightcoral;"><i class="iconic-x"></i></span>
           <% end %>
         </td>
         <td class="center"><%= problem.id %></td>
