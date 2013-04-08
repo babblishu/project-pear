@@ -6,6 +6,8 @@ class SubmissionsController < ApplicationController
   before_filter :require_admin, only: [ :show, :hide, :rejudge ]
   skip_before_filter :inspect_login_cookie, only: [ :get_waiting, :receive_result ]
   skip_before_filter :inspect_current_user, only: [ :get_waiting, :receive_result ]
+  skip_before_filter :inspect_blocked_user, only: [ :get_waiting, :receive_result ]
+  skip_before_filter :inspect_need_captcha, only: [ :get_waiting, :receive_result ]
   before_filter :inspect_submit_interval, only: [ :create ]
 
   def result
@@ -237,11 +239,13 @@ class SubmissionsController < ApplicationController
   end
 
   def clear_problem_status_cache(problem_id)
-    #total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
-    #total_page = 1 if total_page == 0
-    #1.upto(total_page) do |page|
-    #  expire_action controller: 'problems', action: 'status', problem_id: problem_id, page: page
-    #end
+    Rails.cache.delete "model/problem/total_page/#{problem_id}"
+    total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
+    total_page = 1 if total_page == 0
+    total_page = 5 if total_page > 5
+    1.upto(total_page) do |page|
+      expire_fragment controller: 'problems', action: 'status', problem_id: problem_id, page: page
+    end
   end
 
   def update_stat_cache(submission)

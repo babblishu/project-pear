@@ -11,7 +11,9 @@ class ProblemsController < ApplicationController
     @problem = Problem.find_by_id! params[:problem_id]
     @page = params[:page].to_i
     @page_size = APP_CONFIG.page_size[:problem_status_list]
-    @total_page = calc_total_page Problem.status_list_count(@problem.id), @page_size
+    @total_page = Rails.cache.fetch("model/problem/total_page/#{@problem.id}") do
+      calc_total_page Problem.status_list_count(@problem.id), @page_size
+    end
     validate_page_number @page, @total_page
   end
 
@@ -138,7 +140,12 @@ class ProblemsController < ApplicationController
   def rejudge
     problem = Problem.find_by_id! params[:problem_id]
     raise AppExceptions::InvalidOperation unless problem.test_data_timestamp
-    problem.rejudge
+    ids = problem.rejudge
+    ids.each do |id|
+      %w{normal self admin}.each do |name|
+        expire_fragment controller: 'submissions', action: 'result', submission_id: id, action_suffix: name
+      end
+    end
     clear_status_cache problem.id
     clear_home_cache
     redirect_to :back, notice: t('problems.rejudge.success')
@@ -171,11 +178,13 @@ class ProblemsController < ApplicationController
   end
 
   def clear_status_cache(problem_id)
-    #total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
-    #total_page = 1 if total_page == 0
-    #1.upto(total_page) do |page|
-    #  expire_action action: 'status', problem_id: problem_id, page: page
-    #end
+    Rails.cache.delete "model/problem/total_page/#{problem_id}"
+    total_page = (Problem.status_list_count(problem_id) - 1) / APP_CONFIG.page_size[:problem_status_list] + 1
+    total_page = 1 if total_page == 0
+    total_page = 5 if total_page > 5
+    1.upto(total_page) do |page|
+      expire_fragment action: 'status', problem_id: problem_id, page: page
+    end
   end
 
   def clear_list_cache(tag_id = nil)

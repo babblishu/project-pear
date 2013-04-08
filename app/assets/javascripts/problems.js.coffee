@@ -150,3 +150,17 @@ $ -> # upload_test_data
   container.find('#upload-test-data-dialog button[type=submit]').click ->
     $(this).disableButton()
     container.find('#upload-test-data-dialog form').submit()
+
+$ -> # status
+  container = $('.problems .status')
+  return unless container.length
+
+  current_user = $.parseJSONDiv('current_user')
+  container.find('#submissions-list tbody tr').each ->
+    row = $(this)
+    owner = row.data('owner')
+    if owner == current_user.handle
+      row.addClass('warning')
+    else if row.data('share') == 0 && current_user.role != 'admin'
+      score = row.find('.score')
+      score.html(score.find('a').html())

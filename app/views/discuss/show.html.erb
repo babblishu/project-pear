@@ -12,9 +12,9 @@
        offset = @page_size * (@page - 1) - 1
        limit = @page_size
      end %>
-  <% @replies = PrimaryReply.where('topic_id = :id', id: @topic.id).order('created_at ASC, id ASC').
+  <% replies = PrimaryReply.where('topic_id = :id', id: @topic.id).order('created_at ASC, id ASC').
           offset(offset).limit(limit) %>
-  <% @markdown = new_markdown %>
+  <% markdown = new_markdown %>
 
   <% if @page == 1 %>
     <div style="margin-top: 15px;">
@@ -29,7 +29,7 @@
           <div class="content">
             <h4><%= @topic.title %></h4>
             <% if @topic.enable_markdown %>
-              <%= raw @markdown.render @topic.content %>
+              <%= raw markdown.render @topic.content %>
             <% else %>
               <%= simple_format h @topic.content %>
             <% end %>
@@ -76,7 +76,7 @@
     </div>
   <% end %>
 
-  <% @replies.each_with_index do |reply, index| %>
+  <% replies.each_with_index do |reply, index| %>
     <div style="margin-top: <%= @page > 1 && index == 0 ? 15 : 25 %>px;">
 
       <a name="<%= "primary_reply_#{reply.id}" %>" style="padding-top: 55px; margin-top: -55px; display: block;"></a>
@@ -92,7 +92,7 @@
               <p style="color: grey;"><%= t '.hidden' %></p>
             <% else %>
               <% if reply.enable_markdown %>
-                <%= raw @markdown.render reply.content %>
+                <%= raw markdown.render reply.content %>
               <% else %>
                 <%= simple_format h reply.content %>
               <% end %>

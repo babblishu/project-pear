@@ -28,6 +28,11 @@ class Topic < ActiveRecord::Base
     $redis.smembers(key)
   end
 
+  def add_appear_users(page, handle)
+    key = APP_CONFIG.redis_namespace[:topic_appear_users] + "#{id}/#{page}"
+    $redis.sadd(key, handle)
+  end
+
   def self.count_for_role(role)
     Rails.cache.fetch("model/topic/count_for_role/#{role}") do
       connection.execute(sanitize_sql_array([
@@ -158,11 +163,6 @@ class Topic < ActiveRecord::Base
         end
       end
     end
-  end
-
-  def add_appear_users(page, handle)
-    key = APP_CONFIG.redis_namespace[:topic_appear_users] + id.to_s + "/#{page}"
-    $redis.sadd(key, handle)
   end
 
   def self.init_appear_users

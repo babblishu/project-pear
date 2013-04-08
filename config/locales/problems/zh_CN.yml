@@ -135,7 +135,7 @@ zh_CN:
         upload_test_data: '上传测试数据'
         download_test_data: '下载测试数据'
         rejudge: '重测本题所有提交'
-        rejudge_confirm: '你确定执行此操作？'
+        rejudge_confirm: '你确定执行此操作？（本题提交数较多时，强烈不建议执行此操作）'
 
     status:
       status: '《%{title}》的提交情况'

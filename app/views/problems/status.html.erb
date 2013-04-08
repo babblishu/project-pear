@@ -1,99 +1,106 @@
-<div id="page-config" class="hidden">
-  <div class="title"><%= t '.status_id', id: @problem.id %></div>
-  <div class="problem-active">true</div>
-</div>
+<% cache_if(@page <= 5, page: @page) do %>
 
-<h2 class="title"><%= t '.status', title: @problem.title %></h2>
+  <div id="page-config" class="hidden">
+    <div class="title"><%= t '.status_id', id: @problem.id %></div>
+    <div class="problem-active">true</div>
+  </div>
 
-<table id="submissions-list" class="table table-condensed table-striped">
-  <thead>
-  <tr>
-    <th><%= t '.rank' %></th>
-    <th><%= t '.user' %></th>
-    <th><%= t '.score' %></th>
-    <th><%= t '.time_used' %></th>
-    <th><%= t '.memory_used' %></th>
-    <th><%= t '.language' %></th>
-    <th><%= t '.platform' %></th>
-    <th><%= t '.code_length' %></th>
-    <th><%= t '.code_size' %></th>
-    <th><%= t '.submit_time' %></th>
-  </tr>
-  </thead>
-  <tbody>
-  <% status_list = Problem.status_list @problem.id, @page, @page_size %>
-  <% status_list.each_with_index do |row, index| %>
-    <tr class="<%= 'warning' if owner?(row) %>">
-      <td><%= (@page - 1) * @page_size + index + 1 %></td>
-      <td><%= user_link row.user_handle %>
-        <% if row.tried_times > 1 %>
-          (<%= link_to row.tried_times, submissions_list_path(handle: row.user_handle, problem_id: @problem.id, choose_all: '1') %>)
-        <% end %>
-      </td>
-      <% if row.share || admin? || owner?(row) %>
-        <td><%= link_to row.score.to_s, submissions_result_path(row.submission_id), target: '_blank' %></td>
-      <% else %>
-        <td><%= row.score %></td>
-      <% end %>
-      <td><%= format_time_used row.time_used %></td>
-      <td><%= format_memory_used row.memory_used %></td>
-      <td><%= format_language row.language %></td>
-      <td><%= format_platform row.platform %></td>
-      <td><%= row.code_length %></td>
-      <td><%= format_code_size row.code_size %></td>
-      <td><%= format_datetime row.created_at %></td>
+  <h2 class="title"><%= t '.status', title: @problem.title %></h2>
+
+  <table id="submissions-list" class="table table-condensed table-striped">
+    <thead>
+    <tr>
+      <th><%= t '.rank' %></th>
+      <th><%= t '.user' %></th>
+      <th><%= t '.score' %></th>
+      <th><%= t '.time_used' %></th>
+      <th><%= t '.memory_used' %></th>
+      <th><%= t '.language' %></th>
+      <th><%= t '.platform' %></th>
+      <th><%= t '.code_length' %></th>
+      <th><%= t '.code_size' %></th>
+      <th><%= t '.submit_time' %></th>
     </tr>
-  <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+    <% status_list = Problem.status_list @problem.id, @page, @page_size %>
+    <% status_list.each_with_index do |row, index| %>
+      <tr data-owner="<%= row.user_handle %>" data-share="<%= row.share ? '1' : '0' %>">
+        <td><%= (@page - 1) * @page_size + index + 1 %></td>
+        <td><%= user_link row.user_handle %>
+          <% if row.tried_times > 1 %>
+            (<%= link_to row.tried_times, submissions_list_path(handle: row.user_handle, problem_id: @problem.id, choose_all: '1') %>)
+          <% end %>
+        </td>
+        <td class="score"><%= link_to row.score.to_s, submissions_result_path(row.submission_id), target: '_blank' %></td>
+        <td><%= format_time_used row.time_used %></td>
+        <td><%= format_memory_used row.memory_used %></td>
+        <td><%= format_language row.language %></td>
+        <td><%= format_platform row.platform %></td>
+        <td><%= row.code_length %></td>
+        <td><%= format_code_size row.code_size %></td>
+        <td><%= format_datetime row.created_at %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
 
-<ul class="pager">
-  <% if @page > 1 %>
-    <li><%= link_to t('.last_page'), problems_status_path(@problem.id, @page - 1) %></li>
-  <% end %>
-  <% if @page < @total_page %>
-    <li><%= link_to t('.next_page'), problems_status_path(@problem.id, @page + 1) %></li>
-  <% end %>
-</ul>
-
-<div id="toolbar" class="hidden">
-  <ul class="nav pull-right">
-    <li><%= link_to t('.view_problem'), problems_show_path(problem_id: @problem.id), style: 'outline: none;' %></li>
-    <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
-        <%= t '.statistics' %>
-        <b class="caret"></b>
-      </a>
-      <div id="statistics-dropdown" class="dropdown-menu">
-        <table class="table">
-          <tbody>
-          <tr>
-            <td class="left-column"><%= t '.accepted_users' %></td>
-            <td class="right-column"><%= @problem.accepted_users %></td>
-          </tr>
-          <tr>
-            <td class="left-column"><%= t '.attempted_users' %></td>
-            <td class="right-column"><%= @problem.attempted_users %></td>
-          </tr>
-          <tr>
-            <td class="left-column"><%= t '.accepted_submissions' %></td>
-            <td class="right-column"><%= @problem.accepted_submissions %></td>
-          </tr>
-          <tr>
-            <td class="left-column"><%= t '.attempted_submissions' %></td>
-            <td class="right-column"><%= @problem.attempted_submissions %></td>
-          </tr>
-          <tr>
-            <td class="left-column"><%= t '.accepted_ratio' %></td>
-            <td class="right-column"><%= ratio_str @problem.accepted_submissions, @problem.attempted_submissions %></td>
-          </tr>
-          <tr>
-            <td class="left-column"><%= t '.average_score' %></td>
-            <td class="right-column"><%= sprintf('%.1f', @problem.average_score) %></td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </li>
+  <ul class="pager">
+    <% if @page > 1 %>
+      <li><%= link_to t('.last_page'), problems_status_path(@problem.id, @page - 1) %></li>
+    <% end %>
+    <% if @page < @total_page %>
+      <li><%= link_to t('.next_page'), problems_status_path(@problem.id, @page + 1) %></li>
+    <% end %>
   </ul>
-</div>
+
+  <div id="toolbar" class="hidden">
+    <ul class="nav pull-right">
+      <li><%= link_to t('.view_problem'), problems_show_path(problem_id: @problem.id), style: 'outline: none;' %></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="outline: none;">
+          <%= t '.statistics' %>
+          <b class="caret"></b>
+        </a>
+
+        <div id="statistics-dropdown" class="dropdown-menu">
+          <table class="table">
+            <tbody>
+            <tr>
+              <td class="left-column"><%= t '.accepted_users' %></td>
+              <td class="right-column"><%= @problem.accepted_users %></td>
+            </tr>
+            <tr>
+              <td class="left-column"><%= t '.attempted_users' %></td>
+              <td class="right-column"><%= @problem.attempted_users %></td>
+            </tr>
+            <tr>
+              <td class="left-column"><%= t '.accepted_submissions' %></td>
+              <td class="right-column"><%= @problem.accepted_submissions %></td>
+            </tr>
+            <tr>
+              <td class="left-column"><%= t '.attempted_submissions' %></td>
+              <td class="right-column"><%= @problem.attempted_submissions %></td>
+            </tr>
+            <tr>
+              <td class="left-column"><%= t '.accepted_ratio' %></td>
+              <td class="right-column"><%= ratio_str @problem.accepted_submissions, @problem.attempted_submissions %></td>
+            </tr>
+            <tr>
+              <td class="left-column"><%= t '.average_score' %></td>
+              <td class="right-column"><%= sprintf('%.1f', @problem.average_score) %></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+<% end %>
+
+<% if @current_user %>
+  <%= json_div_tag 'current_user', {handle: @current_user.handle, role: @current_user.role} %>
+<% else %>
+  <%= json_div_tag 'current_user', {handle: '', role: 'normal_user'} %>
+<% end %>

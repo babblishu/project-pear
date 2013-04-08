@@ -170,6 +170,7 @@ class UsersController < ApplicationController
   def search
     if params[:ajax]
       if params[:add_advanced_users]
+        raise AppExceptions::NoPrivilegeError unless @current_user && @current_user.role == 'admin'
         user = User.fetch_by_uniq_key params[:handle], :handle
         return render json: { success: false, notice: t('users.search.not_exist', handle: params[:handle]) } unless user
         return render json: { success: false, notice: t('users.search.not_normal_user', handle: user.handle)} unless user.role == 'normal_user'
@@ -183,6 +184,7 @@ class UsersController < ApplicationController
         }
       else
         if params[:add_advanced_users_auto_complete]
+          raise AppExceptions::NoPrivilegeError unless @current_user && @current_user.role == 'admin'
           key = APP_CONFIG.redis_namespace[:normal_user_index] + params[:handle].downcase
           users = $redis.srandmember(key, 9)
         else

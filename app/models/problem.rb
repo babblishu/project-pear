@@ -127,6 +127,7 @@ class Problem < ActiveRecord::Base
       key = APP_CONFIG.redis_namespace[:waiting_submissions] + submission.platform
       $redis.rpush(key, submission.id)
     end
+    submissions.map(&:id)
   end
 
   def accepted_users
