@@ -104,6 +104,7 @@ class ProblemsController < ApplicationController
       problem.unzip_attachment_file(dir) if dir
       if need_clear_list_cache
         clear_list_cache
+        problem.tags.each { |tag| clear_list_cache tag.id }
         clear_status_cache problem.id
         Problem.add_title problem.id, problem.title
       end
