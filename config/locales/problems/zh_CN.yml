@@ -10,6 +10,12 @@ zh_CN:
       accepted_ratio: '通过比率'
       add_problem: '添加题目'
       filter: '筛选'
+      filter_dialog:
+        filter: '按标签筛选'
+        filter_info: '将会筛选出拥有所有选择标签的题目'
+        filter_alert: '最多选择五个标签'
+        close: '关闭'
+        submit: '确定'
 
     new_dialog:
       add_problem: '添加题目'
@@ -21,13 +27,6 @@ zh_CN:
       add: '添加'
       close: '关闭'
       submitting: '提交中'
-
-    filter_dialog:
-      filter: '按标签筛选'
-      filter_info: '将会筛选出拥有所有选择标签的题目'
-      filter_alert: '最多选择五个标签'
-      close: '关闭'
-      submit: '确定'
 
     submit_dialog:
       submit_program: '提交程序'

@@ -92,8 +92,40 @@
 
 <% end %>
 
-<% cache(action_suffix: 'filter_dialog') do %>
-  <%= render 'problems/filter_dialog' %>
+<% role = @current_user ? @current_user.role : 'normal_user' %>
+<% cache(action_suffix: "filter_dialog/#{role}") do %>
+  <div id="filter-dialog" class="modal hide fade">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+      <h3><%= t '.filter' %></h3>
+    </div>
+    <div class="modal-body">
+      <%= form_tag problems_list_path, method: :get, id: 'filter-form' do %>
+        <div class="row-fluid">
+          <% tags = Tag.valid_entry(role) %>
+          <% 4.times do |x| %>
+            <div class="span3">
+              <% tags.each_with_index do |tag, index| %>
+                <% if index % 4 == x %>
+                  <label class="checkbox">
+                    <%= check_box_tag tag.id.to_s, '1', false, name: "tag_#{tag.id}" %>
+                    <span><%= tag.name %></span>
+                  </label>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        <div id="alert-message" class="hidden"><%= t '.filter_dialog.filter_alert' %></div>
+      <% end %>
+    </div>
+    <div class="modal-footer">
+      <a data-dismiss="modal" class="btn"><%= t '.filter_dialog.close' %></a>
+      <button class="btn btn-primary submit" data-toggle="tooltip" title="<%= t '.filter_dialog.filter_info' %>">
+        <%= t '.filter_dialog.submit' %>
+      </button>
+    </div>
+  </div>
 <% end %>
 
 <%= json_div_tag('problems_stat', @problems.map { |problem| [

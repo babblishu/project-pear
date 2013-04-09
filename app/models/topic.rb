@@ -166,7 +166,7 @@ class Topic < ActiveRecord::Base
   end
 
   def self.init_appear_users
-    key = APP_CONFIG.redis_namespace[:topic_appear_users] + 'exists'
+    key = APP_CONFIG.redis_namespace[:topic_appear_users]
     return if $redis.exists(key)
     $redis.set(key, 1)
     Topic.all.each do |topic|

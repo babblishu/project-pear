@@ -388,7 +388,7 @@ class User < ActiveRecord::Base
   end
 
   def self.init_user_avatar_url
-    key = APP_CONFIG.redis_namespace[:user_avatar_url] + '/exists'
+    key = APP_CONFIG.redis_namespace[:user_avatar_url]
     return if $redis.exists(key)
     $redis.set(key, 1)
     User.all.each { |user| user.refresh_avatar_url }
@@ -405,10 +405,16 @@ class User < ActiveRecord::Base
   end
 
   def self.init_user_index
+    key = APP_CONFIG.redis_namespace[:user_index]
+    return if $redis.exists(key)
+    $redis.set(key, 1)
     User.where('NOT blocked').each { |user| add_handle_index :user_index, user.handle }
   end
 
   def self.init_normal_user_index
+    key = APP_CONFIG.redis_namespace[:normal_user_index]
+    return if $redis.exists(key)
+    $redis.set(key, 1)
     User.where("NOT blocked AND role = 'normal_user'").each { |user| add_handle_index :normal_user_index, user.handle }
   end
 
