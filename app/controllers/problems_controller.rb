@@ -99,6 +99,8 @@ class ProblemsController < ApplicationController
       affected_tags = problem.update_tags(tags)
       if affected_tags
         affected_tags.each { |id| clear_list_cache id }
+      end
+      if affected_tags || need_clear_list_cache
         %w{normal_user advanced_user admin}.each do |role|
           expire_fragment(controller: 'problems', action: 'list', action_suffix: "filter_dialog/#{role}")
         end
