@@ -101,8 +101,9 @@ class ProblemsController < ApplicationController
         affected_tags.each { |id| clear_list_cache id }
       end
       if affected_tags || need_clear_list_cache
+        Tag.clear_cache
         %w{normal_user advanced_user admin}.each do |role|
-          expire_fragment(controller: 'problems', action: 'list', action_suffix: "filter_dialog/#{role}")
+          expire_fragment(action: 'list', action_suffix: "filter_dialog/#{role}")
         end
       end
       problem.unzip_attachment_file(dir) if dir

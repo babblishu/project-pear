@@ -90,7 +90,6 @@ class Problem < ActiveRecord::Base
 
   def update_tags(tag_list)
     return nil if tag_list.sort == tags.all.map(&:name).sort
-    Tag.clear_cache
     res = []
     Tag.transaction do
       connection.execute('LOCK TABLE tags')
