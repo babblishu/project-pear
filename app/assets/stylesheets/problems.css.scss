@@ -64,6 +64,33 @@
     .formula {
       font-size: 18px;
       font-family: 'Times New Roman', Times, serif;
+      .operator {
+        margin-left: 4px;
+        margin-right: 4px;
+      }
+      .comma {
+        margin-right: 4px;
+      }
+      .apostrophes.with-left-margin {
+        margin-left: 2px;
+      }
+      .bracket.with-left-margin {
+        margin-left: 2px;
+      }
+      .bracket.with.right-margin {
+        margin-right: 2px;
+      }
+    }
+    .formula.error {
+      color: red;
+      margin-left: 2px;
+      margin-right: 2px;
+    }
+    .formula.with-left-margin {
+      margin-left: 2px;
+    }
+    .formula.with-right-margin {
+      margin-right: 2px;
     }
     li {
       line-height: 25px;

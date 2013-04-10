@@ -2,9 +2,10 @@
 <html>
 
 <head>
+  <meta charset="UTF-8">
   <title><%= APP_CONFIG.oj_name %></title>
-  <%= stylesheet_link_tag "application" %>
-  <%= javascript_include_tag "application" %>
+  <%= stylesheet_link_tag 'application' %>
+  <%= javascript_include_tag 'application' %>
   <% if notice && !notice.empty? %>
     <script type="text/javascript">
       alert("<%= notice %>");

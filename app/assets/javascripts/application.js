@@ -3,7 +3,6 @@
 //= require bootstrap.js
 //= require jquery.cookie.js
 //= require jquery.sortElements.js
-//= require jquery.sessionStorage.js
 //= require jquery.form.js
 //= require google.prettify.js
 //= require google.prettify.lang-pascal.js

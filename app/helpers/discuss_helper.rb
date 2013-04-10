@@ -22,13 +22,13 @@ module DiscussHelper
           flag = true if line =~ /\A\s{0,3}~~~\s*\w*\s*\Z/
         end
         if flag
-          res += line
+          res << line
         else
           if !line.empty? && line[0] == '=' && res.last == "\n"
             res.chop!
-            res += line
+            res << line
           else
-            res += line.gsub(/^\s*#/, "\\#").gsub(/^\s*-/, "\\-").gsub(/^\s*>/, "\\>")
+            res << line.gsub(/^\s*#/, "\\#").gsub(/^\s*-/, "\\-").gsub(/^\s*>/, "\\>")
           end
         end
       end
