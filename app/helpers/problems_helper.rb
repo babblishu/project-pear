@@ -101,7 +101,15 @@ module ProblemsHelper
         end
 
         if is_operator(ch)
-          pre = cur == 0 ? '' : tmp[cur - 1]
+          no_margin = false
+          if ch == '+' && cur + 1 < len && tmp[cur + 1] == '+'
+            no_margin = true
+            cur += 1
+          end
+          if ch == '-' && cur + 1 < len && tmp[cur + 1] == '-'
+            no_margin = true
+            cur += 1
+          end
           ch = "\u{2212}" if ch == '-'
           ch = "\u{00D7}" if ch == '*'
           if ch == '<' && cur + 1 < len && tmp[cur + 1] == '='
@@ -116,7 +124,7 @@ module ProblemsHelper
             ch = "\u{2260}"
             cur += 1
           end
-          if pre == '' || !is_number(ch) && !is_letter(ch)
+          if no_margin
             res << ch
           else
             res << '<span class="operator">' + ch + '</span>'
