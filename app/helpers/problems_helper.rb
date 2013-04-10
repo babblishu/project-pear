@@ -133,6 +133,7 @@ module ProblemsHelper
           else
             res << '<span class="operator">' + ch + '</span>'
           end
+          number_or_letter = false
         end
 
         if ch == '#'
@@ -153,6 +154,7 @@ module ProblemsHelper
           else
             res << ch
           end
+          number_or_letter = false
         end
 
         if ch == '^' || ch == '_'
@@ -185,6 +187,7 @@ module ProblemsHelper
 
         if ch == ','
           res << '<span class="comma">,</span>'
+          number_or_letter = false
         end
 
         if ch == "\'"
@@ -195,6 +198,7 @@ module ProblemsHelper
             span_class << 'with-left-margin'
           end
           res << '<span class="' + span_class.join(' ') + '">' + ch + '</span>'
+          number_or_letter = false
         end
 
         if is_bracket(ch) || ch == '|'
@@ -203,6 +207,7 @@ module ProblemsHelper
           span_class << 'with-right-margin' if cur + 1 < len && (cur + 2 >= len || !same_bracket(tmp[cur + 2], ch))
           res << ' ' if ch == '(' && cur > 0 && tmp[cur - 1] == ' '
           res << '<span class="' + span_class.join(' ') + '">' + ch + '</span>'
+          number_or_letter = false
         end
 
         if is_number(ch)
@@ -213,6 +218,7 @@ module ProblemsHelper
 
         if ch == '.' || ch == '!'
           res << ch
+          number_or_letter = false
         end
 
         cur += 1
