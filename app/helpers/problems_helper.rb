@@ -62,6 +62,14 @@ module ProblemsHelper
           end
         end
       end
+
+      if inside_formula
+        res << '$' << formula
+      end
+      if outside_formula
+        res << render_formula_span(formula, need_left_margin, false)
+      end
+
       res
     end
 
