@@ -128,6 +128,15 @@ module ProblemsHelper
             ch = "\u{2260}"
             cur += 1
           end
+
+          if ch == '-' && cur + 1 < len && tmp[cur + 1] == '>'
+            ch = "\u{2192}"
+            cur += 1
+          end
+          if ch == '<' && cur + 1 < len && tmp[cur + 1] == '-'
+            ch = "\u{2190}"
+            cur += 1
+          end
           if no_margin
             res << ch
           else
@@ -246,7 +255,7 @@ module ProblemsHelper
 
     def is_operator(ch)
       return true if ['+', '-', '*', '/', '<', '>', '=', '~'].include? ch
-      return true if ["\u{2212}", "\u{002D}"].include? ch
+      return true if ["\u{2212}", "\u{002D}", "\u{2190}", "\u{2192}"].include? ch
       return true if "\u{2200}" <= ch && ch <= "\u{22FF}"
       false
     end
