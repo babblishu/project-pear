@@ -114,6 +114,14 @@ module ProblemsHelper
             no_margin = true
             cur += 1
           end
+          if ch == '-' && cur + 1 < len && tmp[cur + 1] == '>'
+            ch = "\u{2192}"
+            cur += 1
+          end
+          if ch == '<' && cur + 1 < len && tmp[cur + 1] == '-'
+            ch = "\u{2190}"
+            cur += 1
+          end
           ch = "\u{2212}" if ch == '-'
           ch = "\u{00D7}" if ch == '*'
           if ch == '<' && cur + 1 < len && tmp[cur + 1] == '='
@@ -126,15 +134,6 @@ module ProblemsHelper
           end
           if ch == '<' && cur + 1 < len && tmp[cur + 1] == '>'
             ch = "\u{2260}"
-            cur += 1
-          end
-
-          if ch == '-' && cur + 1 < len && tmp[cur + 1] == '>'
-            ch = "\u{2192}"
-            cur += 1
-          end
-          if ch == '<' && cur + 1 < len && tmp[cur + 1] == '-'
-            ch = "\u{2190}"
             cur += 1
           end
           if no_margin
