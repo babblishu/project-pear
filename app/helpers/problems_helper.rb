@@ -93,12 +93,15 @@ module ProblemsHelper
       len = tmp.size
       cur = 0
       res = ''
+      number_or_letter = false
+
       while cur < len
         ch = tmp[cur]
 
         if is_letter(ch)
-          res << ' ' if cur > 0 && tmp[cur - 1] == ' '
+          res << ' ' if number_or_letter && tmp[cur - 1] == ' '
           res << '<i>' + ch + '</i>'
+          number_or_letter = true
         end
 
         if is_operator(ch)
@@ -202,8 +205,13 @@ module ProblemsHelper
           res << '<span class="' + span_class.join(' ') + '">' + ch + '</span>'
         end
 
-        if is_number(ch) || ch == '.' || ch == '!'
-          res << ' ' if cur > 0 && tmp[cur - 1] == ' '
+        if is_number(ch)
+          res << ' ' if number_or_letter && tmp[cur - 1] == ' '
+          res << ch
+          number_or_letter = true
+        end
+
+        if ch == '.' || ch == '!'
           res << ch
         end
 
