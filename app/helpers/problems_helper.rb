@@ -97,6 +97,7 @@ module ProblemsHelper
         ch = tmp[cur]
 
         if is_letter(ch)
+          res << ' ' if cur > 0 && tmp[cur - 1] == ' '
           res << '<i>' + ch + '</i>'
         end
 
@@ -202,6 +203,7 @@ module ProblemsHelper
         end
 
         if is_number(ch) || ch == '.' || ch == '!'
+          res << ' ' if cur > 0 && tmp[cur - 1] == ' '
           res << ch
         end
 
