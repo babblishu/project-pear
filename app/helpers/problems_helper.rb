@@ -116,7 +116,7 @@ module ProblemsHelper
             ch = "\u{2260}"
             cur += 1
           end
-          if pre == ''
+          if pre == '' || !is_number(ch) && !is_letter(ch)
             res << ch
           else
             res << '<span class="operator">' + ch + '</span>'
@@ -187,8 +187,8 @@ module ProblemsHelper
 
         if is_bracket(ch) || ch == '|'
           span_class = ['bracket']
-          span_class << 'with-left-margin' if cur > 0
-          span_class << 'with-right-margin' if cur + 1 < len
+          span_class << 'with-left-margin' if cur > 0 && (cur - 2 < 0 || !same_bracket(tmp[cur - 2], ch))
+          span_class << 'with-right-margin' if cur + 1 < len && (cur + 2 >= len || !same_bracket(tmp[cur + 2], ch))
           res << ' ' if ch == '(' && cur > 0 && tmp[cur - 1] == ' '
           res << '<span class="' + span_class.join(' ') + '">' + ch + '</span>'
         end
@@ -229,6 +229,13 @@ module ProblemsHelper
 
     def is_bracket(ch)
       ['(', ')', '{', '}', '[', ']'].include? ch
+    end
+
+    def same_bracket(ch1, ch2)
+      return true if ch1 == '{' && ch2 == '}' || ch1 == '}' && ch2 == '{'
+      return true if ch1 == '(' && ch2 == ')' || ch1 == ')' && ch2 == '('
+      return true if ch1 == '[' && ch2 == ']' || ch1 == ']' && ch2 == '['
+      false
     end
 
     def find_right_bracket(char_arr, start)
