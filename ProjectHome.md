@@ -1,0 +1,1 @@
+You can use this code freely under GPLv3 license. But I have no plan to provide a turtorial on deploying it.
